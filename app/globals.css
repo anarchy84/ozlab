@@ -1,0 +1,329 @@
+/* ─────────────────────────────────────────────
+   오즈랩페이 글로벌 스타일 (P5 섹션 포팅판)
+   - 토큰 (컬러·사이즈 등) 은 tailwind.config.ts
+   - 이 파일엔 베이스 타이포 + 한국어 조판 유틸 + 섹션 공통 비주얼 헬퍼
+   - 헬퍼는 Tailwind utility 로 표현 어려운 것만 @layer components 에 유지
+   ───────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────
+   @layer base — html/body 렌더 품질 + 제목 공통
+   ───────────────────────────────────────────── */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-feature-settings: 'ss01', 'ss02';
+    letter-spacing: -0.01em;
+    line-height: 1.55;
+  }
+
+  h1, h2, h3, h4 {
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #03c75a;
+    outline-offset: 2px;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   @layer components — 섹션 공통 비주얼 헬퍼
+   (Tailwind 유틸만으로 표현 어려운 복합 스타일)
+   ───────────────────────────────────────────── */
+@layer components {
+  /* 중앙 컨테이너 (max-w 1160 + 좌우 패딩) */
+  .container-oz {
+    @apply max-w-container mx-auto px-6;
+  }
+
+  /* ── 히어로 ─────────────────────────────── */
+  .hero-device-bg {
+    position: absolute;
+    inset: -5%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(3, 199, 90, 0.4),
+      rgba(3, 199, 90, 0.08) 45%,
+      transparent 70%
+    );
+    filter: blur(50px);
+  }
+  .hero-tag {
+    @apply absolute z-10 bg-white border border-ink-150 rounded-pill px-4 py-2.5 inline-flex items-center gap-2 font-semibold text-[13px] shadow-sm;
+    animation: float 5s ease-in-out infinite;
+  }
+  .hero-tag .dot {
+    @apply w-2 h-2 rounded-full bg-naver-green;
+  }
+  .hero-tag.t1 { top: 10%; left: -4%; animation-delay: 0s; }
+  .hero-tag.t2 { top: 48%; right: -6%; animation-delay: 1s; }
+  .hero-tag.t3 { bottom: 14%; left: 6%; animation-delay: 2s; }
+  .hero-tag.t4 { top: 18%; right: 4%; animation-delay: 1.5s; background: #0a0a0a; color: white; }
+  .hero-tag.t4 .dot { background: #17e06d; }
+
+  /* ── Painpoints 카드 ─────────────────────── */
+  .pain-card {
+    @apply relative bg-white border border-ink-150 rounded-xl p-8 shadow-sm;
+  }
+  .pain-card .num {
+    @apply absolute top-6 right-6 text-ink-200 text-2xl font-extrabold;
+  }
+  .pain-card h3 {
+    @apply text-lg font-bold text-ink-900 mt-6 mb-3;
+  }
+  .pain-card p {
+    @apply text-ink-500 text-[15px] leading-relaxed mb-4;
+  }
+  .pain-bubble {
+    @apply inline-block bg-ink-100 text-ink-700 text-sm px-3 py-1.5 rounded-md italic;
+  }
+
+  /* ── Showcase (다크) ─────────────────────── */
+  .showcase-dark {
+    @apply relative overflow-hidden bg-surface-dark text-white rounded-xl p-12 lg:p-16 grid md:grid-cols-2 gap-10 items-center;
+  }
+  .showcase-dark::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 60%;
+    height: 140%;
+    background: radial-gradient(circle, rgba(23, 224, 109, 0.25), transparent 70%);
+    filter: blur(80px);
+    pointer-events: none;
+  }
+
+  /* ── ReviewAutomation flow ───────────────── */
+  .flow-step {
+    @apply relative bg-white/5 border border-white/10 rounded-lg p-6 text-white backdrop-blur-sm;
+  }
+  .flow-step .idx {
+    @apply inline-block bg-naver-neon text-ink-900 text-xs font-extrabold px-2 py-1 rounded-sm tracking-wider mb-3;
+  }
+  .flow-step h4 {
+    @apply text-white text-lg font-bold mb-2;
+  }
+  .flow-step p {
+    @apply text-white/70 text-sm leading-relaxed;
+  }
+  .flow-arrow {
+    @apply hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 text-naver-neon z-10 bg-surface-dark rounded-full w-10 h-10 items-center justify-center;
+  }
+  .review-mock {
+    @apply bg-white rounded-xl p-6 shadow-lg;
+  }
+  .review-mock .stars {
+    @apply text-[#ffc107] text-sm tracking-wider;
+  }
+
+  /* ── PlacePlus 데모 ──────────────────────── */
+  .place-badge-demo {
+    @apply bg-white border border-ink-150 rounded-xl p-6 shadow-md;
+  }
+  .place-item {
+    @apply flex gap-3 py-3 border-b border-ink-100 last:border-0;
+  }
+  .place-thumb {
+    @apply w-16 h-16 rounded-md flex-shrink-0 bg-ink-200;
+  }
+  .place-thumb.a { background: linear-gradient(135deg, #ffc6a0, #ff7a45); }
+  .place-thumb.b { background: linear-gradient(135deg, #a0ffcb, #17e06d); }
+  .place-thumb.c { background: linear-gradient(135deg, #e0e0e0, #9a9a9a); }
+  .place-body { @apply flex-1 min-w-0; }
+  .place-title {
+    @apply text-[15px] font-bold text-ink-900 flex items-center gap-2;
+  }
+  .place-plus-mark {
+    @apply inline-block bg-naver-green text-white text-[11px] font-extrabold px-1.5 py-0.5 rounded-sm;
+  }
+  .place-meta {
+    @apply text-xs text-ink-500 flex gap-2 mt-1;
+  }
+  .place-meta .rating {
+    @apply text-accent-red font-bold;
+  }
+
+  /* ── Mechanism 카드 ──────────────────────── */
+  .mech-item {
+    @apply bg-white border border-ink-150 rounded-lg p-6 text-center;
+  }
+  .mech-icon {
+    @apply w-14 h-14 mx-auto rounded-full bg-naver-soft text-naver-deep flex items-center justify-center mb-4;
+  }
+  .mech-item h4 {
+    @apply text-ink-900 text-lg font-bold mb-2;
+  }
+  .mech-item p {
+    @apply text-ink-500 text-sm leading-relaxed;
+  }
+
+  /* ── Pricing 카드 ────────────────────────── */
+  .price-card {
+    @apply relative bg-white border border-ink-150 rounded-xl p-6 text-center shadow-sm transition-shadow hover:shadow-md;
+  }
+  .price-card.featured {
+    @apply border-naver-green border-2 shadow-green;
+  }
+  .price-tag {
+    @apply inline-block bg-ink-100 text-ink-600 text-[11px] font-extrabold px-2 py-1 rounded-sm tracking-wider mb-3;
+  }
+  .price-card.featured .price-tag {
+    @apply bg-naver-green text-white;
+  }
+  .price-card h3 {
+    @apply text-ink-900 text-base font-bold mb-4 min-h-[48px];
+  }
+  .price-img {
+    @apply my-4 flex items-center justify-center h-32;
+  }
+  .price-img img {
+    @apply max-h-full w-auto;
+  }
+  .price-orig {
+    @apply text-ink-400 text-xs line-through mb-1;
+  }
+  .price-now {
+    @apply text-ink-900 text-2xl font-extrabold mb-3;
+  }
+  .price-now small {
+    @apply block text-naver-deep text-xs font-semibold mb-1;
+  }
+  .price-color {
+    @apply flex justify-center gap-3 text-xs text-ink-500;
+  }
+  .price-color .sw {
+    @apply inline-block w-3 h-3 rounded-full border border-ink-150 align-middle mr-1;
+  }
+
+  /* ── Testimonials 카드 ───────────────────── */
+  .quote-card {
+    @apply bg-white border border-ink-150 rounded-xl p-8 shadow-sm;
+  }
+  .quote-card .stars {
+    @apply text-[#ffc107] text-lg tracking-wider mb-4;
+  }
+  .quote-card blockquote {
+    @apply text-ink-700 text-[15px] leading-relaxed mb-6 italic;
+  }
+  .quote-author {
+    @apply flex items-center gap-3;
+  }
+  .quote-avatar {
+    @apply w-11 h-11 rounded-full bg-naver-soft text-naver-deep font-extrabold flex items-center justify-center text-lg;
+  }
+  .quote-name {
+    @apply text-sm font-bold text-ink-900;
+  }
+  .quote-role {
+    @apply text-xs text-ink-500;
+  }
+
+  /* ── FAQ 아코디언 ────────────────────────── */
+  .faq-item {
+    @apply border-b border-ink-150;
+  }
+  .faq-q {
+    @apply w-full flex justify-between items-center py-6 text-left font-bold text-ink-900 text-[17px] cursor-pointer;
+  }
+  .faq-q .ic {
+    @apply w-8 h-8 rounded-full bg-ink-100 text-ink-600 flex items-center justify-center flex-shrink-0 ml-4 transition-transform;
+  }
+  .faq-item[data-open='true'] .faq-q .ic {
+    @apply bg-naver-green text-white rotate-45;
+  }
+  .faq-a {
+    @apply overflow-hidden max-h-0 transition-all duration-300 text-ink-500 text-[15px] leading-relaxed;
+  }
+  .faq-item[data-open='true'] .faq-a {
+    @apply max-h-96 pb-6;
+  }
+
+  /* ── ApplyForm 인풋 ──────────────────────── */
+  .form-field label {
+    @apply block text-sm font-semibold text-ink-700 mb-2;
+  }
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    @apply w-full px-4 py-3 border border-ink-200 rounded-md bg-white text-ink-900 text-[15px] focus:border-naver-green focus:outline-none transition-colors;
+  }
+  .form-field textarea {
+    @apply resize-y min-h-[88px];
+  }
+  .form-check {
+    @apply flex items-start gap-2 text-sm text-ink-500 mt-4;
+  }
+
+  /* ── Floating CTA ────────────────────────── */
+  .floating-cta {
+    @apply fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white shadow-lg border border-ink-150 rounded-pill px-5 py-3 flex items-center gap-4 opacity-0 translate-y-4 pointer-events-none transition-all duration-300 max-w-[calc(100%-32px)];
+  }
+  .floating-cta.show {
+    @apply opacity-100 translate-y-0 pointer-events-auto;
+  }
+  .floating-cta .msg {
+    @apply text-sm text-ink-700;
+  }
+  .floating-cta .close {
+    @apply w-7 h-7 rounded-full bg-ink-100 text-ink-500 flex items-center justify-center text-lg leading-none;
+  }
+
+  /* ── 버튼 (최소 세트 — btn-primary/ghost/lg) ── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill font-bold transition-all px-5 py-3 text-[15px];
+  }
+  .btn-primary {
+    @apply bg-naver-green text-white hover:bg-naver-dark shadow-green;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-ink-700 border border-ink-200 hover:bg-ink-50;
+  }
+  .btn.lg { @apply px-7 py-4 text-base; }
+  .btn.sm { @apply px-4 py-2 text-sm; }
+}
+
+/* ─────────────────────────────────────────────
+   @layer utilities — 한국어 조판 & 하이라이트
+   ───────────────────────────────────────────── */
+@layer utilities {
+  /* 한국어 어절 단위 줄바꿈 */
+  .break-keep {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* eyebrow 칩 */
+  .eyebrow {
+    @apply inline-flex items-center gap-1.5 text-[13px] font-semibold tracking-wide text-naver-deep bg-naver-soft px-3 py-1.5 rounded-pill;
+  }
+  .eyebrow-dark {
+    @apply inline-flex items-center gap-1.5 text-[13px] font-semibold tracking-wide px-3 py-1.5 rounded-pill;
+    color: #17e06d;
+    background: rgba(23, 224, 109, 0.12);
+  }
+
+  /* 네이버 그린 하이라이트 마커 */
+  .hl-green {
+    background: linear-gradient(transparent 58%, rgba(3, 199, 90, 0.25) 58%);
+    color: inherit;
+    padding: 0 2px;
+  }
+  .hl-solid {
+    background: #03c75a;
+    color: white;
+    padding: 0 0.18em;
+    border-radius: 4px;
+  }
+}
