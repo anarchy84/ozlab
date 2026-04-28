@@ -36,8 +36,22 @@ export function ReviewAutomation({ blocks }: Props) {
   ]
 
   return (
-    <section id="review" className="showcase-dark py-section">
-      <div className="container-oz">
+    // 외부 wrapper : 다크 배경 + 패딩 (showcase-dark grid 컨테이너 X)
+    <section
+      id="review"
+      className="py-section bg-surface-dark text-white relative overflow-hidden"
+    >
+      {/* 그린 글로우 (우상단) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-[20%] -right-[10%] w-[60%] h-[140%] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(23, 224, 109, 0.2), transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      />
+      <div className="container-oz relative">
         {/* 섹션 헤드 */}
         <div className="text-center max-w-[820px] mx-auto mb-14">
           <span className="eyebrow dark">

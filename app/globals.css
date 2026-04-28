@@ -266,6 +266,26 @@
     @apply flex items-start gap-2 text-sm text-ink-500 mt-4;
   }
 
+  /* ── Features 4섹션 불릿 (체크 아이콘) ──── */
+  .feature-bullets {
+    @apply list-none p-0 m-0;
+  }
+  .feature-bullets li {
+    @apply flex items-start gap-3 py-2.5 text-ink-700 text-base;
+  }
+  .feature-bullets li::before {
+    content: '';
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #e6faed;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 12.5 L10 16.5 L18 8' stroke='%23016e33' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px 18px;
+  }
+
   /* ── Floating CTA ────────────────────────── */
   .floating-cta {
     @apply fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white shadow-lg border border-ink-150 rounded-pill px-5 py-3 flex items-center gap-4 opacity-0 translate-y-4 pointer-events-none transition-all duration-300 max-w-[calc(100%-32px)];

@@ -21,8 +21,19 @@ interface Props {
 
 export function Promotion({ blocks }: Props) {
   return (
-    <section className="showcase-dark py-section">
-      <div className="container-oz">
+    // 외부 wrapper : 다크 배경 + 패딩 (grid 컨테이너 X — 안쪽 박스에서 grid 처리)
+    <section className="py-section bg-surface-dark text-white relative overflow-hidden">
+      {/* 그린 글로우 (우상단) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-[30%] -right-[15%] w-[600px] h-[600px] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(23, 224, 109, 0.25), transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      />
+      <div className="container-oz relative">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* 좌측 카피 */}
           <div>

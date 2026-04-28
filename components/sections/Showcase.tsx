@@ -21,8 +21,22 @@ interface Props {
 
 export function Showcase({ blocks }: Props) {
   return (
-    <section className="showcase-dark py-section">
-      <div className="container-oz">
+    // 외부 wrapper : 다크 배경 + 패딩만 (grid 없음)
+    // 잘못된 상태로는 <section className="showcase-dark"> 였는데
+    // showcase-dark 안에 grid md:grid-cols-2 가 있어서 페이지 전체가
+    // 좌우 2단으로 갈라지고 container-oz 가 좌측 좁은 컬럼에 갇혔던 버그.
+    <section className="py-section bg-surface-dark text-white relative overflow-hidden">
+      {/* 그린 글로우 (우상단 radial gradient blur) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-[20%] -right-[10%] w-[60%] h-[140%] rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(23, 224, 109, 0.25), transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      />
+      <div className="container-oz relative">
         {/* 섹션 헤드 — 라이트 톤 카피 */}
         <div className="text-center max-w-[780px] mx-auto mb-16">
           <span className="eyebrow">
