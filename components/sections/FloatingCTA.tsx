@@ -12,18 +12,19 @@
 import { useState, useEffect } from 'react'
 import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
-import { EditableLink } from '@/components/editable/EditableLink'
+import { DynamicCTA } from '@/components/cta/DynamicCTA'
 import {
   pickTextOrUndef,
-  pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctas?: CtaButton[]
 }
 
-export function FloatingCTA({ blocks }: Props) {
+export function FloatingCTA({ blocks, ctas }: Props) {
   const [show, setShow] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
@@ -33,8 +34,6 @@ export function FloatingCTA({ blocks }: Props) {
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [dismissed])
-
-  const ctaValue = pickLinkOrUndef(blocks, 'home.floating.cta')
 
   return (
     <div className={`floating-cta ${show ? 'show' : ''}`}>
@@ -65,18 +64,17 @@ export function FloatingCTA({ blocks }: Props) {
           />
         </strong>
       </div>
-      <EditableLink
-        blockKey="home.floating.cta"
-        fallback={{ label: '지금 신청하기', href: '#apply', target: '_self' }}
-        value={ctaValue}
-        pagePath="/"
+      <DynamicCTA
+        placement="floating"
+        ctas={ctas}
+        fallback={{ label: '지금 신청하기', href: '#apply' }}
         className="btn btn-primary"
       >
         <span className="flex items-center gap-2">
-          {ctaValue?.label ?? '지금 신청하기'}
+          {ctas?.[0]?.label ?? '지금 신청하기'}
           <Icon.Arrow s={16} />
         </span>
-      </EditableLink>
+      </DynamicCTA>
       <button
         className="close"
         onClick={() => setDismissed(true)}

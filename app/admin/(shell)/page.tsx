@@ -14,6 +14,7 @@ import { isSuperAdmin } from '@/lib/admin/permissions'
 import type {
   ConsultationFunnelRow,
   ConsultationByChannelRow,
+  CtaPerformanceRow,
   DbStatus,
 } from '@/lib/admin/types'
 
@@ -34,8 +35,8 @@ export default async function AdminDashboardPage() {
   const profile = await requireAdminProfile()
   const supabase = createClient()
 
-  // 병렬 쿼리 5개
-  const [funnelRes, channelRes, statusesRes, recentRes, totalRes] = await Promise.all([
+  // 병렬 쿼리 6개 (CTA 성과 추가)
+  const [funnelRes, channelRes, statusesRes, recentRes, totalRes, ctaPerfRes] = await Promise.all([
     supabase.from('v_consultation_funnel').select('*'),
     supabase
       .from('v_consultation_by_channel')
@@ -49,6 +50,7 @@ export default async function AdminDashboardPage() {
       .order('created_at', { ascending: false })
       .limit(5),
     supabase.from('consultations').select('id', { count: 'exact', head: true }),
+    supabase.from('v_cta_performance').select('*'),
   ])
 
   const funnel = (funnelRes.data as ConsultationFunnelRow[] | null) ?? []
@@ -57,6 +59,9 @@ export default async function AdminDashboardPage() {
   const statuses = (statusesRes.data as DbStatus[] | null) ?? []
   const recent = (recentRes.data as RecentRow[] | null) ?? []
   const total = totalRes.count ?? 0
+  const ctaPerf = ((ctaPerfRes.data as CtaPerformanceRow[] | null) ?? [])
+    .filter((c) => c.is_active)
+    .sort((a, b) => (b.lead_count ?? 0) - (a.lead_count ?? 0))
 
   // 매체별 집계 (30일 누적) — channel별로 lead/conversion sum
   const channelAgg = new Map<
@@ -179,6 +184,64 @@ export default async function AdminDashboardPage() {
                   <td className="px-4 py-2 text-right text-ink-400">
                     {r.junkRate.toFixed(2)}%
                   </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* CTA별 전환율 (cta_buttons 마스터) */}
+      <div>
+        <div className="flex items-end justify-between mb-2">
+          <h2 className="text-sm font-semibold text-ink-200">
+            CTA별 성과 <span className="text-xs text-ink-500 font-normal">(전체 누적)</span>
+          </h2>
+          {isSuperAdmin(profile.role) && (
+            <Link
+              href="/admin/settings/cta"
+              className="text-xs text-naver-neon hover:text-naver-green"
+            >
+              CTA 관리 →
+            </Link>
+          )}
+        </div>
+        <div className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-ink-900 text-ink-400 text-xs">
+              <tr>
+                <th className="text-left px-4 py-2 font-semibold">위치</th>
+                <th className="text-left px-4 py-2 font-semibold">라벨</th>
+                <th className="text-left px-4 py-2 font-semibold">UTM 캠페인</th>
+                <th className="text-right px-4 py-2 font-semibold">신청</th>
+                <th className="text-right px-4 py-2 font-semibold">전환</th>
+                <th className="text-right px-4 py-2 font-semibold">전환율</th>
+                <th className="text-right px-4 py-2 font-semibold">7일</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ink-700">
+              {ctaPerf.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-ink-500 text-sm">
+                    등록된 CTA가 없습니다.
+                  </td>
+                </tr>
+              )}
+              {ctaPerf.map((c) => (
+                <tr key={c.cta_id} className="hover:bg-ink-800/40 transition-colors">
+                  <td className="px-4 py-2 text-ink-200 font-medium">{c.placement}</td>
+                  <td className="px-4 py-2 text-ink-200">{c.label}</td>
+                  <td className="px-4 py-2 text-ink-400 text-xs font-mono">
+                    {c.utm_campaign ?? '-'}
+                  </td>
+                  <td className="px-4 py-2 text-right text-ink-200">{c.lead_count}</td>
+                  <td className="px-4 py-2 text-right text-naver-neon font-semibold">
+                    {c.conversion_count}
+                  </td>
+                  <td className="px-4 py-2 text-right text-naver-neon">
+                    {c.conversion_rate_pct ?? '0.00'}%
+                  </td>
+                  <td className="px-4 py-2 text-right text-ink-400">+{c.week_count}</td>
                 </tr>
               ))}
             </tbody>

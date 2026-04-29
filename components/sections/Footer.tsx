@@ -7,17 +7,20 @@
 import { OzLogo } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
+import { DynamicCTA } from '@/components/cta/DynamicCTA'
 import {
   pickTextOrUndef,
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctas?: CtaButton[]
 }
 
-export function Footer({ blocks }: Props) {
+export function Footer({ blocks, ctas }: Props) {
   const serviceLinks = [
     { key: 'home.footer.service.link1', label: '기능 소개', href: '#features' },
     { key: 'home.footer.service.link2', label: '리뷰 자동화', href: '#review' },
@@ -25,9 +28,9 @@ export function Footer({ blocks }: Props) {
     { key: 'home.footer.service.link4', label: '가격 안내', href: '#pricing' },
   ]
 
+  // supportLinks 의 "상담 신청"은 DynamicCTA 로 별도 처리 (어트리뷰션 추적)
   const supportLinks = [
     { key: 'home.footer.support.link1', label: '1588-0000 (평일 9–18시)', href: 'tel:1588-0000' },
-    { key: 'home.footer.support.link2', label: '상담 신청', href: '#apply' },
     { key: 'home.footer.support.link3', label: '자주 묻는 질문', href: '#faq' },
     { key: 'home.footer.support.link4', label: '이용약관 · 개인정보처리방침', href: '#' },
   ]
@@ -106,7 +109,24 @@ export function Footer({ blocks }: Props) {
             />
           </h5>
           <div className="flex flex-col gap-2">
-            {supportLinks.map((l) => (
+            {/* 전화 (1번 링크) */}
+            <EditableLink
+              key={supportLinks[0].key}
+              blockKey={supportLinks[0].key}
+              fallback={{ label: supportLinks[0].label, href: supportLinks[0].href, target: '_self' }}
+              value={pickLinkOrUndef(blocks, supportLinks[0].key)}
+              pagePath="/"
+              className="text-sm text-ink-300 hover:text-white transition-colors"
+            />
+            {/* 상담 신청 — DynamicCTA (어트리뷰션 추적) */}
+            <DynamicCTA
+              placement="footer"
+              ctas={ctas}
+              fallback={{ label: '상담 신청', href: '#apply' }}
+              className="text-sm text-ink-300 hover:text-white transition-colors text-left"
+            />
+            {/* FAQ + 약관 (3-4번 링크) */}
+            {supportLinks.slice(1).map((l) => (
               <EditableLink
                 key={l.key}
                 blockKey={l.key}

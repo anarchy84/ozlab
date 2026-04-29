@@ -92,6 +92,62 @@ export interface ConsultationByChannelRow {
   unapproved_rate_pct: string | null
 }
 
+// ----- CTA 버튼 -----
+export const CTA_PLACEMENTS = [
+  'nav',
+  'hero',
+  'showcase',
+  'promotion',
+  'floating',
+  'footer',
+  'pricing',
+  'features',
+  'mechanism',
+  'review',
+  'custom',
+] as const
+
+export type CtaPlacement = (typeof CTA_PLACEMENTS)[number]
+
+export const CTA_STYLES = ['primary', 'secondary', 'ghost', 'outline', 'floating'] as const
+export type CtaStyle = (typeof CTA_STYLES)[number]
+
+export interface CtaButton {
+  id: number
+  placement: CtaPlacement
+  sort_order: number
+  label: string
+  target_href: string
+  target_blank: boolean
+  utm_source: string | null
+  utm_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  style: CtaStyle
+  is_active: boolean
+  note: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CtaButtonInput = Omit<CtaButton, 'id' | 'created_at' | 'updated_at'>
+
+export interface CtaPerformanceRow {
+  cta_id: number
+  placement: CtaPlacement
+  label: string
+  utm_campaign: string | null
+  is_active: boolean
+  lead_count: number
+  conversion_count: number
+  promising_count: number
+  unapproved_count: number
+  conversion_rate_pct: string | null
+  today_count: number
+  week_count: number
+  month_count: number
+}
+
 export interface ConsultationByCounselorRow {
   counselor_id: string
   counselor_name: string | null

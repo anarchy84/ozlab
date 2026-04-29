@@ -7,17 +7,20 @@
 import { OzLogo, Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
+import { DynamicCTA } from '@/components/cta/DynamicCTA'
 import {
   pickTextOrUndef,
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctas?: CtaButton[]
 }
 
-export function Nav({ blocks }: Props) {
+export function Nav({ blocks, ctas }: Props) {
   // 메뉴 링크 5개 — 각각 블록으로 관리
   const menuLinks = [
     { key: 'home.nav.link1', label: '기능', href: '#features' },
@@ -63,12 +66,11 @@ export function Nav({ blocks }: Props) {
               pagePath="/"
             />
           </a>
-          {/* 주 CTA */}
-          <EditableLink
-            blockKey="home.nav.cta"
-            fallback={{ label: '지금 신청하기', href: '#apply', target: '_self' }}
-            value={pickLinkOrUndef(blocks, 'home.nav.cta')}
-            pagePath="/"
+          {/* 주 CTA — cta_buttons.placement='nav' (어드민 동적 관리) */}
+          <DynamicCTA
+            placement="nav"
+            ctas={ctas}
+            fallback={{ label: '지금 신청하기', href: '#apply' }}
             className="btn btn-primary sm"
           />
         </div>

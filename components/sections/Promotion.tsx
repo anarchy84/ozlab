@@ -8,18 +8,21 @@ import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
 import MediaSlot from '@/components/ui/MediaSlot'
+import { DynamicCTA } from '@/components/cta/DynamicCTA'
 import {
   pickTextOrUndef,
   pickImageOrUndef,
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctas?: CtaButton[]
 }
 
-export function Promotion({ blocks }: Props) {
+export function Promotion({ blocks, ctas }: Props) {
   return (
     // 외부 wrapper : 다크 배경 + 패딩 (grid 컨테이너 X — 안쪽 박스에서 grid 처리)
     <section className="py-section bg-surface-dark text-white relative overflow-hidden">
@@ -90,18 +93,17 @@ export function Promotion({ blocks }: Props) {
                 pagePath="/"
               />
             </p>
-            <EditableLink
-              blockKey="home.promotion.cta"
-              fallback={{ label: '지금 신청하기', href: '#apply', target: '_self' }}
-              value={pickLinkOrUndef(blocks, 'home.promotion.cta')}
-              pagePath="/"
+            <DynamicCTA
+              placement="promotion"
+              ctas={ctas}
+              fallback={{ label: '지금 신청하기', href: '#apply' }}
               className="btn btn-primary lg"
             >
               <span className="flex items-center gap-2">
-                {pickLinkOrUndef(blocks, 'home.promotion.cta')?.label ?? '지금 신청하기'}
+                {ctas?.[0]?.label ?? '지금 신청하기'}
                 <Icon.Arrow s={18} />
               </span>
-            </EditableLink>
+            </DynamicCTA>
           </div>
 
           {/* 우측 0원 프로모 이미지 */}

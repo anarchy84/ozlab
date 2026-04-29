@@ -15,6 +15,7 @@
 'use client'
 
 import type { ContentBlock } from '@/lib/content-blocks'
+import type { CtaButton, CtaPlacement } from '@/lib/admin/types'
 
 import { PromoStrip } from '@/components/sections/PromoStrip'
 import { Nav } from '@/components/sections/Nav'
@@ -35,27 +36,28 @@ import { FloatingCTA } from '@/components/sections/FloatingCTA'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctasByPlacement: Partial<Record<CtaPlacement, CtaButton[]>>
 }
 
-export default function HomeClient({ blocks }: Props) {
+export default function HomeClient({ blocks, ctasByPlacement }: Props) {
   return (
     <>
       <PromoStrip blocks={blocks} />
-      <Nav blocks={blocks} />
-      <Hero blocks={blocks} />
+      <Nav blocks={blocks} ctas={ctasByPlacement.nav} />
+      <Hero blocks={blocks} ctas={ctasByPlacement.hero} />
       <Painpoints blocks={blocks} />
-      <Showcase blocks={blocks} />
+      <Showcase blocks={blocks} ctas={ctasByPlacement.showcase} />
       <Features blocks={blocks} />
       <ReviewAutomation blocks={blocks} />
       <PlacePlus blocks={blocks} />
       <Mechanism blocks={blocks} />
       <Pricing blocks={blocks} />
-      <Promotion blocks={blocks} />
+      <Promotion blocks={blocks} ctas={ctasByPlacement.promotion} />
       <Testimonials blocks={blocks} />
       <FAQ blocks={blocks} />
       <ApplyForm blocks={blocks} />
-      <Footer blocks={blocks} />
-      <FloatingCTA blocks={blocks} />
+      <Footer blocks={blocks} ctas={ctasByPlacement.footer} />
+      <FloatingCTA blocks={blocks} ctas={ctasByPlacement.floating} />
     </>
   )
 }

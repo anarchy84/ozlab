@@ -8,18 +8,21 @@ import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
 import MediaSlot from '@/components/ui/MediaSlot'
+import { DynamicCTA } from '@/components/cta/DynamicCTA'
 import {
   pickTextOrUndef,
   pickImageOrUndef,
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctas?: CtaButton[]
 }
 
-export function Hero({ blocks }: Props) {
+export function Hero({ blocks, ctas }: Props) {
   // 떠다니는 태그 4개 — 위치 t1/t2/t3/t4 는 CSS 에서 고정
   const tags = [
     { key: 'home.hero.tag1', label: '네이버 리뷰 자동 작성', pos: 't1' },
@@ -98,20 +101,19 @@ export function Hero({ blocks }: Props) {
               />
             </p>
 
-            {/* CTA 2개 */}
+            {/* CTA 2개 — primary 는 cta_buttons (어드민 동적), secondary 는 EditableLink */}
             <div className="flex gap-3 flex-wrap">
-              <EditableLink
-                blockKey="home.hero.cta.primary"
-                fallback={{ label: '0원으로 시작하기', href: '#apply', target: '_self' }}
-                value={pickLinkOrUndef(blocks, 'home.hero.cta.primary')}
-                pagePath="/"
+              <DynamicCTA
+                placement="hero"
+                ctas={ctas}
+                fallback={{ label: '0원으로 시작하기', href: '#apply' }}
                 className="btn btn-primary lg"
               >
                 <span className="flex items-center gap-2">
-                  {pickLinkOrUndef(blocks, 'home.hero.cta.primary')?.label ?? '0원으로 시작하기'}
+                  {ctas?.[0]?.label ?? '0원으로 시작하기'}
                   <Icon.Arrow s={18} />
                 </span>
-              </EditableLink>
+              </DynamicCTA>
               <EditableLink
                 blockKey="home.hero.cta.secondary"
                 fallback={{ label: '리뷰 자동화 보기', href: '#review', target: '_self' }}

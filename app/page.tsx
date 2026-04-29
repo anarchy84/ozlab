@@ -14,16 +14,18 @@
 
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
+import { fetchCtasByPlacement } from '@/lib/cta-server'
 import HomeClient from './(home)/HomeClient'
 
-// 편집 즉시 반영 — 캐시 최소화
-// P6 에서 revalidateTag 로 전환 검토 (편집 PATCH 시점에만 무효화)
 export const revalidate = 0
 
 export default async function HomePage() {
-  // "/" 페이지에 속한 모든 content_blocks 일괄 조회
-  const blocksMap = await getBlocksForPage('/')
+  // 병렬로 콘텐츠 블록 + CTA 마스터 조회
+  const [blocksMap, ctasByPlacement] = await Promise.all([
+    getBlocksForPage('/'),
+    fetchCtasByPlacement(),
+  ])
   const blocks = blocksMapToRecord(blocksMap)
 
-  return <HomeClient blocks={blocks} />
+  return <HomeClient blocks={blocks} ctasByPlacement={ctasByPlacement} />
 }

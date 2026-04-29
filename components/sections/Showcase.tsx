@@ -8,18 +8,21 @@ import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
 import MediaSlot from '@/components/ui/MediaSlot'
+import { DynamicCTA } from '@/components/cta/DynamicCTA'
 import {
   pickTextOrUndef,
   pickImageOrUndef,
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
   blocks: Record<string, ContentBlock>
+  ctas?: CtaButton[]
 }
 
-export function Showcase({ blocks }: Props) {
+export function Showcase({ blocks, ctas }: Props) {
   return (
     // 외부 wrapper : 다크 배경 + 패딩만 (grid 없음)
     // 잘못된 상태로는 <section className="showcase-dark"> 였는데
@@ -126,18 +129,17 @@ export function Showcase({ blocks }: Props) {
                 pagePath="/"
               />
             </p>
-            <EditableLink
-              blockKey="home.showcase.cta"
-              fallback={{ label: '0원으로 시작하기', href: '#apply', target: '_self' }}
-              value={pickLinkOrUndef(blocks, 'home.showcase.cta')}
-              pagePath="/"
+            <DynamicCTA
+              placement="showcase"
+              ctas={ctas}
+              fallback={{ label: '0원으로 시작하기', href: '#apply' }}
               className="btn lg !bg-[#17e06d] !text-ink-900"
             >
               <span className="flex items-center gap-2">
-                {pickLinkOrUndef(blocks, 'home.showcase.cta')?.label ?? '0원으로 시작하기'}
+                {ctas?.[0]?.label ?? '0원으로 시작하기'}
                 <Icon.Arrow s={18} />
               </span>
-            </EditableLink>
+            </DynamicCTA>
           </div>
 
           <div className="relative">

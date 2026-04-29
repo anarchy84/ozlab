@@ -14,6 +14,7 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react'
 import { EditableText } from '@/components/editable/EditableText'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
+import { readCtaAttribution } from '@/lib/cta-attribution'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -65,14 +66,22 @@ export function ApplyForm({ blocks }: Props) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    // 1) URL 쿼리 + sessionStorage(CTA 클릭) 통합 어트리뷰션 읽기
+    //    URL 쿼리가 있으면 우선 (광고 트래픽 보호)
+    const attr = readCtaAttribution()
+
+    // 2) URL 의 utm_term 도 별도 캐치 (cta-attribution 은 5종 다 안 다룸)
     const sp = new URLSearchParams(window.location.search)
+    const utmTerm = sp.get('utm_term')
+
     const u: Record<string, string> = {}
-    ;['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(
-      (k) => {
-        const v = sp.get(k)
-        if (v) u[k] = v
-      }
-    )
+    if (attr.utm_source)   u.utm_source   = attr.utm_source
+    if (attr.utm_medium)   u.utm_medium   = attr.utm_medium
+    if (attr.utm_campaign) u.utm_campaign = attr.utm_campaign
+    if (attr.utm_content)  u.utm_content  = attr.utm_content
+    if (utmTerm)           u.utm_term     = utmTerm
+
     setUtm(u)
   }, [])
 
