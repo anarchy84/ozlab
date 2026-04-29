@@ -15,7 +15,7 @@
 //   - /api/admin/content-blocks/upload 로 업로드 → url + (선택) fallback_url 반환
 //   - 투명 PNG는 has_alpha=true 로 응답 → UI 에 뱃지 표시
 //
-// 자동 발행 금지 원칙 준수 :
+// 발행 안전장치 (마케터 실수 방지) :
 //   - Step 1 → Step 2 전환 필수 (바로 저장 버튼 없음)
 //   - Step 2 에서 "취소" 누르면 Step 1 로 복귀
 //   - "이전 버전으로 되돌리기" 버튼은 향후 history 탭에서 제공 (Phase 0.5)

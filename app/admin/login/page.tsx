@@ -12,6 +12,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/admin'
+  const errorParam = searchParams.get('error')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,16 +35,28 @@ function LoginForm() {
     router.refresh()
   }
 
+  // URL 에 ?error=no_access 가 붙어 들어온 경우 (admin_users 미등록)
+  const noAccessHint =
+    errorParam === 'no_access'
+      ? '이 계정은 어드민 사용자로 등록되어 있지 않습니다. super_admin 에게 초대를 요청하세요.'
+      : null
+
   return (
     <form onSubmit={handleLogin} className="space-y-4">
+      {noAccessHint && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-amber-300 text-xs">
+          {noAccessHint}
+        </div>
+      )}
+
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
+        <div className="bg-accent-red/10 border border-accent-red/30 rounded-lg p-3 text-accent-red text-sm">
           {error}
         </div>
       )}
 
       <div>
-        <label htmlFor="email" className="block text-sm text-gray-300 mb-1.5">
+        <label htmlFor="email" className="block text-sm text-ink-300 mb-1.5">
           이메일
         </label>
         <input
@@ -52,13 +65,13 @@ function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2.5 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-naver-green/50 focus:border-naver-green"
           placeholder="ourteam.kr@gmail.com"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm text-gray-300 mb-1.5">
+        <label htmlFor="password" className="block text-sm text-ink-300 mb-1.5">
           비밀번호
         </label>
         <input
@@ -67,7 +80,7 @@ function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2.5 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-naver-green/50 focus:border-naver-green"
           placeholder="••••••••"
         />
       </div>
@@ -75,7 +88,7 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white font-medium rounded-lg transition-colors"
+        className="w-full py-2.5 bg-naver-green hover:bg-naver-dark disabled:opacity-50 text-white font-bold rounded-lg transition-colors"
       >
         {loading ? '로그인 중...' : '로그인'}
       </button>
@@ -85,22 +98,26 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-surface-dark flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white">오즈랩페이</h1>
-          <p className="text-gray-400 text-sm mt-1">관리자 로그인</p>
+          <h1 className="text-2xl font-bold text-ink-100 flex items-center justify-center gap-2">
+            <span className="text-naver-neon">●</span>
+            오즈랩페이
+          </h1>
+          <p className="text-ink-400 text-sm mt-1">관리자 로그인</p>
         </div>
 
-        {/* 로그인 폼 — Suspense로 useSearchParams 감싸기 */}
-        <Suspense fallback={
-          <div className="text-center py-8 text-gray-500">로딩 중...</div>
-        }>
+        <Suspense
+          fallback={
+            <div className="text-center py-8 text-ink-500">로딩 중...</div>
+          }
+        >
           <LoginForm />
         </Suspense>
 
-        <p className="text-center text-gray-600 text-xs mt-6">
+        <p className="text-center text-ink-600 text-xs mt-6">
           © 2026 오즈랩페이. 관리자 전용 페이지입니다.
         </p>
       </div>

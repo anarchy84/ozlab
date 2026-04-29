@@ -1,20 +1,22 @@
 // ─────────────────────────────────────────────
-// /admin/(shell) — 어드민 shell 레이아웃 (인증 게이트 + 상단 네비)
+// /admin/(shell) — 어드민 shell 레이아웃 (인증 + role 게이트 + 상단 네비)
 //
 // route group "(shell)" 안의 페이지만 이 layout 적용 :
-//   · /admin            → /admin/(shell)/page.tsx
-//   · /admin/consultations → /admin/(shell)/consultations/page.tsx
+//   · /admin                    → 대시보드
+//   · /admin/consultations      → 상담 신청 목록
+//   · /admin/users              → 사용자 관리 (super_admin 전용)
+//   · /admin/settings/statuses  → 상태 관리 (super_admin 전용)
 //
-// /admin/login 은 (shell) 외부라 인증 게이트 통과 X (자체 디자인 그대로 사용)
-//
-// SSR 시점에 Supabase auth 검사 → 비로그인이면 /admin/login 으로 리다이렉트
+// 인증 흐름 :
+//   1) Supabase auth 쿠키 확인 → 비로그인 → /admin/login
+//   2) admin_users 등록 + is_active 확인 → 미등록 → /admin/login?error=no_access
+//   3) role 별로 메뉴 필터 (super_admin 만 사용자/설정 메뉴 표시)
 // ─────────────────────────────────────────────
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdminProfile } from '@/lib/admin/auth-helpers'
+import { ROLE_LABELS, ROLE_EMOJI, isSuperAdmin } from '@/lib/admin/permissions'
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton'
 
-// 어드민 페이지 캐시 금지 — 항상 최신 데이터
 export const dynamic = 'force-dynamic'
 
 export default async function AdminShellLayout({
@@ -22,45 +24,65 @@ export default async function AdminShellLayout({
 }: {
   children: React.ReactNode
 }) {
-  // 인증 체크 — 비로그인이면 로그인 페이지로 redirect
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/admin/login')
+  // 인증 + role 체크 (admin_users 미등록이면 redirect)
+  const profile = await requireAdminProfile()
 
   return (
-    <div className="min-h-screen bg-ink-50">
-      <header className="bg-white border-b border-ink-150 sticky top-0 z-30">
+    <div className="min-h-screen bg-surface-dark text-ink-100">
+      <header className="bg-ink-900 border-b border-ink-700 sticky top-0 z-30">
         <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/admin" className="font-bold text-ink-900">
+            <Link href="/admin" className="font-bold text-ink-100 flex items-center gap-2">
+              <span className="text-naver-neon">●</span>
               오즈랩페이 어드민
             </Link>
             <nav className="flex items-center gap-5 text-sm">
               <Link
                 href="/admin"
-                className="text-ink-600 hover:text-ink-900 transition-colors"
+                className="text-ink-300 hover:text-ink-100 transition-colors"
               >
                 대시보드
               </Link>
               <Link
                 href="/admin/consultations"
-                className="text-ink-600 hover:text-ink-900 transition-colors"
+                className="text-ink-300 hover:text-ink-100 transition-colors"
               >
                 상담 신청
               </Link>
+              {isSuperAdmin(profile.role) && (
+                <>
+                  <Link
+                    href="/admin/users"
+                    className="text-ink-300 hover:text-ink-100 transition-colors"
+                  >
+                    사용자 관리
+                  </Link>
+                  <Link
+                    href="/admin/settings/statuses"
+                    className="text-ink-300 hover:text-ink-100 transition-colors"
+                  >
+                    상태 관리
+                  </Link>
+                </>
+              )}
               <Link
                 href="/"
                 target="_blank"
-                className="text-ink-600 hover:text-ink-900 transition-colors"
+                className="text-ink-400 hover:text-ink-100 transition-colors"
               >
                 사이트 보기 ↗
               </Link>
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-ink-500 hidden sm:inline">{user.email}</span>
+            <span className="hidden sm:flex items-center gap-1.5 text-ink-200">
+              <span title={ROLE_LABELS[profile.role]}>{ROLE_EMOJI[profile.role]}</span>
+              <span className="font-medium">
+                {profile.display_name ?? profile.email}
+              </span>
+              <span className="text-ink-600">·</span>
+              <span className="text-ink-400">{ROLE_LABELS[profile.role]}</span>
+            </span>
             <AdminSignOutButton />
           </div>
         </div>

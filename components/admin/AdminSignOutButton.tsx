@@ -27,7 +27,7 @@ export function AdminSignOutButton() {
       type="button"
       onClick={handleSignOut}
       disabled={loading}
-      className="text-sm text-ink-500 hover:text-ink-900 transition-colors disabled:opacity-50"
+      className="text-sm text-ink-400 hover:text-ink-100 transition-colors disabled:opacity-50"
     >
       {loading ? '로그아웃 중…' : '로그아웃'}
     </button>
