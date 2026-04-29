@@ -1,19 +1,22 @@
 // ─────────────────────────────────────────────
-// /admin/consultations — 상담 신청 목록 (Phase A 강화)
+// /admin/consultations — 상담 신청 목록
 //
-// 강화 항목 :
-//   · status_id JOIN → db_statuses 의 라벨·색상으로 동적 렌더
-//   · 상태 필터를 db_statuses 동적 옵션으로
-//   · 매체(utm_source) 필터 추가
-//   · 상담사(counselor) 표시
-//   · 즐겨찾기·블랙리스트 토글 표시
-//   · 검색 (이름·연락처·매장명·내부메모)
+// 구조 :
+//   server (이 파일) : SSR 데이터 fetch + 검색/필터 GET form
+//   client (ConsultationsListClient) : 표 + 상세 모달 트리거
+//
+// 강화 :
+//   · status_id JOIN → db_statuses 색상으로 동적 렌더
+//   · 상태 필터 동적 옵션 (db_statuses)
+//   · 매체(utm_source) 필터
+//   · 상담사 표시
+//   · 행 클릭 → ConsultationDetailModal (메모/상태/이력/페이지네이션)
 // ─────────────────────────────────────────────
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
-import { ConsultationStatusActions } from '@/components/admin/ConsultationStatusActions'
 import type { DbStatus } from '@/lib/admin/types'
+import { ConsultationsListClient, type ConsultationRow } from './ConsultationsListClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,27 +27,6 @@ interface SP {
   status_id?: string
   channel?: string
   page?: string
-}
-
-interface ConsultationRow {
-  id: string
-  created_at: string
-  name: string
-  phone: string
-  store_name: string | null
-  industry: string | null
-  region: string | null
-  message: string | null
-  internal_memo: string | null
-  status: string | null
-  status_id: number | null
-  contacted_at: string | null
-  done_at: string | null
-  utm_source: string | null
-  utm_campaign: string | null
-  counselor_id: string | null
-  is_favorite: boolean
-  is_blacklisted: boolean
 }
 
 export default async function ConsultationsListPage({
@@ -62,15 +44,21 @@ export default async function ConsultationsListPage({
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  // 상태 마스터 + 매체 옵션 (필터 드롭다운용)
-  const [{ data: statusesData }, { data: channelsData }] = await Promise.all([
-    supabase.from('db_statuses').select('*').order('sort_order'),
-    supabase
-      .from('consultations')
-      .select('utm_source')
-      .not('utm_source', 'is', null)
-      .limit(500),
-  ])
+  // 상태 마스터 + 매체 옵션 + 상담사 목록 (필터/모달용)
+  const [{ data: statusesData }, { data: channelsData }, { data: counselorsData }] =
+    await Promise.all([
+      supabase.from('db_statuses').select('*').order('sort_order'),
+      supabase
+        .from('consultations')
+        .select('utm_source')
+        .not('utm_source', 'is', null)
+        .limit(500),
+      supabase
+        .from('admin_users')
+        .select('user_id, display_name')
+        .eq('is_active', true)
+        .in('role', ['super_admin', 'admin', 'counselor']),
+    ])
   const statuses = (statusesData as DbStatus[] | null) ?? []
   const channels = Array.from(
     new Set(
@@ -79,13 +67,19 @@ export default async function ConsultationsListPage({
         .filter(Boolean) as string[],
     ),
   ).sort()
+  const counselors = (counselorsData ?? []) as {
+    user_id: string
+    display_name: string | null
+  }[]
 
+  // 본 목록
   let query = supabase
     .from('consultations')
     .select(
       `id, created_at, name, phone, store_name, industry, region, message, internal_memo,
-       status, status_id, contacted_at, done_at, utm_source, utm_campaign,
-       counselor_id, is_favorite, is_blacklisted`,
+       status, status_id, contacted_at, done_at, utm_source, utm_campaign, db_group_label,
+       counselor_id, callable_time, device_type, contract_period,
+       is_favorite, is_blacklisted, ip_address`,
       { count: 'exact' },
     )
     .order('created_at', { ascending: false })
@@ -104,23 +98,11 @@ export default async function ConsultationsListPage({
   const total = count ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  // 상담사 ID → display 이름 매핑
-  const counselorIds = Array.from(
-    new Set(items.map((c) => c.counselor_id).filter(Boolean) as string[]),
-  )
-  const counselorMap = new Map<string, string>()
-  if (counselorIds.length > 0) {
-    const { data: counselors } = await supabase
-      .from('admin_users')
-      .select('user_id, display_name')
-      .in('user_id', counselorIds)
-    for (const c of counselors ?? []) {
-      counselorMap.set(c.user_id, c.display_name ?? c.user_id.slice(0, 8))
-    }
+  // counselor display_name 매핑
+  const counselorMap: Record<string, string> = {}
+  for (const c of counselors) {
+    counselorMap[c.user_id] = c.display_name ?? c.user_id.slice(0, 8)
   }
-
-  const statusMap = new Map<number, DbStatus>()
-  for (const s of statuses) statusMap.set(s.id, s)
 
   return (
     <div className="space-y-6">
@@ -128,7 +110,7 @@ export default async function ConsultationsListPage({
         <div>
           <h1 className="text-2xl font-bold text-ink-100">상담 신청</h1>
           <p className="text-sm text-ink-400 mt-1">
-            총 {total.toLocaleString()}건 · {page} / {totalPages} 페이지
+            총 {total.toLocaleString()}건 · {page} / {totalPages} 페이지 · 행 클릭으로 상세
           </p>
         </div>
         <Link href="/admin" className="text-sm text-ink-400 hover:text-ink-100">
@@ -211,119 +193,12 @@ export default async function ConsultationsListPage({
         </div>
       )}
 
-      <div className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-hidden">
-        {items.length === 0 ? (
-          <div className="p-12 text-center text-ink-500 text-sm">
-            조건에 맞는 상담이 없습니다.
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-ink-900 text-ink-400 text-xs">
-              <tr>
-                <th className="text-left px-3 py-3 font-semibold">접수</th>
-                <th className="text-left px-3 py-3 font-semibold">매체</th>
-                <th className="text-left px-3 py-3 font-semibold">신청자</th>
-                <th className="text-left px-3 py-3 font-semibold">매장</th>
-                <th className="text-left px-3 py-3 font-semibold">상태</th>
-                <th className="text-left px-3 py-3 font-semibold">담당</th>
-                <th className="text-left px-3 py-3 font-semibold">메모</th>
-                <th className="text-right px-3 py-3 font-semibold">처리</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-700">
-              {items.map((c) => {
-                const st = c.status_id ? statusMap.get(c.status_id) : null
-                return (
-                  <tr key={c.id} className="hover:bg-ink-800/40 transition-colors">
-                    <td className="px-3 py-3 align-top text-ink-400 text-xs whitespace-nowrap">
-                      {formatKst(c.created_at)}
-                    </td>
-                    <td className="px-3 py-3 align-top text-xs">
-                      {c.utm_source ? (
-                        <span className="font-medium text-ink-200">{c.utm_source}</span>
-                      ) : (
-                        <span className="text-ink-600">-</span>
-                      )}
-                      {c.utm_campaign && (
-                        <div className="text-ink-500 text-[10px] mt-0.5">
-                          {c.utm_campaign}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 align-top whitespace-nowrap">
-                      <div className="font-semibold text-ink-100 flex items-center gap-1">
-                        {c.is_favorite && <span title="즐겨찾기">❤️</span>}
-                        {c.is_blacklisted && <span title="블랙리스트">🚫</span>}
-                        {c.name}
-                      </div>
-                      <div className="text-ink-400 text-xs mt-0.5">
-                        <a href={`tel:${c.phone}`} className="hover:underline">
-                          {c.phone}
-                        </a>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 align-top">
-                      <div className="text-ink-200">{c.store_name ?? '—'}</div>
-                      <div className="text-ink-500 text-xs mt-0.5">
-                        {[c.industry, c.region].filter(Boolean).join(' · ') || '—'}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 align-top">
-                      {st ? (
-                        <span
-                          className="inline-block text-[11px] font-bold px-2 py-0.5 rounded"
-                          style={{ backgroundColor: st.bg_color, color: st.text_color }}
-                        >
-                          {st.label}
-                        </span>
-                      ) : (
-                        <span className="inline-block text-[11px] text-ink-500">
-                          {c.status ?? '-'}
-                        </span>
-                      )}
-                      {c.contacted_at && (
-                        <div className="text-[10px] text-ink-500 mt-1">
-                          연락 {formatKstShort(c.contacted_at)}
-                        </div>
-                      )}
-                      {c.done_at && (
-                        <div className="text-[10px] text-ink-500 mt-1">
-                          완료 {formatKstShort(c.done_at)}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 align-top text-xs">
-                      {c.counselor_id ? (
-                        <span className="text-ink-200">
-                          {counselorMap.get(c.counselor_id) ?? '?'}
-                        </span>
-                      ) : (
-                        <span className="text-ink-600">미배정</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 align-top max-w-xs">
-                      <div className="text-ink-200 break-keep line-clamp-2 text-xs">
-                        {c.message ?? '—'}
-                      </div>
-                      {c.internal_memo && (
-                        <div className="text-ink-400 italic line-clamp-1 text-[11px] mt-1">
-                          📝 {c.internal_memo}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 align-top text-right whitespace-nowrap">
-                      <ConsultationStatusActions
-                        id={c.id}
-                        currentStatus={c.status ?? 'new'}
-                      />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <ConsultationsListClient
+        items={items}
+        statuses={statuses}
+        counselors={counselors}
+        counselorMap={counselorMap}
+      />
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 text-sm">
@@ -346,27 +221,6 @@ export default async function ConsultationsListPage({
       )}
     </div>
   )
-}
-
-// ----- 헬퍼 -----
-function formatKst(iso: string): string {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: '2-digit',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(new Date(iso))
-}
-
-function formatKstShort(iso: string): string {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(iso))
 }
 
 function makeHref(args: {
