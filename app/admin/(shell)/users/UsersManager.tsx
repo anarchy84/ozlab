@@ -441,6 +441,54 @@ function EditUserModal({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // 비밀번호 재설정
+  const [pwInput, setPwInput] = useState('')
+  const [pwResetting, setPwResetting] = useState(false)
+  const [pwResult, setPwResult] = useState<{ password: string; email: string | null; login_url: string } | null>(null)
+  const [pwError, setPwError] = useState<string | null>(null)
+
+  async function handleResetPassword() {
+    if (!confirm('이 사용자의 비밀번호를 재설정하시겠습니까?\n슈퍼어드민이 직접 전달해야 합니다.')) return
+    setPwError(null)
+    setPwResetting(true)
+    try {
+      const res = await fetch(`/api/admin/users/${user.user_id}/reset-password`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ password: pwInput.trim() || undefined }),
+      })
+      const j = (await res.json()) as {
+        error?: string
+        password?: string
+        email?: string | null
+        login_url?: string
+      }
+      if (!res.ok) throw new Error(j.error ?? '재설정 실패')
+      setPwResult({
+        password: j.password ?? '',
+        email: j.email ?? null,
+        login_url: j.login_url ?? 'https://ozlabpay.kr/admin/login',
+      })
+      setPwInput('')
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setPwResetting(false)
+    }
+  }
+
+  function copyShareText() {
+    if (!pwResult) return
+    const text =
+      `[오즈랩페이 어드민 계정 안내]\n` +
+      `로그인 주소: ${pwResult.login_url}\n` +
+      `이메일: ${pwResult.email ?? user.email ?? ''}\n` +
+      `임시 비밀번호: ${pwResult.password}\n\n` +
+      `로그인 후 비밀번호를 변경해 주세요.`
+    navigator.clipboard.writeText(text)
+    alert('복사 완료. 슬랙·카톡에 붙여넣기 하세요.')
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
@@ -569,6 +617,66 @@ function EditUserModal({
           >
             {submitting ? '저장 중...' : '저장'}
           </button>
+        </div>
+
+        {/* ── 비밀번호 재설정 섹션 ── */}
+        <div className="mt-4 pt-4 border-t border-ink-700">
+          <h4 className="text-sm font-bold text-ink-200 mb-2">🔑 비밀번호 재설정</h4>
+          <p className="text-xs text-ink-500 mb-3">
+            이메일 발송 없이 즉시 새 비밀번호를 발급합니다. 슈퍼어드민이 슬랙·카톡으로 직접 전달하세요.
+          </p>
+
+          {pwResult ? (
+            <div className="space-y-2 bg-ink-900 border border-naver-green/40 rounded p-3 text-sm">
+              <div>
+                <span className="text-ink-500 text-xs">로그인 주소</span>
+                <div className="font-mono text-ink-100 break-all">{pwResult.login_url}</div>
+              </div>
+              <div>
+                <span className="text-ink-500 text-xs">이메일</span>
+                <div className="font-mono text-ink-100">{pwResult.email ?? user.email ?? '-'}</div>
+              </div>
+              <div>
+                <span className="text-ink-500 text-xs">임시 비밀번호</span>
+                <div className="font-mono text-naver-neon font-bold text-base break-all">
+                  {pwResult.password}
+                </div>
+              </div>
+              <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-200">
+                ⚠️ 다시 볼 수 없습니다. 지금 복사하세요.
+              </div>
+              <button
+                type="button"
+                onClick={copyShareText}
+                className="w-full px-3 py-1.5 text-sm bg-ink-700 text-ink-100 rounded hover:bg-ink-600"
+              >
+                📋 안내 문구 복사
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={pwInput}
+                onChange={(e) => setPwInput(e.target.value)}
+                placeholder="비우면 자동 생성 (12자, 안전)"
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm font-mono focus:outline-none focus:border-naver-green"
+              />
+              {pwError && (
+                <div className="rounded border border-red-800/50 bg-red-900/20 p-2 text-xs text-red-300">
+                  {pwError}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                disabled={pwResetting}
+                className="w-full px-3 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white font-bold rounded disabled:opacity-50"
+              >
+                {pwResetting ? '재설정 중...' : '🔑 임시 비밀번호 발급'}
+              </button>
+            </div>
+          )}
         </div>
       </form>
     </div>
