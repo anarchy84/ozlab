@@ -23,7 +23,7 @@
 //   500 { error: '...' }           — DB / 서버 에러
 // ─────────────────────────────────────────────
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 
 // 봇 차단 — 이 라우트는 캐시 금지
@@ -163,7 +163,9 @@ export async function POST(req: NextRequest) {
   // 4) Supabase insert
   //    inferred_channel/keyword/creative/landing_title/referer_domain 은
   //    DB trigger 가 INSERT 시 자동으로 채움 (fill_attribution_inferred)
-  const supabase = createClient()
+  //    trigger 안에서 content_posts SELECT 가 필요해서 service_role 사용
+  //    (RLS 우회 — 폼 제출은 honeypot+consent 로 검증)
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('consultations')
     .insert({
