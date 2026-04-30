@@ -75,7 +75,7 @@ export function UsersManager({ myUserId }: { myUserId: string }) {
           onClick={() => setShowInvite(true)}
           className="px-3 py-1.5 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark"
         >
-          + 사용자 초대
+          + 사용자 추가
         </button>
       </div>
 
@@ -207,8 +207,10 @@ function InviteModal({
   const [role, setRole] = useState<AdminRole>('counselor')
   const [displayName, setDisplayName] = useState('')
   const [department, setDepartment] = useState('')
+  const [password, setPassword] = useState('')      // 비우면 자동 생성
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<{ email: string; password: string; login_url: string } | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -223,18 +225,97 @@ function InviteModal({
           role,
           display_name: displayName.trim() || undefined,
           department: department.trim() || undefined,
+          password: password.trim() || undefined,
         }),
       })
+      const j = (await res.json()) as {
+        error?: string
+        hint?: string
+        email?: string
+        password?: string
+        login_url?: string
+      }
       if (!res.ok) {
-        const j = (await res.json()) as { error?: string; hint?: string }
         throw new Error([j.error, j.hint].filter(Boolean).join(' / '))
       }
-      onInvited()
+      // 결과 화면 표시 (자동 닫기 X — 비번 복사 시간 줘야 함)
+      setResult({
+        email: j.email ?? email,
+        password: j.password ?? '(자동 생성됨)',
+        login_url: j.login_url ?? 'https://ozlabpay.kr/admin/login',
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function copyShareText() {
+    if (!result) return
+    const text =
+      `[오즈랩페이 어드민 계정 안내]\n` +
+      `로그인 주소: ${result.login_url}\n` +
+      `이메일: ${result.email}\n` +
+      `임시 비밀번호: ${result.password}\n\n` +
+      `로그인 후 비밀번호를 변경해 주세요.`
+    navigator.clipboard.writeText(text)
+    alert('복사 완료. 슬랙·카톡에 붙여넣기 하세요.')
+  }
+
+  // 결과 화면
+  if (result) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div className="bg-surface-darkSoft rounded-lg shadow-xl w-full max-w-md p-6 space-y-4">
+          <h3 className="text-lg font-bold text-ink-100">✅ 계정 생성 완료</h3>
+          <p className="text-xs text-ink-400">
+            아래 정보를 슬랙·카톡으로 직접 전달하세요. 이메일은 발송되지 않습니다.
+          </p>
+
+          <div className="space-y-2 bg-ink-900 border border-ink-700 rounded p-3 text-sm">
+            <div>
+              <span className="text-ink-500 text-xs">로그인 주소</span>
+              <div className="font-mono text-ink-100 break-all">{result.login_url}</div>
+            </div>
+            <div>
+              <span className="text-ink-500 text-xs">이메일</span>
+              <div className="font-mono text-ink-100">{result.email}</div>
+            </div>
+            <div>
+              <span className="text-ink-500 text-xs">임시 비밀번호</span>
+              <div className="font-mono text-naver-neon font-bold text-base">
+                {result.password}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-200">
+            ⚠️ 이 비밀번호는 다시 볼 수 없습니다. 지금 복사하세요.
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={copyShareText}
+              className="px-3 py-1.5 text-sm bg-ink-700 text-ink-100 rounded hover:bg-ink-600"
+            >
+              📋 안내 문구 복사
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setResult(null)
+                onInvited()
+              }}
+              className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark"
+            >
+              완료
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -243,9 +324,9 @@ function InviteModal({
         onSubmit={handleSubmit}
         className="bg-surface-darkSoft rounded-lg shadow-xl w-full max-w-md p-6 space-y-4"
       >
-        <h3 className="text-lg font-bold text-ink-100">새 사용자 초대</h3>
+        <h3 className="text-lg font-bold text-ink-100">새 사용자 추가</h3>
         <p className="text-xs text-ink-500">
-          이메일로 초대 링크를 보냅니다. 받은 사람이 비번을 설정하면 자동으로 어드민 진입할 수 있습니다.
+          이메일 인증 없이 즉시 활성 계정 생성. 임시 비밀번호를 받아 슬랙·카톡으로 직접 전달하세요.
         </p>
 
         <label className="block text-sm">
@@ -297,6 +378,20 @@ function InviteModal({
           />
         </label>
 
+        <label className="block text-sm">
+          <span className="text-ink-200 font-medium">임시 비밀번호 (선택)</span>
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="비우면 자동 생성 (12자 영대소+숫자+특수)"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm font-mono focus:outline-none focus:border-naver-green"
+          />
+          <span className="text-[11px] text-ink-500 mt-1 block">
+            8자 이상이면 그대로 사용. 그 외엔 자동 생성됩니다.
+          </span>
+        </label>
+
         {error && (
           <div className="rounded border border-red-800/50 bg-red-900/20 p-2 text-xs text-red-300">
             {error}
@@ -316,7 +411,7 @@ function InviteModal({
             disabled={submitting || !email.trim()}
             className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark disabled:opacity-50"
           >
-            {submitting ? '발송 중...' : '초대 보내기'}
+            {submitting ? '생성 중...' : '계정 생성'}
           </button>
         </div>
       </form>

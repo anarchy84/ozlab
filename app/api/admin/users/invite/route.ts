@@ -1,22 +1,19 @@
 // ─────────────────────────────────────────────
-// /api/admin/users/invite — 신규 어드민 사용자 이메일 초대
+// /api/admin/users/invite — 신규 어드민 사용자 즉시 생성
 //
 // 권한 : super_admin 만
 //
-// 흐름 :
-//   1) Supabase Auth Admin API 의 inviteUserByEmail() 호출
-//      → Supabase 가 자동으로 초대 메일 발송
-//      → 사용자가 링크 클릭 → 비번 설정 → 자동 로그인
-//   2) 동시에 admin_users 에 INSERT (auth.users 에 user 가 만들어진 후)
-//      또는 첫 로그인 시 트리거로 자동 INSERT
-//      → 본 구현은 invite 단계에서 user_metadata.role 같이 전달해 두고
-//        사용자가 비번 설정 후 첫 어드민 진입 시 trigger 가 admin_users INSERT
+// 흐름 (이메일 인증 없이 즉시 활성) :
+//   1) supabase.auth.admin.createUser({ email, password, email_confirm: true })
+//      → 이메일 발송 X, 즉시 활성 계정 생성
+//   2) admin_users 에 INSERT
+//   3) 응답에 임시 비밀번호 + 로그인 URL 포함
+//      → 슈퍼어드민이 슬랙/카톡으로 직접 전달
 //
-//   ⚠️ 트리거 이슈 :
-//      현재는 트리거 안 만들어져 있어서 invite API 가 직접 admin_users INSERT 시도.
-//      단, invite 시점에는 auth.users 에 user 가 아직 없을 수 있음 (이메일 검증 전).
-//      → invite 응답에서 user_id 받으면 즉시 admin_users INSERT.
-//      → 사용자가 비번 미설정/만료된 경우 admin_users 만 남고 로그인 불가 (정상 동작)
+// 왜 이 방식인가 :
+//   기존 inviteUserByEmail() 은 Supabase 기본 SMTP 의존.
+//   한국 도메인 차단·rate limit 으로 발송 실패 빈번.
+//   직접 비밀번호 발급이 가장 안정적 + 빠름.
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -32,6 +29,26 @@ interface InviteBody {
   display_name?: string
   department?: string
   note?: string
+  password?: string             // 슈퍼어드민이 지정 — 비우면 자동 생성
+}
+
+// 안전한 임시 비밀번호 자동 생성 (12자, 영대소문자+숫자+특수)
+function generatePassword(len = 12): string {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const lower = 'abcdefghijkmnpqrstuvwxyz'
+  const digit = '23456789'
+  const special = '!@#$%'
+  const all = upper + lower + digit + special
+  let out =
+    upper[Math.floor(Math.random() * upper.length)] +
+    lower[Math.floor(Math.random() * lower.length)] +
+    digit[Math.floor(Math.random() * digit.length)] +
+    special[Math.floor(Math.random() * special.length)]
+  for (let i = out.length; i < len; i++) {
+    out += all[Math.floor(Math.random() * all.length)]
+  }
+  // 셔플
+  return out.split('').sort(() => Math.random() - 0.5).join('')
 }
 
 export async function POST(req: NextRequest) {
@@ -63,35 +80,45 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // 비밀번호 — 입력값 우선, 없으면 자동 생성
+  const password = (body.password?.trim() && body.password.trim().length >= 8)
+    ? body.password.trim()
+    : generatePassword(12)
+
   const supabase = createAdminClient()
 
-  // ----- 1) Supabase Auth invite -----
-  const { data: invited, error: inviteError } =
-    await supabase.auth.admin.inviteUserByEmail(email, {
-      data: {
+  // ----- 1) 이메일 인증 없이 즉시 활성 사용자 생성 -----
+  const { data: created, error: createError } =
+    await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,                    // 핵심 — 이메일 발송·확인 우회
+      user_metadata: {
         role: body.role,
         display_name: body.display_name?.trim() ?? null,
         department: body.department?.trim() ?? null,
       },
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ozlabpay.kr'}/admin`,
     })
 
-  if (inviteError) {
-    console.error('[invite]', inviteError)
-    // 이미 가입된 경우
-    if (inviteError.message?.toLowerCase().includes('already')) {
+  if (createError) {
+    console.error('[invite createUser]', createError)
+    if (
+      createError.message?.toLowerCase().includes('already') ||
+      createError.message?.toLowerCase().includes('registered') ||
+      (createError as { code?: string }).code === 'email_exists'
+    ) {
       return NextResponse.json(
-        { error: '이미 가입된 이메일입니다.' },
+        { error: '이미 가입된 이메일입니다. 사용자 목록에서 권한을 변경하거나 비활성화 후 재등록하세요.' },
         { status: 409 },
       )
     }
-    return NextResponse.json({ error: inviteError.message }, { status: 500 })
+    return NextResponse.json({ error: createError.message }, { status: 500 })
   }
 
-  const userId = invited?.user?.id
+  const userId = created?.user?.id
   if (!userId) {
     return NextResponse.json(
-      { error: 'invite 응답에 user_id 없음 — Supabase 응답 확인 필요' },
+      { error: '계정 생성 응답에 user_id 없음' },
       { status: 500 },
     )
   }
@@ -121,11 +148,15 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ozlabpay.kr'}/admin/login`
+
   return NextResponse.json({
     success: true,
     user_id: userId,
     email,
     role: body.role,
-    message: `초대 메일을 ${email} 로 발송했습니다.`,
+    password,                  // 슈퍼어드민이 직접 전달용 — 응답에서만 노출, DB 에 저장 X
+    login_url: loginUrl,
+    message: `계정 생성 완료. 아래 비밀번호를 슬랙·카톡으로 직접 전달하세요.`,
   })
 }
