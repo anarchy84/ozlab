@@ -41,11 +41,18 @@ interface ConsultationInput {
   message?: string
   consent_privacy?: boolean
   _hp?: string
+  // 광고 캠페인
   utm_source?: string
   utm_medium?: string
   utm_campaign?: string
   utm_term?: string
   utm_content?: string
+  // 광고 클릭 ID
+  gclid?: string
+  fbclid?: string
+  // 유입 경로 (클라가 보낸 First-touch 우선)
+  referer?: string
+  landing_page_path?: string
 }
 
 // -------------------------------------------------------------
@@ -145,11 +152,17 @@ export async function POST(req: NextRequest) {
   }
 
   // 3) 메타 정보 추출
+  //    referer / landing_page : 클라가 First-touch 로 보낸 게 우선 (정확)
+  //    없으면 서버 헤더 referer 사용 (제출 직전 페이지)
   const ip = getClientIp(req)
   const ua = req.headers.get('user-agent')
-  const referer = req.headers.get('referer')
+  const headerReferer = req.headers.get('referer')
+  const referer = clean(body.referer, 500) ?? (headerReferer ? headerReferer.slice(0, 500) : null)
+  const landingPagePath = clean(body.landing_page_path, 500)
 
   // 4) Supabase insert
+  //    inferred_channel/keyword/creative/landing_title/referer_domain 은
+  //    DB trigger 가 INSERT 시 자동으로 채움 (fill_attribution_inferred)
   const supabase = createClient()
   const { data, error } = await supabase
     .from('consultations')
@@ -163,14 +176,17 @@ export async function POST(req: NextRequest) {
       message: clean(body.message, 2000),
       ip_address: ip,
       user_agent: ua ? ua.slice(0, 1000) : null,
-      referer: referer ? referer.slice(0, 500) : null,
-      utm_source: clean(body.utm_source, 100),
-      utm_medium: clean(body.utm_medium, 100),
-      utm_campaign: clean(body.utm_campaign, 100),
-      utm_term: clean(body.utm_term, 100),
+      referer,
+      landing_page_path: landingPagePath,
+      utm_source:  clean(body.utm_source, 100),
+      utm_medium:  clean(body.utm_medium, 100),
+      utm_campaign:clean(body.utm_campaign, 100),
+      utm_term:    clean(body.utm_term, 100),
       utm_content: clean(body.utm_content, 100),
+      gclid:       clean(body.gclid, 200),
+      fbclid:      clean(body.fbclid, 200),
     })
-    .select('id, name, phone, store_name, industry, region, message')
+    .select('id, name, phone, store_name, industry, region, message, inferred_channel')
     .single()
 
   if (error || !data) {

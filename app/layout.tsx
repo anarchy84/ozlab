@@ -5,6 +5,7 @@ import { EditorModal } from '@/components/editable/EditorModal'
 // 관리자 권한 체크 — 앱 전체에서 Supabase auth 호출을 1회로 축소
 // (EditOverlay 가 수십 개 깔릴 때 NavigatorLock 경쟁 방지)
 import { AdminGuardProvider } from '@/components/editable/AdminGuardProvider'
+import { AttributionTracker } from '@/components/AttributionTracker'
 import './globals.css'
 
 // ─────────────────────────────────────────────
@@ -77,6 +78,8 @@ export default function RootLayout({
         */}
         <AdminGuardProvider>
           <EditorProvider>
+            {/* 사이트 첫 진입 시 First-touch 어트리뷰션 30일 보존 */}
+            <AttributionTracker />
             <main className="flex-1">{children}</main>
             {/* 전역 편집 모달 — admin 이 ✏️ 눌렀을 때만 실제 DOM 에 나타남 */}
             <EditorModal />

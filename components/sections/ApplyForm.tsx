@@ -61,28 +61,29 @@ export function ApplyForm({ blocks }: Props) {
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // mount 시 URL 에서 utm_* 캐싱 — submit 시 함께 전송 (광고 어트리뷰션용)
-  const [utm, setUtm] = useState<Record<string, string>>({})
+  // mount 시 어트리뷰션 캐싱 — submit 시 함께 전송
+  // utm 5종 + gclid/fbclid + referer/landing_page (First-touch + URL + CTA 머지)
+  const [attribution, setAttribution] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // 1) URL 쿼리 + sessionStorage(CTA 클릭) 통합 어트리뷰션 읽기
-    //    URL 쿼리가 있으면 우선 (광고 트래픽 보호)
+    // 통합 어트리뷰션 — readAttribution() 내부에서
+    //   URL 쿼리 > Session(CTA 클릭 24h) > First-touch(localStorage 30일) 머지
     const attr = readCtaAttribution()
 
-    // 2) URL 의 utm_term 도 별도 캐치 (cta-attribution 은 5종 다 안 다룸)
-    const sp = new URLSearchParams(window.location.search)
-    const utmTerm = sp.get('utm_term')
-
     const u: Record<string, string> = {}
-    if (attr.utm_source)   u.utm_source   = attr.utm_source
-    if (attr.utm_medium)   u.utm_medium   = attr.utm_medium
-    if (attr.utm_campaign) u.utm_campaign = attr.utm_campaign
-    if (attr.utm_content)  u.utm_content  = attr.utm_content
-    if (utmTerm)           u.utm_term     = utmTerm
+    if (attr.utm_source)        u.utm_source        = attr.utm_source
+    if (attr.utm_medium)        u.utm_medium        = attr.utm_medium
+    if (attr.utm_campaign)      u.utm_campaign      = attr.utm_campaign
+    if (attr.utm_content)       u.utm_content       = attr.utm_content
+    if (attr.utm_term)          u.utm_term          = attr.utm_term
+    if (attr.gclid)             u.gclid             = attr.gclid
+    if (attr.fbclid)            u.fbclid            = attr.fbclid
+    if (attr.referer)           u.referer           = attr.referer
+    if (attr.landing_page_path) u.landing_page_path = attr.landing_page_path
 
-    setUtm(u)
+    setAttribution(u)
   }, [])
 
   // 단일 onChange 핸들러 — text/select/textarea 모두 처리
@@ -109,7 +110,7 @@ export function ApplyForm({ blocks }: Props) {
       const res = await fetch('/api/consultations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, ...utm }),
+        body: JSON.stringify({ ...form, ...attribution }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {

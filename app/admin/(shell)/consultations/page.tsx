@@ -34,7 +34,7 @@ export default async function ConsultationsListPage({
 }: {
   searchParams: SP
 }) {
-  await requireAdminProfile()
+  const profile = await requireAdminProfile()
   const supabase = createClient()
 
   const q = (searchParams.q ?? '').trim()
@@ -77,8 +77,11 @@ export default async function ConsultationsListPage({
     .from('consultations')
     .select(
       `id, created_at, name, phone, store_name, industry, region, message, internal_memo,
-       status, status_id, contacted_at, done_at, utm_source, utm_campaign, db_group_label,
-       counselor_id, callable_time, device_type, contract_period,
+       status, status_id, contacted_at, done_at,
+       utm_source, utm_medium, utm_campaign, utm_term, utm_content,
+       gclid, fbclid, referer, landing_page_path,
+       inferred_channel, inferred_keyword, inferred_creative, inferred_landing_title, referer_domain,
+       db_group_label, counselor_id, callable_time, device_type, contract_period,
        is_favorite, is_blacklisted, ip_address`,
       { count: 'exact' },
     )
@@ -198,6 +201,7 @@ export default async function ConsultationsListPage({
         statuses={statuses}
         counselors={counselors}
         counselorMap={counselorMap}
+        myRole={profile.role}
       />
 
       {totalPages > 1 && (

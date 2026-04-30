@@ -30,8 +30,23 @@ export interface ConsultationFull {
   status_id: number | null
   contacted_at: string | null
   done_at: string | null
+  // utm 5종 + 광고 클릭 ID
   utm_source: string | null
+  utm_medium: string | null
   utm_campaign: string | null
+  utm_term: string | null
+  utm_content: string | null
+  gclid: string | null
+  fbclid: string | null
+  // 유입 경로
+  referer: string | null
+  landing_page_path: string | null
+  // 자동 분류 (DB trigger)
+  inferred_channel: string | null
+  inferred_keyword: string | null
+  inferred_creative: string | null
+  inferred_landing_title: string | null
+  referer_domain: string | null
   db_group_label: string | null
   counselor_id: string | null
   callable_time: string | null
@@ -331,6 +346,11 @@ export function ConsultationDetailModal({
           </div>
         </div>
 
+        {/* 유입 출처 — 풀 너비 카드 (모달 본문 최상단) */}
+        <div className="px-6 pt-6">
+          <AttributionCard c={c} />
+        </div>
+
         {/* 본문 — 3컬럼 */}
         <div className="grid md:grid-cols-3 gap-4 p-6">
           {/* DB 정보 */}
@@ -338,8 +358,6 @@ export function ConsultationDetailModal({
             <h3 className="text-sm font-semibold text-ink-200 mb-2">DB 정보</h3>
             <Field label="이름" value={c.name} />
             <Field label="접수일자" value={new Date(c.created_at).toLocaleString('ko-KR')} />
-            <Field label="매체" value={c.utm_source ?? '-'} />
-            <Field label="캠페인" value={c.utm_campaign ?? '-'} />
             <Field label="DB그룹" value={c.db_group_label ?? '-'} />
             <Field label="IP" value={c.ip_address ?? '-'} mono />
             <div>
@@ -560,6 +578,151 @@ function Field({
       >
         {value}
       </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// 유입 출처 카드 — 분류된 매체/캠페인/키워드/소재/랜딩 + 원본 디버그
+// ─────────────────────────────────────────────
+const CHANNEL_BG: Record<string, string> = {
+  'naver-ads':       'bg-violet-500/20 text-violet-200 border-violet-500/40',
+  'google-ads':      'bg-violet-500/20 text-violet-200 border-violet-500/40',
+  'meta-ads':        'bg-violet-500/20 text-violet-200 border-violet-500/40',
+  'kakao-ads':       'bg-violet-500/20 text-violet-200 border-violet-500/40',
+  'daangn-ads':      'bg-violet-500/20 text-violet-200 border-violet-500/40',
+  'youtube-ads':     'bg-violet-500/20 text-violet-200 border-violet-500/40',
+  'naver-search':    'bg-blue-500/20 text-blue-200 border-blue-500/40',
+  'google-search':   'bg-blue-500/20 text-blue-200 border-blue-500/40',
+  'daum-search':     'bg-blue-500/20 text-blue-200 border-blue-500/40',
+  'bing-search':     'bg-blue-500/20 text-blue-200 border-blue-500/40',
+  'referral-blog':   'bg-orange-500/20 text-orange-200 border-orange-500/40',
+  'internal-blog':   'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
+  'internal':        'bg-emerald-500/10 text-emerald-200 border-emerald-500/30',
+  'social-organic':  'bg-pink-500/20 text-pink-200 border-pink-500/40',
+  'kakao':           'bg-yellow-500/20 text-yellow-200 border-yellow-500/40',
+  'referral-other':  'bg-amber-500/15 text-amber-200 border-amber-500/30',
+  'direct':          'bg-ink-700 text-ink-300 border-ink-600',
+}
+
+const CHANNEL_LABEL: Record<string, string> = {
+  'naver-ads': '네이버 광고',
+  'google-ads': '구글 광고',
+  'meta-ads': '메타 광고',
+  'kakao-ads': '카카오 광고',
+  'daangn-ads': '당근 광고',
+  'youtube-ads': '유튜브 광고',
+  'naver-search': '네이버 검색',
+  'google-search': '구글 검색',
+  'daum-search': '다음 검색',
+  'bing-search': '빙 검색',
+  'referral-blog': '외부 블로그',
+  'internal-blog': '자체 블로그',
+  'internal': '자체 사이트',
+  'social-organic': 'SNS',
+  'kakao': '카카오톡',
+  'referral-other': '외부 사이트',
+  'direct': '직접 진입',
+}
+
+function AttributionCard({ c }: { c: ConsultationFull }) {
+  const ch = c.inferred_channel ?? 'direct'
+  const cls = CHANNEL_BG[ch] ?? 'bg-ink-700 text-ink-300 border-ink-600'
+  const label = CHANNEL_LABEL[ch] ?? ch
+
+  return (
+    <div className="bg-surface-darkSoft border border-ink-700 rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-sm font-bold text-ink-100">🎯 유입 출처</span>
+        <span className={`px-2 py-0.5 text-xs font-bold rounded border ${cls}`}>
+          {label}
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-4 gap-3 text-xs">
+        <Cell label="캠페인" value={c.utm_campaign} />
+        <Cell
+          label="키워드"
+          value={
+            c.inferred_keyword === '(not provided)'
+              ? null
+              : c.inferred_keyword
+          }
+          fallback={
+            c.inferred_keyword === '(not provided)'
+              ? '(구글 정책상 비공개)'
+              : '—'
+          }
+          highlight
+        />
+        <Cell label="소재" value={c.inferred_creative} />
+        <Cell
+          label="랜딩"
+          value={
+            c.inferred_landing_title
+              ? `📄 ${c.inferred_landing_title}`
+              : c.landing_page_path ?? null
+          }
+          highlight={!!c.inferred_landing_title}
+        />
+      </div>
+
+      {/* 원본 디버그 — 펼침 */}
+      <details className="mt-3 text-xs">
+        <summary className="cursor-pointer text-ink-500 hover:text-ink-300">
+          원본 데이터 (디버그용) ▾
+        </summary>
+        <div className="mt-2 p-3 bg-ink-900 border border-ink-700 rounded font-mono text-[11px] text-ink-300 space-y-0.5">
+          <KV k="utm_source" v={c.utm_source} />
+          <KV k="utm_medium" v={c.utm_medium} />
+          <KV k="utm_campaign" v={c.utm_campaign} />
+          <KV k="utm_term" v={c.utm_term} />
+          <KV k="utm_content" v={c.utm_content} />
+          <KV k="gclid" v={c.gclid} />
+          <KV k="fbclid" v={c.fbclid} />
+          <KV k="referer" v={c.referer} />
+          <KV k="landing_page_path" v={c.landing_page_path} />
+          <KV k="referer_domain" v={c.referer_domain} />
+        </div>
+      </details>
+    </div>
+  )
+}
+
+function Cell({
+  label,
+  value,
+  fallback = '—',
+  highlight = false,
+}: {
+  label: string
+  value: string | null
+  fallback?: string
+  highlight?: boolean
+}) {
+  return (
+    <div>
+      <div className="text-ink-500 mb-1">{label}</div>
+      <div
+        className={`px-2 py-1.5 rounded border ${
+          value
+            ? highlight
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+              : 'bg-ink-900 border-ink-700 text-ink-100'
+            : 'bg-ink-900/50 border-ink-700/50 text-ink-600 italic'
+        } break-keep`}
+      >
+        {value ?? fallback}
+      </div>
+    </div>
+  )
+}
+
+function KV({ k, v }: { k: string; v: string | null }) {
+  return (
+    <div className="flex gap-2">
+      <span className="text-ink-500 min-w-[140px]">{k}</span>
+      <span className="text-ink-200 break-all">{v ?? <span className="text-ink-600">null</span>}</span>
     </div>
   )
 }
