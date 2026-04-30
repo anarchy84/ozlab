@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오즈랩페이 어드민 1차 운영 가이드 v1.0</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --bg: #0b1220;
+    --surface: #131c2e;
+    --surface-2: #1a2440;
+    --border: #2a3556;
+    --ink-100: #f4f7fb;
+    --ink-300: #b6c1d8;
+    --ink-500: #7e8aa8;
+    --ink-700: #4a5470;
+    --naver: #00c73c;
+    --naver-soft: rgba(0, 199, 60, 0.15);
+    --amber: #fbbf24;
+    --red: #ef4444;
+    --violet: #a78bfa;
+    --blue: #60a5fa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink-100);
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+  .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* TOC sidebar */
+  aside.toc {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .brand {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--ink-100);
+    margin-bottom: 4px;
+  }
+  .brand small {
+    display: block;
+    font-weight: 400;
+    color: var(--ink-500);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .toc-list {
+    list-style: none;
+    margin-top: 24px;
+  }
+  .toc-list li { margin-bottom: 6px; }
+  .toc-list a {
+    display: block;
+    padding: 6px 8px;
+    color: var(--ink-300);
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .toc-list a:hover { background: var(--surface-2); color: var(--naver); }
+  .toc-list .group-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-700);
+    margin: 16px 0 6px 8px;
+    font-weight: 700;
+  }
+
+  /* Main */
+  main {
+    padding: 48px 56px;
+    max-width: 980px;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  h1 + .sub {
+    color: var(--ink-300);
+    margin-bottom: 4px;
+  }
+  .meta {
+    color: var(--ink-500);
+    font-size: 12px;
+    margin-bottom: 40px;
+  }
+
+  section {
+    margin-bottom: 56px;
+    scroll-margin-top: 24px;
+  }
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--naver);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2 .num {
+    background: var(--naver);
+    color: #001a08;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--ink-100);
+  }
+  p { margin-bottom: 12px; color: var(--ink-300); font-size: 14px; }
+  strong { color: var(--ink-100); }
+  code {
+    background: var(--surface-2);
+    color: var(--naver);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: ui-monospace, 'SF Mono', monospace;
+  }
+
+  ul, ol { margin: 8px 0 12px 20px; color: var(--ink-300); font-size: 14px; }
+  ul li, ol li { margin-bottom: 4px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface);
+    color: var(--ink-300);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  tr:hover td { background: var(--surface); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 12px 0;
+  }
+  .tip {
+    background: rgba(251, 191, 36, 0.08);
+    border-left: 3px solid var(--amber);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--ink-300);
+  }
+  .warn {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid var(--red);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--ink-300);
+  }
+  .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background: var(--naver);
+    color: #001a08;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    border: 1px solid;
+    margin-right: 4px;
+  }
+  .badge.super { background: rgba(167, 139, 250, 0.15); color: var(--violet); border-color: var(--violet); }
+  .badge.marketing { background: rgba(251, 191, 36, 0.15); color: var(--amber); border-color: var(--amber); }
+  .badge.tm { background: rgba(244, 114, 182, 0.15); color: #f472b6; border-color: #f472b6; }
+  .badge.counselor { background: rgba(0, 199, 60, 0.15); color: var(--naver); border-color: var(--naver); }
+  .badge.itops { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: #94a3b8; }
+
+  .quickstart {
+    background: linear-gradient(135deg, rgba(0,199,60,0.15), rgba(96,165,250,0.08));
+    border: 1px solid var(--naver);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 32px 0;
+  }
+  .quickstart h2 {
+    border: none;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+  .step-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .step-num {
+    background: var(--naver);
+    color: #001a08;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .step-title { font-weight: 700; color: var(--ink-100); margin-bottom: 4px; font-size: 14px; }
+  .step-desc { font-size: 12px; color: var(--ink-300); }
+
+  /* SVG mockup */
+  .mock {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 16px 0;
+  }
+  .mock-caption {
+    font-size: 11px;
+    color: var(--ink-500);
+    text-align: center;
+    margin-top: 8px;
+    font-style: italic;
+  }
+  .mock svg { width: 100%; height: auto; display: block; border-radius: 6px; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--ink-500);
+    font-size: 12px;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: black; }
+    .layout { display: block; }
+    aside.toc { display: none; }
+    main { max-width: none; padding: 20mm 16mm; }
+    h2 { color: #00a830; border-color: #00a830; page-break-after: avoid; }
+    section { page-break-inside: avoid; }
+    .card, .tip, .warn { background: #f9fafb; border-color: #d1d5db; color: #374151; }
+    p, ul li, td { color: #374151; }
+    h1, h3, strong { color: #111827; }
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    aside.toc { position: relative; height: auto; }
+    main { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="toc">
+  <div class="brand">
+    오즈랩페이 어드민
+    <small>1차 운영 가이드 v1.0</small>
+  </div>
+  <ul class="toc-list">
+    <li class="group-title">시작</li>
+    <li><a href="#quickstart">⚡ Quick Start (4분)</a></li>
+    <li><a href="#login">1. 로그인 · 권한</a></li>
+
+    <li class="group-title">CRM</li>
+    <li><a href="#consultations">2. 상담 신청 처리</a></li>
+    <li><a href="#attribution">3. 유입 출처 보기</a></li>
+    <li><a href="#revenue">4. 매출 등록</a></li>
+
+    <li class="group-title">광고·콘텐츠</li>
+    <li><a href="#ad-sync">5. 광고 시트 동기화</a></li>
+    <li><a href="#dashboard">6. 매출·광고 대시보드</a></li>
+    <li><a href="#content">7. 블로그 글쓰기</a></li>
+    <li><a href="#cta">8. 홈 인라인 편집·CTA</a></li>
+
+    <li class="group-title">운영 설정</li>
+    <li><a href="#permissions">9. 권한 매트릭스</a></li>
+    <li><a href="#users">10. 사용자 추가</a></li>
+    <li><a href="#products">11. 상품 카탈로그</a></li>
+    <li><a href="#distribution">12. DB 자동분배</a></li>
+
+    <li class="group-title">기타</li>
+    <li><a href="#faq">FAQ · 트러블슈팅</a></li>
+    <li><a href="#contact">문의</a></li>
+  </ul>
+</aside>
+
+<main>
+  <h1>오즈랩페이 어드민 1차 운영 가이드</h1>
+  <p class="sub">마케팅팀 · TM실장 · 상담사 · 전산관리자용</p>
+  <p class="meta">v1.0 · 2026.04.30 · 실사용 1~2주 후 v2 업데이트 예정</p>
+
+  <!-- ========== Quick Start ========== -->
+  <section id="quickstart" class="quickstart">
+    <h2>⚡ Quick Start (첫 진입 4단계)</h2>
+    <p>처음 들어왔다면 아래 순서로 한 번씩 클릭해보세요. 각 4분이면 끝.</p>
+    <div class="step-grid">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">권한 매트릭스</div>
+        <div class="step-desc">슈퍼어드민이 5 role × 23 권한 토글로 누가 뭘 볼 수 있을지 결정</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">DB 분배 ON</div>
+        <div class="step-desc">자동 라운드로빈 + 미배정 리드 재분배 한 번 돌리기</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">광고 시트 sync</div>
+        <div class="step-desc">루커용 시트 "웹에 게시" CSV URL 입력 → "지금 동기화"</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">대시보드 확인</div>
+        <div class="step-desc">매출 분석 + 광고 성과 페이지에서 KPI 자동 집계 확인</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 1. 로그인 ========== -->
+  <section id="login">
+    <h2><span class="num">1</span> 로그인 · 권한</h2>
+
+    <h3>접속 주소</h3>
+    <ul>
+      <li>라이브 사이트 : <code>https://ozlabpay.kr</code></li>
+      <li>어드민 : <code>https://ozlabpay.kr/admin</code></li>
+    </ul>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+        <rect width="700" height="240" fill="#0b1220" rx="6"/>
+        <!-- 헤더 -->
+        <rect x="0" y="0" width="700" height="40" fill="#131c2e"/>
+        <circle cx="20" cy="20" r="4" fill="#00c73c"/>
+        <text x="32" y="24" fill="#f4f7fb" font-size="11" font-weight="700">오즈랩페이 어드민</text>
+        <!-- 로그인 카드 -->
+        <rect x="220" y="65" width="260" height="160" fill="#131c2e" stroke="#2a3556" rx="8"/>
+        <text x="350" y="92" fill="#f4f7fb" font-size="14" font-weight="700" text-anchor="middle">로그인</text>
+        <rect x="240" y="105" width="220" height="28" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="248" y="123" fill="#7e8aa8" font-size="10">이메일</text>
+        <rect x="240" y="140" width="220" height="28" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="248" y="158" fill="#7e8aa8" font-size="10">비밀번호</text>
+        <rect x="240" y="180" width="220" height="32" fill="#00c73c" rx="4"/>
+        <text x="350" y="200" fill="#001a08" font-size="12" font-weight="700" text-anchor="middle">로그인</text>
+      </svg>
+      <div class="mock-caption">/admin/login — 슈퍼어드민이 등록한 이메일·비밀번호</div>
+    </div>
+
+    <h3>5개 권한 등급</h3>
+    <table>
+      <thead>
+        <tr><th>권한</th><th>대상</th><th>핵심 권한</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="badge super">👑 슈퍼어드민</span></td><td>대표</td><td>모든 권한 + 권한 매트릭스 편집</td></tr>
+        <tr><td><span class="badge marketing">📊 마케팅팀</span></td><td>마케터</td><td>광고/매출/콘텐츠/CTA (계정 관리 제외)</td></tr>
+        <tr><td><span class="badge tm">🎧 TM실장</span></td><td>상담실 책임자</td><td>상담 운영 총괄 (계정 관리 제외)</td></tr>
+        <tr><td><span class="badge counselor">📞 상담사</span></td><td>상담사</td><td>상담 처리 + 매출 입력</td></tr>
+        <tr><td><span class="badge itops">🛠 전산관리자</span></td><td>IT 운영</td><td>시스템 운영 (광고·매출·지출 안 보임)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">💡 권한은 슈퍼어드민이 <strong>언제든 줬다 뺐다 가능</strong>. 권한 매트릭스 메뉴에서 셀 클릭만 하면 즉시 반영.</div>
+  </section>
+
+  <!-- ========== 2. 상담 신청 ========== -->
+  <section id="consultations">
+    <h2><span class="num">2</span> 상담 신청 처리</h2>
+    <p>핵심 화면. 신청 들어온 모든 리드를 처리하는 곳.</p>
+
+    <h3>기본 흐름</h3>
+    <ol>
+      <li>사이드바 <strong>"상담 신청"</strong> 클릭</li>
+      <li>리스트에서 <strong>행 클릭</strong> → 상세 모달</li>
+      <li>모달에서 상태 변경 / 메모 작성 / 담당자 배정</li>
+      <li><strong>← →</strong> 키로 다음 건 이동</li>
+      <li><strong>Esc</strong> 닫기</li>
+    </ol>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+        <rect width="700" height="280" fill="#0b1220" rx="6"/>
+        <text x="20" y="28" fill="#f4f7fb" font-size="14" font-weight="700">상담 신청</text>
+        <text x="20" y="44" fill="#7e8aa8" font-size="10">총 245건 · 1/9 페이지 · 행 클릭으로 상세</text>
+        <!-- 검색 바 -->
+        <rect x="20" y="58" width="660" height="36" fill="#131c2e" stroke="#2a3556" rx="6"/>
+        <text x="32" y="80" fill="#7e8aa8" font-size="10">홍길동 / 010-1234 / 강남식당</text>
+        <rect x="600" y="64" width="70" height="24" fill="#00c73c" rx="4"/>
+        <text x="635" y="80" fill="#001a08" font-size="10" font-weight="700" text-anchor="middle">적용</text>
+        <!-- 표 헤더 -->
+        <rect x="20" y="110" width="660" height="28" fill="#131c2e"/>
+        <text x="30" y="128" fill="#7e8aa8" font-size="10" font-weight="700">접수</text>
+        <text x="100" y="128" fill="#7e8aa8" font-size="10" font-weight="700">매체</text>
+        <text x="180" y="128" fill="#7e8aa8" font-size="10" font-weight="700">신청자</text>
+        <text x="290" y="128" fill="#7e8aa8" font-size="10" font-weight="700">매장</text>
+        <text x="400" y="128" fill="#7e8aa8" font-size="10" font-weight="700">상태</text>
+        <text x="480" y="128" fill="#7e8aa8" font-size="10" font-weight="700">담당</text>
+        <text x="570" y="128" fill="#7e8aa8" font-size="10" font-weight="700">메모</text>
+        <!-- 행 1 -->
+        <rect x="20" y="138" width="660" height="36" fill="transparent" stroke="#2a3556" stroke-dasharray="0" />
+        <text x="30" y="158" fill="#b6c1d8" font-size="10">04.29 16:30</text>
+        <rect x="100" y="146" width="44" height="18" fill="rgba(167,139,250,0.2)" rx="3"/>
+        <text x="122" y="158" fill="#a78bfa" font-size="9" text-anchor="middle">네이버 광고</text>
+        <text x="180" y="158" fill="#f4f7fb" font-size="11" font-weight="700">홍길동</text>
+        <text x="290" y="158" fill="#b6c1d8" font-size="10">강남스시</text>
+        <rect x="400" y="146" width="40" height="18" fill="#60a5fa" rx="3"/>
+        <text x="420" y="158" fill="#001a08" font-size="9" text-anchor="middle">신규</text>
+        <text x="480" y="158" fill="#7e8aa8" font-size="10">미배정</text>
+        <text x="570" y="158" fill="#b6c1d8" font-size="10">POS 견적 부탁</text>
+        <!-- 행 2 -->
+        <rect x="20" y="174" width="660" height="36" fill="rgba(0,199,60,0.05)"/>
+        <text x="30" y="194" fill="#b6c1d8" font-size="10">04.29 15:30</text>
+        <rect x="100" y="182" width="44" height="18" fill="rgba(167,139,250,0.2)" rx="3"/>
+        <text x="122" y="194" fill="#a78bfa" font-size="9" text-anchor="middle">메타 광고</text>
+        <text x="180" y="194" fill="#f4f7fb" font-size="11" font-weight="700">❤️ 김영희</text>
+        <text x="290" y="194" fill="#b6c1d8" font-size="10">오즈카페</text>
+        <rect x="400" y="182" width="48" height="18" fill="#fbbf24" rx="3"/>
+        <text x="424" y="194" fill="#001a08" font-size="9" text-anchor="middle">상담중</text>
+        <text x="480" y="194" fill="#b6c1d8" font-size="10">대웅</text>
+        <text x="570" y="194" fill="#b6c1d8" font-size="10">월매출 3000만</text>
+        <!-- 화살표 -->
+        <text x="350" y="248" fill="#00c73c" font-size="12" text-anchor="middle">↑ 행 클릭 → 상세 모달</text>
+      </svg>
+      <div class="mock-caption">/admin/consultations — 행 어디든 클릭하면 모달</div>
+    </div>
+
+    <h3>모달 안에서 할 수 있는 것</h3>
+    <table>
+      <tbody>
+        <tr><td>상태 변경</td><td>드롭다운에서 "개통완료" 등 선택 → 자동 매출 모달 뜸</td></tr>
+        <tr><td>담당 상담사 배정</td><td>counselor 권한 사용자 중 선택</td></tr>
+        <tr><td>내부 메모</td><td>고객은 못 봄. 통화 결과·다음 액션 기록</td></tr>
+        <tr><td>❤️ 즐겨찾기</td><td>유망 리드 마킹 (즉시 토글)</td></tr>
+        <tr><td>🚫 블랙리스트</td><td>장난·어뷰징 신청 차단 (연락처/IP)</td></tr>
+        <tr><td>이력 조회</td><td>모달 하단 — 누가 언제 무엇을 변경했는지</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">💡 <strong>상담사 워크플로우</strong> : 출근 → "신규" 필터 → 위에서부터 행 클릭 → 통화 → 메모 + 상태 변경 → → 키로 다음 건. 반복.</div>
+  </section>
+
+  <!-- ========== 3. 유입 출처 ========== -->
+  <section id="attribution">
+    <h2><span class="num">3</span> 유입 출처 보기</h2>
+    <p>이 리드가 어디서 들어왔는지 자동 분류돼서 한 줄로 보입니다.</p>
+
+    <h3>매체 컬러 코드</h3>
+    <table>
+      <tbody>
+        <tr><td>🟣 보라</td><td>광고 (네이버·구글·메타 광고)</td></tr>
+        <tr><td>🔵 파랑</td><td>검색 자연 유입 (네이버·구글 검색)</td></tr>
+        <tr><td>🟢 초록</td><td><strong>자체 블로그 → 신청</strong> (콘텐츠 ROI 핵심)</td></tr>
+        <tr><td>🟠 주황</td><td>외부 블로그·카페 (네이버 블로그·티스토리)</td></tr>
+        <tr><td>⚫ 회색</td><td>직접 진입 (북마크·카톡 인앱)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>펼침 패널 (마케팅팀·TM실장·슈퍼어드민만 보임)</h3>
+    <p>상담 목록 우상단 <strong>"🎯 유입 출처 펼치기 ▶"</strong> 토글 → 캠페인·키워드·소재·랜딩 4컬럼 추가.</p>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+        <rect width="700" height="230" fill="#0b1220" rx="6"/>
+        <!-- 토글 -->
+        <rect x="540" y="12" width="140" height="26" fill="rgba(0,199,60,0.2)" stroke="#00c73c" rx="4"/>
+        <text x="610" y="29" fill="#00c73c" font-size="11" font-weight="700" text-anchor="middle">🎯 유입 출처 접기 ◀</text>
+        <!-- 표 헤더 (펼친 상태) -->
+        <rect x="20" y="50" width="660" height="28" fill="#131c2e"/>
+        <text x="30" y="68" fill="#7e8aa8" font-size="10" font-weight="700">매체</text>
+        <rect x="80" y="50" width="280" height="28" fill="rgba(0,199,60,0.05)"/>
+        <text x="90" y="68" fill="#00c73c" font-size="10" font-weight="700">캠페인</text>
+        <text x="170" y="68" fill="#00c73c" font-size="10" font-weight="700">키워드</text>
+        <text x="270" y="68" fill="#00c73c" font-size="10" font-weight="700">소재</text>
+        <text x="320" y="68" fill="#00c73c" font-size="10" font-weight="700">랜딩</text>
+        <text x="400" y="68" fill="#7e8aa8" font-size="10" font-weight="700">신청자</text>
+        <!-- 행 1 -->
+        <rect x="20" y="78" width="660" height="40" stroke="#2a3556"/>
+        <rect x="28" y="88" width="44" height="18" fill="rgba(167,139,250,0.2)" rx="3"/>
+        <text x="50" y="100" fill="#a78bfa" font-size="9" text-anchor="middle">네이버 광고</text>
+        <rect x="80" y="78" width="280" height="40" fill="rgba(0,199,60,0.05)"/>
+        <text x="90" y="100" fill="#b6c1d8" font-size="10">brand-2026q2</text>
+        <text x="170" y="100" fill="#10b981" font-size="10">"카드단말기 0원"</text>
+        <text x="270" y="100" fill="#b6c1d8" font-size="10">hero-A</text>
+        <text x="320" y="100" fill="#10b981" font-size="9">📄 카드단말기 0원...</text>
+        <text x="400" y="100" fill="#f4f7fb" font-size="10" font-weight="700">홍길동</text>
+        <!-- 행 2 -->
+        <rect x="20" y="118" width="660" height="40" stroke="#2a3556"/>
+        <rect x="28" y="128" width="44" height="18" fill="rgba(96,165,250,0.2)" rx="3"/>
+        <text x="50" y="140" fill="#60a5fa" font-size="9" text-anchor="middle">네이버 검색</text>
+        <rect x="80" y="118" width="280" height="40" fill="rgba(0,199,60,0.05)"/>
+        <text x="90" y="140" fill="#7e8aa8" font-size="10">—</text>
+        <text x="170" y="140" fill="#10b981" font-size="10">"오즈랩페이 후기"</text>
+        <text x="270" y="140" fill="#7e8aa8" font-size="10">—</text>
+        <text x="320" y="140" fill="#7e8aa8" font-size="9">← search.naver.com</text>
+        <text x="400" y="140" fill="#f4f7fb" font-size="10" font-weight="700">박철수</text>
+        <!-- 행 3 (자체 블로그) -->
+        <rect x="20" y="158" width="660" height="40" stroke="#2a3556"/>
+        <rect x="28" y="168" width="44" height="18" fill="rgba(0,199,60,0.2)" rx="3"/>
+        <text x="50" y="180" fill="#00c73c" font-size="9" text-anchor="middle">자체 블로그</text>
+        <rect x="80" y="158" width="280" height="40" fill="rgba(0,199,60,0.05)"/>
+        <text x="90" y="180" fill="#7e8aa8" font-size="10">—</text>
+        <text x="170" y="180" fill="#7e8aa8" font-size="10">—</text>
+        <text x="270" y="180" fill="#7e8aa8" font-size="10">—</text>
+        <text x="320" y="180" fill="#10b981" font-size="9">📄 POS 추천 7가지</text>
+        <text x="400" y="180" fill="#f4f7fb" font-size="10" font-weight="700">이수민</text>
+      </svg>
+      <div class="mock-caption">펼침 토글 ON → 캠페인/키워드/소재/랜딩 4컬럼 추가 (초록 = 자체 블로그 ROI 핵심)</div>
+    </div>
+
+    <div class="warn">⚠️ 광고 utm 표준 안 박으면 분류가 깨집니다. 광고대행사한테 <code>UTM_NAMING_GUIDE.md</code> 전달하세요.</div>
+  </section>
+
+  <!-- ========== 4. 매출 등록 ========== -->
+  <section id="revenue">
+    <h2><span class="num">4</span> 매출 등록 (가장 중요)</h2>
+    <p>리드별로 매출을 기록해야 광고 ROAS·LTV·코호트 분석이 작동합니다.</p>
+
+    <h3>자동 트리거</h3>
+    <p>상담 상태를 <strong>"개통완료"</strong> 같은 전환 상태로 변경하면 → 매출 입력 모달이 자동으로 뜸.</p>
+
+    <h3>입력 항목</h3>
+    <table>
+      <tbody>
+        <tr><td>상품</td><td>드롭다운에서 선택 (Npay커넥트단말기 등)</td></tr>
+        <tr><td>매출액</td><td>총 매출 (원)</td></tr>
+        <tr><td><strong>사은품액</strong></td><td>통신사 지원금·기타 — <strong>매출에서 차감</strong>되어 순매출 자동</td></tr>
+        <tr><td>약정</td><td>12/24/36/48개월</td></tr>
+        <tr><td>월 매출</td><td>구독형 상품 (선택)</td></tr>
+        <tr><td>개통일</td><td>실제 매출 발생일</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">💡 한 리드에 <strong>여러 매출</strong> 기록 가능 (단말기 + 인터넷 동시 가입 등). 모달 우측 매출 카드에 누적 합계 자동.</div>
+
+    <div class="warn">⚠️ 매출 입력은 상담사 책임. 안 넣으면 ROAS·LTV가 0으로 나와 광고 효율 측정 불가.</div>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+        <rect width="700" height="380" fill="#0b1220" rx="6"/>
+        <!-- 모달 배경 dim -->
+        <rect width="700" height="380" fill="rgba(0,0,0,0.5)"/>
+        <!-- 모달 -->
+        <rect x="100" y="20" width="500" height="340" fill="#131c2e" stroke="#00c73c" rx="10"/>
+        <text x="120" y="50" fill="#f4f7fb" font-size="14" font-weight="700">💰 매출 등록</text>
+        <text x="580" y="50" fill="#7e8aa8" font-size="10" text-anchor="end">홍길동</text>
+        <line x1="120" y1="62" x2="580" y2="62" stroke="#2a3556"/>
+        <!-- 상품 -->
+        <text x="120" y="86" fill="#7e8aa8" font-size="10">상품</text>
+        <rect x="120" y="92" width="460" height="28" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="130" y="110" fill="#f4f7fb" font-size="11">[Pos] Npay커넥트단말기 ▼</text>
+        <!-- 매출액 + 사은품 -->
+        <text x="120" y="138" fill="#7e8aa8" font-size="10">매출액 (원)</text>
+        <rect x="120" y="144" width="220" height="28" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="130" y="162" fill="#f4f7fb" font-size="12" font-family="ui-monospace">1,200,000</text>
+        <text x="360" y="138" fill="#7e8aa8" font-size="10">사은품액 (통신사 지원금 등)</text>
+        <rect x="360" y="144" width="220" height="28" fill="#0b1220" stroke="#fbbf24" rx="4"/>
+        <text x="370" y="162" fill="#fbbf24" font-size="12" font-family="ui-monospace">200,000</text>
+        <!-- 순매출 표시 -->
+        <text x="120" y="190" fill="#7e8aa8" font-size="10">순매출 = </text>
+        <text x="170" y="190" fill="#00c73c" font-size="14" font-weight="700">1,000,000원</text>
+        <!-- 약정 + 월 매출 -->
+        <text x="120" y="218" fill="#7e8aa8" font-size="10">약정 기간</text>
+        <rect x="120" y="224" width="220" height="26" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="130" y="241" fill="#f4f7fb" font-size="11">24개월 ▼</text>
+        <text x="360" y="218" fill="#7e8aa8" font-size="10">월 매출 (구독형, 선택)</text>
+        <rect x="360" y="224" width="220" height="26" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="370" y="241" fill="#f4f7fb" font-size="11" font-family="ui-monospace">50,000</text>
+        <!-- 개통일 -->
+        <text x="120" y="268" fill="#7e8aa8" font-size="10">개통일</text>
+        <rect x="120" y="274" width="460" height="26" fill="#0b1220" stroke="#2a3556" rx="4"/>
+        <text x="130" y="291" fill="#f4f7fb" font-size="11">2026-05-12</text>
+        <!-- 버튼 -->
+        <rect x="240" y="316" width="100" height="32" fill="#4a5470" rx="4"/>
+        <text x="290" y="336" fill="#f4f7fb" font-size="11" text-anchor="middle">건너뛰기</text>
+        <rect x="350" y="316" width="80" height="32" fill="#4a5470" rx="4"/>
+        <text x="390" y="336" fill="#f4f7fb" font-size="11" text-anchor="middle">취소</text>
+        <rect x="440" y="316" width="140" height="32" fill="#00c73c" rx="4"/>
+        <text x="510" y="336" fill="#001a08" font-size="11" font-weight="700" text-anchor="middle">매출 등록</text>
+      </svg>
+      <div class="mock-caption">상태를 "개통완료"로 변경하면 자동으로 뜸 — 사은품(노란색)은 매출에서 차감되어 순매출 자동 계산</div>
+    </div>
+  </section>
+
+  <!-- ========== 5. 광고 시트 ========== -->
+  <section id="ad-sync">
+    <h2><span class="num">5</span> 광고 시트 동기화</h2>
+    <p>루커 스튜디오용 Google Sheets를 어드민으로 가져옴 → 매출과 자동 매칭.</p>
+
+    <h3>한 번 설정</h3>
+    <ol>
+      <li>Google Sheets 열고 <strong>파일 → 공유 → 웹에 게시 → CSV 형식 → 게시</strong></li>
+      <li>나오는 URL 복사</li>
+      <li>어드민 → <strong>"광고 sync"</strong> → URL 붙여넣기 → 저장</li>
+      <li><strong>"🔄 지금 동기화"</strong> 클릭</li>
+    </ol>
+
+    <h3>시트 컬럼 (1행 헤더)</h3>
+    <p>한글/영문 모두 OK. 둘 중 하나만 있으면 자동 매핑.</p>
+    <table>
+      <thead><tr><th>한글</th><th>영문</th><th>예시</th></tr></thead>
+      <tbody>
+        <tr><td>날짜 / 일자</td><td>date</td><td>2026-04-29</td></tr>
+        <tr><td>매체 / 채널</td><td>channel</td><td>naver / google / meta / daangn</td></tr>
+        <tr><td>서비스 / 상품군</td><td>service</td><td>토스단말기 / 인터넷가입 (선택)</td></tr>
+        <tr><td>노출수</td><td>impressions</td><td>5217</td></tr>
+        <tr><td>클릭수</td><td>clicks</td><td>151</td></tr>
+        <tr><td>전환수</td><td>conversions</td><td>26</td></tr>
+        <tr><td>광고비 / 비용</td><td>spend</td><td>1,584,970</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">💡 같은 (날짜·매체·서비스) 행은 <strong>덮어쓰기(UPSERT)</strong>. 시트 갱신 후 sync 다시 누르면 최신값으로 갱신됨.</div>
+    <div class="warn">⚠️ 자동 cron 동기화는 다음 버전 추가 예정. 현재는 수동 클릭만.</div>
+  </section>
+
+  <!-- ========== 6. 대시보드 ========== -->
+  <section id="dashboard">
+    <h2><span class="num">6</span> 매출·광고 대시보드</h2>
+
+    <h3>매출 분석 (경영자 뷰)</h3>
+    <p>사이드바 <strong>"매출 분석"</strong> → 총매출 / 총광고비 / ROAS / 매체별 코호트 (30/60/90일 누적) / 매체별 LTV.</p>
+
+    <h3>광고 성과 (마케터 뷰)</h3>
+    <p>사이드바 <strong>"광고 성과"</strong> → 노출/클릭/CTR/전환/CVR/CPA/광고비 + 매체별 합계.</p>
+
+    <div class="tip">💡 둘 다 <strong>시트 sync + 매출 등록</strong>이 돼야 데이터가 나옴. 둘 중 하나만 비어 있으면 한쪽 KPI는 0.</div>
+  </section>
+
+  <!-- ========== 7. 콘텐츠 ========== -->
+  <section id="content">
+    <h2><span class="num">7</span> 블로그 글쓰기</h2>
+    <p>SEO 최적화 글 작성. 자체 블로그 → 신청 전환은 광고비 0원의 황금 채널.</p>
+
+    <h3>흐름</h3>
+    <ol>
+      <li>사이드바 <strong>"콘텐츠"</strong> → "+ 새 글 작성"</li>
+      <li>제목 입력 (slug 자동 생성)</li>
+      <li>TipTap 에디터로 본문 (🖼 이미지 즉석 업로드)</li>
+      <li>오른쪽 패널 <strong>포커스 키워드</strong> 입력 → 3-Tier SEO 점수 자동</li>
+      <li>임시저장 또는 발행</li>
+    </ol>
+
+    <h3>3-Tier SEO 점수</h3>
+    <table>
+      <tbody>
+        <tr><td>Tier 1 (40%)</td><td>기본 SEO — RankMath류 7항목 (제목·키워드 밀도·메타·이미지 alt 등)</td></tr>
+        <tr><td>Tier 2 (30%)</td><td>네이버 다이아 — 본문 1500자+ / H2 3개+ / 표·리스트 / 권위 인용 / 모바일 가독성</td></tr>
+        <tr><td>Tier 3 (30%)</td><td>구글 EEAT — 직접 경험어 / 수치·단위 / 외부 출처 / 작성자·출처</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">💡 <strong>S 등급(85점+)</strong> 노리는 팁 : 1500자 + 이미지 2개 + H2 3개 + 외부 권위 사이트 1개 인용 + "직접 운영" 같은 경험어 + 수치 3개 이상.</div>
+  </section>
+
+  <!-- ========== 8. CTA · 홈 편집 ========== -->
+  <section id="cta">
+    <h2><span class="num">8</span> 홈 인라인 편집 · CTA 관리</h2>
+
+    <h3>홈 인라인 편집</h3>
+    <p>어드민 로그인 상태에서 홈(<code>ozlabpay.kr</code>) 방문 → 텍스트·이미지에 마우스 올리면 <strong>✏️ 작은 연필 배지</strong> 노출 → 클릭 → 모달로 즉석 편집.</p>
+
+    <h3>CTA 관리 (슈퍼어드민)</h3>
+    <p>홈의 모든 "지금 신청하기" 버튼을 한 곳에서 관리. 위치·라벨·링크·utm 파라미터 자동 부여.</p>
+    <ul>
+      <li>매체별 utm 다르게 설정 → 어트리뷰션 자동 추적</li>
+      <li>A/B 테스트 시 라벨만 바꿔서 클릭률 비교</li>
+      <li>대시보드에서 CTA별 전환율 표 확인</li>
+    </ul>
+  </section>
+
+  <!-- ========== 9. 권한 매트릭스 ========== -->
+  <section id="permissions">
+    <h2><span class="num">9</span> 권한 매트릭스 (슈퍼어드민)</h2>
+    <p>5 role × 23 permission 체크박스 그리드. 셀 클릭 = 즉시 부여/회수.</p>
+
+    <h3>권한 그룹</h3>
+    <table>
+      <tbody>
+        <tr><td>상담</td><td>view / edit / delete / distribute / attribution / blacklist</td></tr>
+        <tr><td>매출</td><td>view / edit / delete</td></tr>
+        <tr><td>상품</td><td>view / edit</td></tr>
+        <tr><td>광고</td><td>ad_metrics view·edit / cta.edit</td></tr>
+        <tr><td>콘텐츠</td><td>view / edit / publish / media.upload / inline_edit</td></tr>
+        <tr><td>시스템</td><td>users.invite / users.assign_role / statuses.edit / settings.advanced</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">💡 <strong>실사용 권장 흐름</strong> : 처음 운영 1~2주는 기본 매트릭스 그대로 → 마케팅팀이 "이거 안 보여요" 요청 시 슈퍼어드민이 셀 클릭으로 즉시 부여.</div>
+  </section>
+
+  <!-- ========== 10. 사용자 추가 ========== -->
+  <section id="users">
+    <h2><span class="num">10</span> 사용자 추가 (슈퍼어드민)</h2>
+    <ol>
+      <li>사이드바 <strong>"사용자 관리"</strong> → "+ 사용자 초대"</li>
+      <li>이메일 + 권한 (마케팅팀/TM실장/상담사/전산관리자) + 표시 이름</li>
+      <li>초대 메일 자동 발송 → 상대방이 가입 → 자동 권한 부여</li>
+    </ol>
+
+    <h3>퇴사 처리</h3>
+    <ol>
+      <li>해당 상담사 담당 리드를 다른 상담사에게 재배정</li>
+      <li>비활성화 (계정 삭제 X — 데이터 보존)</li>
+      <li>1개월 후 문제없으면 삭제</li>
+    </ol>
+
+    <div class="warn">⚠️ <strong>슈퍼어드민 보호</strong> : 본인 강등·비활성 불가, 마지막 슈퍼어드민 삭제 불가. 잠김 방지를 위해 슈퍼어드민 최소 2명 유지 권장.</div>
+  </section>
+
+  <!-- ========== 11. 상품 카탈로그 ========== -->
+  <section id="products">
+    <h2><span class="num">11</span> 상품 카탈로그 (마케팅팀·슈퍼어드민)</h2>
+    <p>매출 입력 모달의 드롭다운에 노출될 상품 관리.</p>
+
+    <h3>좌측 카테고리 (추가/수정/삭제 가능)</h3>
+    <p>Pos (카드단말기) / 인터넷가입 / 테이블오더 / CCTV / 키오스크</p>
+
+    <h3>우측 상품</h3>
+    <ul>
+      <li>코드 (영문, 변경 불가) · 상품명 · 카테고리</li>
+      <li>기본 매출액 · 약정 · 월 구독액 → 매출 입력 시 자동 채움</li>
+      <li>활성/비활성 토글</li>
+    </ul>
+  </section>
+
+  <!-- ========== 12. DB 분배 ========== -->
+  <section id="distribution">
+    <h2><span class="num">12</span> DB 자동분배 (마케팅팀·TM실장)</h2>
+    <p>새 리드 들어올 때 라운드로빈으로 상담사에게 공평 자동 배정.</p>
+
+    <h3>설정</h3>
+    <ol>
+      <li>사이드바 <strong>"DB 분배"</strong></li>
+      <li><strong>"자동 배정 활성"</strong> 토글 ON</li>
+      <li>분배 방식: <strong>라운드로빈</strong> (공평 순환)</li>
+      <li>배정 대상 role 선택 (보통 "상담사")</li>
+    </ol>
+
+    <h3>재분배</h3>
+    <ul>
+      <li><strong>미배정 리드만 재분배</strong> — 안전. 배정 안 된 것만 처리</li>
+      <li><strong>전체 재분배 (덮어씀)</strong> — 주의. 기존 배정 다 무시하고 다시</li>
+    </ul>
+
+    <div class="warn">⚠️ 가중치 / 시간대별 / 일일 한도 옵션은 다음 버전 추가 예정.</div>
+  </section>
+
+  <!-- ========== FAQ ========== -->
+  <section id="faq">
+    <h2><span class="num">?</span> FAQ · 트러블슈팅</h2>
+
+    <h3>Q. 인라인 편집 ✏️ 버튼이 안 보여요</h3>
+    <p>A. 같은 브라우저에 어드민 로그인이 돼있는지 확인. counselor 권한은 편집 불가 — 마케팅팀 이상 필요. 강력 새로고침 (Cmd+Shift+R).</p>
+
+    <h3>Q. 매출 등록했는데 대시보드에 안 보여요</h3>
+    <p>A. 1~2분 기다린 뒤 새로고침. 매출 분석 대시보드는 캐시 없이 매번 fresh. 그래도 안 보이면 상담사가 다른 리드의 매출로 잘못 등록한 건 아닌지 확인.</p>
+
+    <h3>Q. 광고 시트 sync 가 0행으로 나와요</h3>
+    <p>A. 시트 1행 헤더가 <code>date, channel, ...</code> 또는 한글 동의어인지 확인. 시트가 "웹에 게시" 상태인지 확인 (그냥 공유는 안 됨). URL 끝이 <code>output=csv</code> 인지.</p>
+
+    <h3>Q. 자동 매출 모달이 안 떠요</h3>
+    <p>A. 변경한 상태가 <code>is_conversion=true</code> 인 상태인지 확인 (상태 관리 메뉴). 기본 시드는 "개통완료" 같은 전환 상태에만 플래그 ON.</p>
+
+    <h3>Q. 권한 변경했는데 반영이 안 돼요</h3>
+    <p>A. 해당 사용자가 어드민에서 새로고침 1회. 그래도 안 되면 로그아웃 → 재로그인.</p>
+
+    <h3>Q. utm 표준 어디에 있어요?</h3>
+    <p>A. <code>docs/UTM_NAMING_GUIDE.md</code> — 광고대행사한테 그대로 전달 가능한 양식.</p>
+  </section>
+
+  <!-- ========== 문의 ========== -->
+  <section id="contact">
+    <h2><span class="num">📮</span> 문의</h2>
+    <table>
+      <tbody>
+        <tr><td>어드민 사용</td><td>슈퍼어드민 (대표 또는 IT 담당)</td></tr>
+        <tr><td>기능 추가 요청</td><td>개발팀</td></tr>
+        <tr><td>광고/마케팅</td><td>마케팅팀</td></tr>
+        <tr><td>긴급 장애</td><td>슈퍼어드민에게 즉시 연락</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p><strong>오즈랩페이 어드민 1차 운영 가이드 v1.0</strong> · 2026.04.30</p>
+    <p>실사용 1~2주 후 v2 업데이트 예정 (마케팅팀·TM실장·상담사 피드백 반영).</p>
+    <p>인쇄: Cmd/Ctrl + P → "PDF로 저장"</p>
+  </footer>
+</main>
+
+</div>
+</body>
+</html>

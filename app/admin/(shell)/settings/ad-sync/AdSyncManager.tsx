@@ -84,11 +84,21 @@ export default function AdSyncManager() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold text-ink-100">광고 성과 시트 sync</h1>
-        <p className="text-sm text-ink-400 mt-1">
-          Google Sheets 에 입력된 광고 일별 성과를 ad_metrics 테이블로 동기화합니다.
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-ink-100">광고 성과 시트 sync</h1>
+          <p className="text-sm text-ink-400 mt-1">
+            Google Sheets 에 입력된 광고 일별 성과를 ad_metrics 테이블로 동기화합니다.
+          </p>
+        </div>
+        <a
+          href="/admin/help/utm"
+          target="_blank"
+          rel="noopener"
+          className="text-xs text-naver-neon hover:underline"
+        >
+          🎯 UTM 표준 가이드 보기 ↗
+        </a>
       </div>
 
       {/* URL 등록 */}

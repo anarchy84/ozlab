@@ -16,6 +16,8 @@ import Link from 'next/link'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
 import { ROLE_LABELS, ROLE_EMOJI, isSuperAdmin } from '@/lib/admin/permissions'
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton'
+import { SettingsDropdown } from '@/components/admin/SettingsDropdown'
+import { HelpFloatingButton } from '@/components/admin/HelpFloatingButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,111 +29,67 @@ export default async function AdminShellLayout({
   // 인증 + role 체크 (admin_users 미등록이면 redirect)
   const profile = await requireAdminProfile()
 
+  // 일상 메뉴 (모든 admin)
+  const mainMenu = [
+    { href: '/admin', label: '대시보드' },
+    { href: '/admin/consultations', label: '상담' },
+    { href: '/admin/dashboard/sales', label: '매출' },
+    { href: '/admin/dashboard/paid-media', label: '광고' },
+    { href: '/admin/content', label: '콘텐츠' },
+    { href: '/admin/media', label: '미디어' },
+  ]
+
+  // 설정 드롭다운 (super_admin / 일부 권한)
+  const settingsMenu = isSuperAdmin(profile.role)
+    ? [
+        { href: '/admin/users', label: '사용자 관리', desc: '계정 초대·권한 변경' },
+        { href: '/admin/settings/permissions', label: '권한 매트릭스', desc: 'role × permission 토글' },
+        { href: '/admin/settings/statuses', label: '상태 관리', desc: '상담 상태·자동화 플래그' },
+        { href: '/admin/settings/cta', label: 'CTA 관리', desc: '홈 버튼·utm 자동' },
+        { href: '/admin/settings/products', label: '상품 관리', desc: '카탈로그·카테고리' },
+        { href: '/admin/settings/distribution', label: 'DB 분배', desc: '자동 배정·재분배' },
+        { href: '/admin/settings/ad-sync', label: '광고 sync', desc: '시트 → ad_metrics' },
+        { href: '/admin/help/utm', label: 'UTM 표준 가이드', desc: '광고대행사 핸드오프용' },
+      ]
+    : []
+
   return (
     <div className="min-h-screen bg-surface-dark text-ink-100">
       <header className="bg-ink-900 border-b border-ink-700 sticky top-0 z-30">
-        <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/admin" className="font-bold text-ink-100 flex items-center gap-2">
+        <div className="max-w-[1280px] mx-auto px-6 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-6 min-w-0">
+            <Link
+              href="/admin"
+              className="font-bold text-ink-100 flex items-center gap-1.5 whitespace-nowrap"
+            >
               <span className="text-naver-neon">●</span>
-              오즈랩페이 어드민
+              <span className="hidden md:inline">오즈랩페이</span>
+              <span className="md:hidden">OZ</span>
             </Link>
-            <nav className="flex items-center gap-5 text-sm">
-              <Link
-                href="/admin"
-                className="text-ink-300 hover:text-ink-100 transition-colors"
-              >
-                대시보드
-              </Link>
-              <Link
-                href="/admin/consultations"
-                className="text-ink-300 hover:text-ink-100 transition-colors"
-              >
-                상담 신청
-              </Link>
-              <Link
-                href="/admin/dashboard/sales"
-                className="text-ink-300 hover:text-ink-100 transition-colors"
-              >
-                매출 분석
-              </Link>
-              <Link
-                href="/admin/dashboard/paid-media"
-                className="text-ink-300 hover:text-ink-100 transition-colors"
-              >
-                광고 성과
-              </Link>
-              <Link
-                href="/admin/content"
-                className="text-ink-300 hover:text-ink-100 transition-colors"
-              >
-                콘텐츠
-              </Link>
-              <Link
-                href="/admin/media"
-                className="text-ink-300 hover:text-ink-100 transition-colors"
-              >
-                미디어
-              </Link>
-              {isSuperAdmin(profile.role) && (
-                <>
-                  <Link
-                    href="/admin/users"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    사용자 관리
-                  </Link>
-                  <Link
-                    href="/admin/settings/statuses"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    상태 관리
-                  </Link>
-                  <Link
-                    href="/admin/settings/cta"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    CTA 관리
-                  </Link>
-                  <Link
-                    href="/admin/settings/products"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    상품 관리
-                  </Link>
-                  <Link
-                    href="/admin/settings/permissions"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    권한 매트릭스
-                  </Link>
-                  <Link
-                    href="/admin/settings/distribution"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    DB 분배
-                  </Link>
-                  <Link
-                    href="/admin/settings/ad-sync"
-                    className="text-ink-300 hover:text-ink-100 transition-colors"
-                  >
-                    광고 sync
-                  </Link>
-                </>
-              )}
+            <nav className="flex items-center gap-4 text-sm whitespace-nowrap">
+              {mainMenu.map((m) => (
+                <Link
+                  key={m.href}
+                  href={m.href}
+                  className="text-ink-300 hover:text-ink-100 transition-colors"
+                >
+                  {m.label}
+                </Link>
+              ))}
+              {settingsMenu.length > 0 && <SettingsDropdown items={settingsMenu} />}
               <Link
                 href="/"
                 target="_blank"
                 className="text-ink-400 hover:text-ink-100 transition-colors"
               >
-                사이트 보기 ↗
+                사이트 ↗
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="hidden sm:flex items-center gap-1.5 text-ink-200">
+          <div className="flex items-center gap-3 text-sm whitespace-nowrap">
+            <span className="hidden lg:flex items-center gap-1.5 text-ink-200">
               <span title={ROLE_LABELS[profile.role]}>{ROLE_EMOJI[profile.role]}</span>
-              <span className="font-medium">
+              <span className="font-medium truncate max-w-[120px]">
                 {profile.display_name ?? profile.email}
               </span>
               <span className="text-ink-600">·</span>
@@ -141,7 +99,10 @@ export default async function AdminShellLayout({
           </div>
         </div>
       </header>
-      <main className="max-w-[1200px] mx-auto px-6 py-8">{children}</main>
+      <main className="max-w-[1280px] mx-auto px-6 py-8">{children}</main>
+
+      {/* 우하단 floating 도움말 버튼 */}
+      <HelpFloatingButton />
     </div>
   )
 }
