@@ -26,6 +26,9 @@ interface SP {
   q?: string
   status_id?: string
   channel?: string
+  from?: string       // YYYY-MM-DD
+  to?: string         // YYYY-MM-DD
+  preset?: string     // 'today' | 'week' | 'month' | 'last_month' | 'last_3m'
   page?: string
 }
 
@@ -40,6 +43,28 @@ export default async function ConsultationsListPage({
   const q = (searchParams.q ?? '').trim()
   const statusId = searchParams.status_id ?? ''
   const channel = (searchParams.channel ?? '').trim()
+  const dateFrom = (searchParams.from ?? '').trim()
+  const dateTo = (searchParams.to ?? '').trim()
+  const preset = (searchParams.preset ?? '').trim()
+
+  // preset → from/to 자동 계산 (직접 from/to 입력 시 우선)
+  let effectiveFrom = dateFrom
+  let effectiveTo = dateTo
+  if (preset && !dateFrom && !dateTo) {
+    const now = new Date()
+    const today = now.toISOString().slice(0, 10)
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10)
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10)
+    const start7d = new Date(now.getTime() - 7 * 86400000).toISOString().slice(0, 10)
+    const start3m = new Date(now.getFullYear(), now.getMonth() - 3, 1).toISOString().slice(0, 10)
+    if (preset === 'today') { effectiveFrom = today; effectiveTo = today }
+    else if (preset === 'week') { effectiveFrom = start7d; effectiveTo = today }
+    else if (preset === 'month') { effectiveFrom = startOfMonth; effectiveTo = today }
+    else if (preset === 'last_month') { effectiveFrom = startOfLastMonth; effectiveTo = endOfLastMonth }
+    else if (preset === 'last_3m') { effectiveFrom = start3m; effectiveTo = today }
+  }
+
   const page = Math.max(1, parseInt(searchParams.page ?? '1', 10) || 1)
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
@@ -90,6 +115,8 @@ export default async function ConsultationsListPage({
 
   if (statusId) query = query.eq('status_id', parseInt(statusId, 10))
   if (channel) query = query.eq('utm_source', channel)
+  if (effectiveFrom) query = query.gte('created_at', effectiveFrom + 'T00:00:00')
+  if (effectiveTo) query = query.lte('created_at', effectiveTo + 'T23:59:59')
   if (q) {
     query = query.or(
       `name.ilike.%${q}%,phone.ilike.%${q}%,store_name.ilike.%${q}%,internal_memo.ilike.%${q}%`,
@@ -121,6 +148,39 @@ export default async function ConsultationsListPage({
         </Link>
       </div>
 
+      {/* 빠른 기간 preset */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { code: '', label: '전체 기간' },
+          { code: 'today', label: '오늘' },
+          { code: 'week', label: '최근 7일' },
+          { code: 'month', label: '이번 달' },
+          { code: 'last_month', label: '지난 달' },
+          { code: 'last_3m', label: '최근 3개월' },
+        ].map((p) => {
+          const isActive = preset === p.code && !dateFrom && !dateTo
+          const sp = new URLSearchParams()
+          if (q) sp.set('q', q)
+          if (statusId) sp.set('status_id', statusId)
+          if (channel) sp.set('channel', channel)
+          if (p.code) sp.set('preset', p.code)
+          const href = `/admin/consultations${sp.toString() ? `?${sp.toString()}` : ''}`
+          return (
+            <Link
+              key={p.code || 'all'}
+              href={href}
+              className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${
+                isActive
+                  ? 'bg-naver-green text-white border-naver-green font-bold'
+                  : 'bg-ink-800 text-ink-300 border-ink-700 hover:bg-ink-700'
+              }`}
+            >
+              {p.label}
+            </Link>
+          )
+        })}
+      </div>
+
       {/* 검색 / 필터 */}
       <form
         method="get"
@@ -136,6 +196,30 @@ export default async function ConsultationsListPage({
             defaultValue={q}
             placeholder="홍길동 / 010-1234 / 강남식당"
             className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded-md text-sm focus:outline-none focus:border-naver-green"
+          />
+        </div>
+        <div>
+          <label htmlFor="from" className="block text-xs text-ink-400 mb-1">
+            시작일
+          </label>
+          <input
+            id="from"
+            name="from"
+            type="date"
+            defaultValue={dateFrom}
+            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-naver-green"
+          />
+        </div>
+        <div>
+          <label htmlFor="to" className="block text-xs text-ink-400 mb-1">
+            종료일
+          </label>
+          <input
+            id="to"
+            name="to"
+            type="date"
+            defaultValue={dateTo}
+            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-naver-green"
           />
         </div>
         <div>
@@ -180,7 +264,7 @@ export default async function ConsultationsListPage({
         >
           적용
         </button>
-        {(q || statusId || channel) && (
+        {(q || statusId || channel || dateFrom || dateTo || preset) && (
           <Link
             href="/admin/consultations"
             className="px-4 py-2 border border-ink-700 rounded-md text-sm text-ink-300 hover:bg-ink-800 transition-colors"
@@ -208,7 +292,7 @@ export default async function ConsultationsListPage({
         <div className="flex items-center justify-center gap-2 text-sm">
           <PageLink
             disabled={page <= 1}
-            href={makeHref({ q, status_id: statusId, channel, page: page - 1 })}
+            href={makeHref({ q, status_id: statusId, channel, from: dateFrom, to: dateTo, preset, page: page - 1 })}
           >
             ← 이전
           </PageLink>
@@ -217,7 +301,7 @@ export default async function ConsultationsListPage({
           </span>
           <PageLink
             disabled={page >= totalPages}
-            href={makeHref({ q, status_id: statusId, channel, page: page + 1 })}
+            href={makeHref({ q, status_id: statusId, channel, from: dateFrom, to: dateTo, preset, page: page + 1 })}
           >
             다음 →
           </PageLink>
@@ -231,12 +315,18 @@ function makeHref(args: {
   q: string
   status_id: string
   channel: string
+  from: string
+  to: string
+  preset: string
   page: number
 }): string {
   const sp = new URLSearchParams()
   if (args.q) sp.set('q', args.q)
   if (args.status_id) sp.set('status_id', args.status_id)
   if (args.channel) sp.set('channel', args.channel)
+  if (args.from) sp.set('from', args.from)
+  if (args.to) sp.set('to', args.to)
+  if (args.preset && !args.from && !args.to) sp.set('preset', args.preset)
   if (args.page > 1) sp.set('page', String(args.page))
   const qs = sp.toString()
   return qs ? `/admin/consultations?${qs}` : '/admin/consultations'
