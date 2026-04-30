@@ -9,29 +9,40 @@ import type { AdminRole } from './types'
 
 // ----- 한글 라벨 -----
 export const ROLE_LABELS: Record<AdminRole, string> = {
-  super_admin: '최고관리자',
-  admin: '운영자',
-  counselor: '상담사',
-  marketer: '마케터',
-  viewer: '뷰어',
+  super_admin: '슈퍼어드민',
+  marketing:   '마케팅팀',
+  tm_lead:     'TM실장',
+  counselor:   '상담사',
+  it_ops:      '전산관리자',
+  // 레거시 호환
+  admin:       '관리자(레거시)',
+  marketer:    '마케터(레거시)',
+  viewer:      '뷰어(레거시)',
 }
 
 // ----- 뱃지 색상 (Tailwind class) -----
 export const ROLE_BADGE_CLASSES: Record<AdminRole, string> = {
   super_admin: 'bg-purple-100 text-purple-800 border-purple-200',
-  admin: 'bg-blue-100 text-blue-800 border-blue-200',
-  counselor: 'bg-green-100 text-green-800 border-green-200',
-  marketer: 'bg-amber-100 text-amber-800 border-amber-200',
-  viewer: 'bg-ink-100 text-ink-700 border-ink-200',
+  marketing:   'bg-amber-100 text-amber-800 border-amber-200',
+  tm_lead:     'bg-rose-100 text-rose-800 border-rose-200',
+  counselor:   'bg-green-100 text-green-800 border-green-200',
+  it_ops:      'bg-slate-100 text-slate-700 border-slate-200',
+  // 레거시
+  admin:       'bg-blue-100 text-blue-800 border-blue-200',
+  marketer:    'bg-amber-100 text-amber-700 border-amber-200',
+  viewer:      'bg-ink-100 text-ink-700 border-ink-200',
 }
 
 // ----- 이모지 (헤더·목록에서 시각적 구분) -----
 export const ROLE_EMOJI: Record<AdminRole, string> = {
   super_admin: '👑',
-  admin: '🛠',
-  counselor: '👤',
-  marketer: '📊',
-  viewer: '👁',
+  marketing:   '📊',
+  tm_lead:     '🎧',
+  counselor:   '📞',
+  it_ops:      '🛠',
+  admin:       '🛡',
+  marketer:    '📈',
+  viewer:      '👁',
 }
 
 // ----- 권한 체크 (UI 분기용) -----
@@ -71,4 +82,14 @@ export function canEditConsultation(
 }
 
 // ----- 초대 가능 role 목록 (super_admin은 별도 워크플로우) -----
-export const INVITABLE_ROLES: AdminRole[] = ['admin', 'counselor', 'marketer', 'viewer']
+//   신규 5개 + 호환용 레거시. UI 에선 신규 우선, 레거시는 옵션으로.
+export const INVITABLE_ROLES: AdminRole[] = [
+  'marketing',
+  'tm_lead',
+  'counselor',
+  'it_ops',
+  // 레거시 (필요 시)
+  'admin',
+  'marketer',
+  'viewer',
+]

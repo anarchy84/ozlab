@@ -50,6 +50,18 @@ export default async function AdminShellLayout({
                 상담 신청
               </Link>
               <Link
+                href="/admin/dashboard/sales"
+                className="text-ink-300 hover:text-ink-100 transition-colors"
+              >
+                매출 분석
+              </Link>
+              <Link
+                href="/admin/dashboard/paid-media"
+                className="text-ink-300 hover:text-ink-100 transition-colors"
+              >
+                광고 성과
+              </Link>
+              <Link
                 href="/admin/content"
                 className="text-ink-300 hover:text-ink-100 transition-colors"
               >
@@ -86,6 +98,24 @@ export default async function AdminShellLayout({
                     className="text-ink-300 hover:text-ink-100 transition-colors"
                   >
                     상품 관리
+                  </Link>
+                  <Link
+                    href="/admin/settings/permissions"
+                    className="text-ink-300 hover:text-ink-100 transition-colors"
+                  >
+                    권한 매트릭스
+                  </Link>
+                  <Link
+                    href="/admin/settings/distribution"
+                    className="text-ink-300 hover:text-ink-100 transition-colors"
+                  >
+                    DB 분배
+                  </Link>
+                  <Link
+                    href="/admin/settings/ad-sync"
+                    className="text-ink-300 hover:text-ink-100 transition-colors"
+                  >
+                    광고 sync
                   </Link>
                 </>
               )}

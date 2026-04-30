@@ -6,16 +6,65 @@
 //   - 20260429000002_admin_users_and_roles.sql → admin_users + role
 // ─────────────────────────────────────────────
 
-// ----- 5개 role -----
+// ----- role 정의 (신규 5개 + 레거시 3개) -----
+//   신규: super_admin / marketing / tm_lead / counselor / it_ops
+//   레거시(호환): admin / marketer / viewer
+//   ※ 권한 매트릭스는 DB role_permissions 에서 동적 관리
 export const ADMIN_ROLES = [
   'super_admin',
-  'admin',
+  'marketing',
+  'tm_lead',
   'counselor',
+  'it_ops',
+  // 레거시 호환
+  'admin',
   'marketer',
   'viewer',
 ] as const
 
 export type AdminRole = (typeof ADMIN_ROLES)[number]
+
+// 권한 코드 (app_permissions.code 와 일치)
+export type PermissionCode =
+  | 'consultations.view'
+  | 'consultations.edit'
+  | 'consultations.delete'
+  | 'consultations.distribute'
+  | 'consultations.attribution'
+  | 'consultations.blacklist'
+  | 'revenue.view'
+  | 'revenue.edit'
+  | 'revenue.delete'
+  | 'products.view'
+  | 'products.edit'
+  | 'ad_metrics.view'
+  | 'ad_metrics.edit'
+  | 'cta.edit'
+  | 'content.view'
+  | 'content.edit'
+  | 'content.publish'
+  | 'media.upload'
+  | 'inline_edit'
+  | 'users.invite'
+  | 'users.assign_role'
+  | 'statuses.edit'
+  | 'settings.advanced'
+
+export interface AppRole {
+  code: AdminRole
+  label: string
+  description: string | null
+  sort_order: number
+  is_legacy: boolean
+}
+
+export interface AppPermission {
+  code: PermissionCode
+  group_label: string
+  label: string
+  description: string | null
+  sort_order: number
+}
 
 // ----- 어드민 사용자 -----
 export interface AdminUser {

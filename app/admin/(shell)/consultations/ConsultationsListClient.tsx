@@ -200,8 +200,10 @@ export function ConsultationsListClient({
               )}
               <th className="text-left px-3 py-3 font-semibold">신청자</th>
               <th className="text-left px-3 py-3 font-semibold">매장</th>
+              <th className="text-left px-3 py-3 font-semibold">DB그룹</th>
               <th className="text-left px-3 py-3 font-semibold">상태</th>
               <th className="text-left px-3 py-3 font-semibold">담당</th>
+              <th className="text-left px-3 py-3 font-semibold">통화가능</th>
               <th className="text-left px-3 py-3 font-semibold">메모</th>
             </tr>
           </thead>
@@ -310,6 +312,20 @@ export function ConsultationsListClient({
                       {[c.industry, c.region].filter(Boolean).join(' · ') || '—'}
                     </div>
                   </td>
+                  <td className="px-3 py-3 align-top text-xs">
+                    {c.db_group_label ? (
+                      <span className="px-2 py-0.5 bg-ink-800 text-ink-200 rounded">
+                        {c.db_group_label}
+                      </span>
+                    ) : (
+                      <span className="text-ink-600">—</span>
+                    )}
+                    {c.device_type && (
+                      <div className="text-[10px] text-ink-500 mt-1">
+                        📟 {c.device_type}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-3 py-3 align-top">
                     {st ? (
                       <span
@@ -341,6 +357,18 @@ export function ConsultationsListClient({
                       </span>
                     ) : (
                       <span className="text-ink-600">미배정</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 align-top text-xs">
+                    {c.callable_time ? (
+                      <span className="text-ink-300">⏰ {c.callable_time}</span>
+                    ) : (
+                      <span className="text-ink-600">—</span>
+                    )}
+                    {c.contract_period && (
+                      <div className="text-[10px] text-ink-500 mt-1">
+                        약정 {c.contract_period}
+                      </div>
                     )}
                   </td>
                   <td className="px-3 py-3 align-top max-w-xs">
