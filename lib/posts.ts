@@ -8,7 +8,9 @@ export interface ContentPost {
   slug: string
   title: string
   excerpt: string | null
-  body_md: string
+  body_md: string                  // DEPRECATED — body_html 우선
+  body_html: string | null         // TipTap HTML (단일 진실)
+  focus_keyword: string | null
   cover_image: string | null
   category: 'blog' | 'news' | 'case_study' | 'faq' | 'guide'
   tags: string[]

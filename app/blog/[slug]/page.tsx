@@ -50,7 +50,10 @@ export default async function BlogPostPage({ params }: Params) {
   const allInCategory = await listPublishedPosts(post.category)
   const related = allInCategory.filter((p) => p.id !== post.id).slice(0, 3)
 
-  const html = renderMarkdown(post.body_md)
+  // body_html 이 있으면 우선 사용 (TipTap), 없으면 markdown 변환 (기존 시드 호환)
+  const html = post.body_html && post.body_html.trim().length > 0
+    ? post.body_html
+    : renderMarkdown(post.body_md)
 
   // JSON-LD Article 구조화 데이터 (구글 리치 결과)
   const jsonLd = {

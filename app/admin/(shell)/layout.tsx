@@ -49,6 +49,18 @@ export default async function AdminShellLayout({
               >
                 상담 신청
               </Link>
+              <Link
+                href="/admin/content"
+                className="text-ink-300 hover:text-ink-100 transition-colors"
+              >
+                콘텐츠
+              </Link>
+              <Link
+                href="/admin/media"
+                className="text-ink-300 hover:text-ink-100 transition-colors"
+              >
+                미디어
+              </Link>
               {isSuperAdmin(profile.role) && (
                 <>
                   <Link
