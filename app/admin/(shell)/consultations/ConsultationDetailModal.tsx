@@ -12,9 +12,10 @@
 // ─────────────────────────────────────────────
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { DbStatus } from '@/lib/admin/types'
+import RevenueModal, { type RevenueDraft } from './RevenueModal'
 
 export interface ConsultationFull {
   id: string
@@ -61,6 +62,22 @@ interface CounselorOption {
   user_id: string
   display_name: string | null
   email?: string | null
+}
+
+interface RevenueRow {
+  id: string
+  consultation_id: string
+  product_id: string | null
+  product_label: string | null
+  amount: number
+  gift_amount: number
+  net_amount: number
+  monthly_amount: number | null
+  contract_period: string | null
+  revenue_date: string
+  recorded_by: string | null
+  recorded_at: string
+  note: string | null
 }
 
 interface HistoryItem {
@@ -119,6 +136,12 @@ export function ConsultationDetailModal({
   const [messages, setMessages] = useState<MessageItem[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
 
+  // 매출 상태
+  const [revenues, setRevenues] = useState<RevenueRow[]>([])
+  const [revenueModalOpen, setRevenueModalOpen] = useState(false)
+  const [revenueModalAuto, setRevenueModalAuto] = useState(false)  // true면 "건너뛰기" 노출
+  const [editingRevenue, setEditingRevenue] = useState<RevenueDraft | undefined>(undefined)
+
   const idx = allIds.indexOf(consultation.id)
   const prevId = idx > 0 ? allIds[idx - 1] : null
   const nextId = idx >= 0 && idx < allIds.length - 1 ? allIds[idx + 1] : null
@@ -132,7 +155,19 @@ export function ConsultationDetailModal({
     setCounselorId(consultation.counselor_id)
     setError(null)
     void loadHistory(consultation.id)
+    void loadRevenues(consultation.id)
   }, [consultation.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadRevenues = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/revenue?consultation_id=${id}`, {
+        cache: 'no-store',
+      })
+      if (res.ok) setRevenues(await res.json())
+    } catch (e) {
+      console.error('[load revenues]', e)
+    }
+  }, [])
 
   // ----- 키보드 단축키 (Esc 닫기, ←→ 이동) -----
   useEffect(() => {
@@ -194,10 +229,11 @@ export function ConsultationDetailModal({
 
   async function saveAll() {
     const body: Record<string, unknown> = {}
-    if (statusId !== c.status_id) body.status_id = statusId
+    const statusChanged = statusId !== c.status_id
+    if (statusChanged) body.status_id = statusId
     if (memo !== (c.internal_memo ?? '')) body.internal_memo = memo
     if (counselorId !== c.counselor_id) body.counselor_id = counselorId
-    if (memoForHistory.trim() && statusId !== c.status_id) {
+    if (memoForHistory.trim() && statusChanged) {
       body.memo_for_history = memoForHistory.trim()
     }
     if (Object.keys(body).length === 0) {
@@ -208,6 +244,16 @@ export function ConsultationDetailModal({
     if (ok) {
       setMemoForHistory('')
       void loadHistory(c.id)
+
+      // 자동 매출 모달 트리거 — 새 상태가 is_conversion=true 면
+      if (statusChanged && statusId) {
+        const newStatus = statuses.find((s) => s.id === statusId)
+        if (newStatus?.is_conversion) {
+          setEditingRevenue(undefined)
+          setRevenueModalAuto(true)
+          setRevenueModalOpen(true)
+        }
+      }
     }
   }
 
@@ -463,6 +509,45 @@ export function ConsultationDetailModal({
               {saving ? '저장 중...' : '💾 저장'}
             </button>
           </section>
+
+          {/* 매출 카드 — 우측 컬럼 하단 (1:N) */}
+          <section className="md:col-span-3 border-t border-ink-700 pt-4">
+            <RevenueCard
+              consultationId={c.id}
+              revenues={revenues}
+              onAdd={() => {
+                setEditingRevenue(undefined)
+                setRevenueModalAuto(false)
+                setRevenueModalOpen(true)
+              }}
+              onEdit={(r) => {
+                setEditingRevenue({
+                  id: r.id,
+                  product_id: r.product_id,
+                  amount: r.amount,
+                  gift_amount: r.gift_amount,
+                  monthly_amount: r.monthly_amount,
+                  contract_period: r.contract_period,
+                  revenue_date: r.revenue_date,
+                  note: r.note,
+                })
+                setRevenueModalAuto(false)
+                setRevenueModalOpen(true)
+              }}
+              onDelete={async (id) => {
+                if (!confirm('이 매출 기록을 삭제할까요?')) return
+                const res = await fetch(`/api/admin/revenue/${id}`, { method: 'DELETE' })
+                if (res.ok) {
+                  void loadRevenues(c.id)
+                  onUpdated()
+                } else {
+                  const err = await res.json().catch(() => ({}))
+                  alert(err.error ?? '삭제 실패')
+                }
+              }}
+              firstApplyDate={c.created_at}
+            />
+          </section>
         </div>
 
         {/* 이력 — 상태 / 메시지 */}
@@ -555,6 +640,23 @@ export function ConsultationDetailModal({
           </section>
         </div>
       </div>
+
+      {/* 매출 등록·수정 모달 */}
+      {revenueModalOpen && (
+        <RevenueModal
+          consultationId={c.id}
+          consultationName={c.name}
+          initial={editingRevenue}
+          onClose={() => setRevenueModalOpen(false)}
+          onSaved={() => {
+            setRevenueModalOpen(false)
+            setEditingRevenue(undefined)
+            void loadRevenues(c.id)
+            onUpdated()
+          }}
+          onSkip={revenueModalAuto ? () => setRevenueModalOpen(false) : undefined}
+        />
+      )}
     </div>
   )
 }
@@ -723,6 +825,138 @@ function KV({ k, v }: { k: string; v: string | null }) {
     <div className="flex gap-2">
       <span className="text-ink-500 min-w-[140px]">{k}</span>
       <span className="text-ink-200 break-all">{v ?? <span className="text-ink-600">null</span>}</span>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// 매출 카드 — 1리드 N매출 (단말기 + 인터넷 동시 가입 등)
+// ─────────────────────────────────────────────
+function RevenueCard({
+  consultationId: _consultationId,
+  revenues,
+  onAdd,
+  onEdit,
+  onDelete,
+  firstApplyDate,
+}: {
+  consultationId: string
+  revenues: RevenueRow[]
+  onAdd: () => void
+  onEdit: (r: RevenueRow) => void
+  onDelete: (id: string) => void
+  firstApplyDate: string
+}) {
+  const totalAmount = revenues.reduce((s, r) => s + Number(r.amount), 0)
+  const totalGift   = revenues.reduce((s, r) => s + Number(r.gift_amount), 0)
+  const totalNet    = revenues.reduce((s, r) => s + Number(r.net_amount), 0)
+
+  // 첫 신청 → 첫 매출 소요일
+  const firstRevenue = revenues.length > 0
+    ? [...revenues].sort((a, b) => a.revenue_date.localeCompare(b.revenue_date))[0]
+    : null
+  let daysToFirstRevenue: number | null = null
+  if (firstRevenue) {
+    const ms = new Date(firstRevenue.revenue_date).getTime() - new Date(firstApplyDate).getTime()
+    daysToFirstRevenue = Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)))
+  }
+
+  return (
+    <div className="bg-naver-green/5 border border-naver-green/30 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-bold text-ink-100">
+          💰 매출 (개통)
+          {revenues.length > 0 && (
+            <span className="ml-2 text-xs text-ink-400">{revenues.length}건</span>
+          )}
+        </h3>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="px-3 py-1 bg-naver-green text-white text-xs font-bold rounded hover:bg-naver-dark"
+        >
+          + 매출 등록
+        </button>
+      </div>
+
+      {revenues.length === 0 ? (
+        <p className="text-xs text-ink-500 py-3">
+          아직 등록된 매출이 없습니다. 개통 후 매출을 등록하세요.
+        </p>
+      ) : (
+        <>
+          <ul className="space-y-2">
+            {revenues.map((r) => (
+              <li
+                key={r.id}
+                className="bg-ink-900 border border-ink-700 rounded p-2.5 text-xs"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-ink-200 font-medium">
+                    {r.revenue_date} · {r.product_label ?? '직접 입력'}
+                  </span>
+                  <span className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(r)}
+                      className="text-ink-400 hover:text-ink-100 text-[11px]"
+                    >
+                      편집
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(r.id)}
+                      className="text-red-400 hover:text-red-300 text-[11px]"
+                    >
+                      삭제
+                    </button>
+                  </span>
+                </div>
+                <div className="mt-1 grid grid-cols-3 gap-2 font-mono">
+                  <span>
+                    매출 <span className="text-ink-100">{Number(r.amount).toLocaleString()}</span>원
+                  </span>
+                  <span>
+                    사은품 <span className="text-amber-300">{Number(r.gift_amount).toLocaleString()}</span>원
+                  </span>
+                  <span>
+                    순매출 <span className="text-naver-neon font-bold">{Number(r.net_amount).toLocaleString()}</span>원
+                  </span>
+                </div>
+                {(r.contract_period || r.monthly_amount) && (
+                  <div className="mt-1 text-ink-400 text-[11px]">
+                    {r.contract_period && <>약정 {r.contract_period}</>}
+                    {r.monthly_amount && (
+                      <> · 월 {Number(r.monthly_amount).toLocaleString()}원</>
+                    )}
+                  </div>
+                )}
+                {r.note && (
+                  <div className="mt-1 text-ink-500 italic text-[11px]">📝 {r.note}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {/* 합계 */}
+          <div className="mt-3 pt-2 border-t border-naver-green/30 flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono">
+            <span className="text-ink-400">
+              누적 매출 <span className="text-ink-100">{totalAmount.toLocaleString()}</span>원
+            </span>
+            <span className="text-ink-400">
+              사은품 <span className="text-amber-300">{totalGift.toLocaleString()}</span>원
+            </span>
+            <span className="text-ink-400">
+              순매출 <span className="text-naver-neon font-bold">{totalNet.toLocaleString()}</span>원
+            </span>
+            {daysToFirstRevenue != null && (
+              <span className="text-ink-500">
+                · 첫 신청 → 첫 매출 {daysToFirstRevenue}일
+              </span>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }

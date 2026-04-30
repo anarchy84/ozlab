@@ -81,6 +81,12 @@ export default async function AdminShellLayout({
                   >
                     CTA 관리
                   </Link>
+                  <Link
+                    href="/admin/settings/products"
+                    className="text-ink-300 hover:text-ink-100 transition-colors"
+                  >
+                    상품 관리
+                  </Link>
                 </>
               )}
               <Link

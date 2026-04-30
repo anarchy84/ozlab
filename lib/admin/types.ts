@@ -160,3 +160,58 @@ export interface ConsultationByCounselorRow {
   conversion_rate_pct: string | null
   unapproved_rate_pct: string | null
 }
+
+// ----- 상품 카탈로그 -----
+export const PRODUCT_CATEGORIES = [
+  '단말기',
+  'POS',
+  '리뷰자동화',
+  '인터넷',
+  '네이버페이연동',
+  '부가서비스',
+] as const
+export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number]
+
+export interface Product {
+  id: string
+  code: string
+  label: string
+  category: string
+  default_amount: number | null
+  default_period: string | null
+  is_subscription: boolean
+  default_monthly: number | null
+  sort_order: number
+  is_active: boolean
+  note: string | null
+  created_at: string
+  updated_at: string
+  created_by: string | null
+}
+
+export type ProductInput = Omit<
+  Product,
+  'id' | 'created_at' | 'updated_at' | 'created_by'
+>
+
+// ----- 매출 기록 -----
+export interface RevenueRecord {
+  id: string
+  consultation_id: string
+  product_id: string | null
+  product_label: string | null
+  amount: number
+  gift_amount: number
+  net_amount: number
+  monthly_amount: number | null
+  contract_period: string | null
+  revenue_date: string                // 'YYYY-MM-DD'
+  recorded_by: string | null
+  recorded_at: string
+  note: string | null
+}
+
+export type RevenueRecordInput = Omit<
+  RevenueRecord,
+  'id' | 'net_amount' | 'recorded_at' | 'recorded_by'
+>
