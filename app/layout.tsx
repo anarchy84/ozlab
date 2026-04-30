@@ -13,6 +13,7 @@ import './globals.css'
 // - OG 이미지·favicon 은 P6 단계에서 제작
 // ─────────────────────────────────────────────
 export const metadata: Metadata = {
+  metadataBase: new URL('https://ozlabpay.kr'),
   title: {
     default: '오즈랩페이 | 네이버페이 연동 POS · 카드 단말기',
     template: '%s | 오즈랩페이',

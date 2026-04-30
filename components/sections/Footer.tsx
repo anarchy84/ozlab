@@ -26,6 +26,7 @@ export function Footer({ blocks, ctas }: Props) {
     { key: 'home.footer.service.link2', label: '리뷰 자동화', href: '#review' },
     { key: 'home.footer.service.link3', label: 'place+ 마크', href: '#placeplus' },
     { key: 'home.footer.service.link4', label: '가격 안내', href: '#pricing' },
+    { key: 'home.footer.service.link5', label: '블로그', href: '/blog' },
   ]
 
   // supportLinks 의 "상담 신청"은 DynamicCTA 로 별도 처리 (어트리뷰션 추적)
