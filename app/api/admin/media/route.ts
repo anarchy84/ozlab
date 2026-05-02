@@ -21,12 +21,26 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 const BUCKET = 'media'
 
+function adminClientOrResponse() {
+  try {
+    return { admin: createAdminClient(), response: null }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Supabase admin client init failed'
+    return { admin: null, response: NextResponse.json({ error: message }, { status: 500 }) }
+  }
+}
+
 // ─── GET : 미디어 목록 ───────────────────────
 export async function GET() {
   const guard = await guardApi(['super_admin', 'admin', 'marketer'])
   if (!guard.ok) return guard.response
 
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) {
+    if (process.env.NODE_ENV === 'development') return NextResponse.json([])
+    return response
+  }
+
   const { data, error } = await admin
     .from('media')
     .select('*')
@@ -87,7 +101,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Image processing failed' }, { status: 500 })
   }
 
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) return response
+
   const ext = file.type.split('/')[1] || 'bin'
   const originalPath = `uploads/${timestamp}-${baseName}.${ext}`
   const webpPath = `uploads/${timestamp}-${baseName}.webp`

@@ -9,6 +9,15 @@ import { renderMarkdown } from '@/lib/markdown'
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 
+function adminClientOrResponse() {
+  try {
+    return { admin: createAdminClient(), response: null }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Supabase admin client init failed'
+    return { admin: null, response: NextResponse.json({ error: message }, { status: 500 }) }
+  }
+}
+
 // ─── GET : 단건 조회 ────────────────────────
 export async function GET(
   _request: NextRequest,
@@ -17,7 +26,9 @@ export async function GET(
   const guard = await guardApi(['super_admin', 'admin', 'marketer', 'viewer'])
   if (!guard.ok) return guard.response
 
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) return response
+
   const { data, error } = await admin
     .from('content_posts')
     .select('*')
@@ -44,7 +55,8 @@ export async function PUT(
   if (!guard.ok) return guard.response
 
   const body = await request.json()
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) return response
 
   // 처음 발행 시 published_at 보존
   let publishedAt: string | null | undefined = body.published_at
@@ -126,7 +138,8 @@ export async function DELETE(
   const guard = await guardApi(['super_admin', 'admin'])
   if (!guard.ok) return guard.response
 
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) return response
 
   // 삭제 전 slug 확보 (캐시 무효화용)
   const { data: existing } = await admin

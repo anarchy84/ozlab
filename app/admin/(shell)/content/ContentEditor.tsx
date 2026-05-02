@@ -152,19 +152,19 @@ export default function ContentEditor({
   return (
     <div>
       {/* 상단 바 */}
-      <div className="flex items-center justify-between mb-6 sticky top-0 z-40 bg-surface-dark py-3 -mx-6 px-6 border-b border-ink-700">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6 sticky top-0 z-40 bg-surface-dark py-3 -mx-4 sm:-mx-6 px-4 sm:px-6 border-b border-ink-700">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             onClick={onClose}
-            className="text-ink-400 hover:text-ink-100 text-sm"
+            className="shrink-0 text-ink-400 hover:text-ink-100 text-sm"
           >
             ← 목록
           </button>
-          <h1 className="text-xl font-bold text-ink-100">
+          <h1 className="min-w-0 text-xl font-bold text-ink-100 break-keep">
             {isEdit ? '글 수정' : '새 글 작성'}
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
           <button
             onClick={() => handleSave(false)}
             disabled={saving || !form.title}
@@ -196,8 +196,8 @@ export default function ContentEditor({
           />
 
           {/* slug */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-ink-500">ozlabpay.kr/blog/</span>
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+            <span className="text-xs text-ink-500 break-all">ozlabpay.kr/blog/</span>
             <input
               type="text"
               value={form.slug}
@@ -224,7 +224,7 @@ export default function ContentEditor({
           </Field>
 
           {/* 카테고리 + 태그 + 작성자 + 핀 */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="카테고리">
               <select
                 value={form.category}
@@ -288,13 +288,13 @@ export default function ContentEditor({
               />
             </Field>
             <Field label="대표 이미지 URL" small>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   type="text"
                   value={form.cover_image}
                   onChange={(e) => setForm({ ...form, cover_image: e.target.value })}
                   placeholder="https://..."
-                  className="flex-1 px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-naver-green"
+                  className="min-w-0 flex-1 px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-naver-green"
                 />
                 <button
                   type="button"

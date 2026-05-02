@@ -320,24 +320,30 @@
 html.light [data-admin-shell] {
   color-scheme: light;
 }
+html.light [data-admin-shell].bg-surface-dark,
 html.light [data-admin-shell] .bg-surface-dark {
   background-color: #f3f4f6 !important;
 }
+html.light [data-admin-shell].bg-surface-darkSoft,
+html.light [data-admin-shell].bg-ink-900,
 html.light [data-admin-shell] .bg-surface-darkSoft,
 html.light [data-admin-shell] .bg-ink-900,
 html.light [data-admin-shell] [class~="bg-ink-900/80"] {
   background-color: #ffffff !important;
 }
+html.light [data-admin-shell].bg-ink-800,
 html.light [data-admin-shell] .bg-ink-800,
 html.light [data-admin-shell] [class~="bg-ink-800/50"],
 html.light [data-admin-shell] [class~="bg-ink-800/40"],
 html.light [data-admin-shell] [class~="bg-ink-800/30"] {
   background-color: #f9fafb !important;
 }
+html.light [data-admin-shell].bg-ink-700,
 html.light [data-admin-shell] .bg-ink-700,
 html.light [data-admin-shell] [class~="bg-ink-700/50"] {
   background-color: #e5e7eb !important;
 }
+html.light [data-admin-shell].bg-ink-600,
 html.light [data-admin-shell] .bg-ink-600,
 html.light [data-admin-shell] .hover\:bg-ink-700:hover,
 html.light [data-admin-shell] [class~="hover:bg-ink-700/50"]:hover {
@@ -366,19 +372,26 @@ html.light [data-admin-shell] .border-ink-600,
 html.light [data-admin-shell] .border-ink-500 {
   border-color: #cbd5e1 !important;
 }
+html.light [data-admin-shell].text-white,
+html.light [data-admin-shell].text-ink-100,
 html.light [data-admin-shell] .text-white,
 html.light [data-admin-shell] .text-ink-100 {
   color: #111827 !important;
 }
+html.light [data-admin-shell].text-ink-200,
 html.light [data-admin-shell] .text-ink-200 {
   color: #1f2937 !important;
 }
+html.light [data-admin-shell].text-ink-300,
 html.light [data-admin-shell] .text-ink-300 {
   color: #374151 !important;
 }
+html.light [data-admin-shell].text-ink-400,
 html.light [data-admin-shell] .text-ink-400 {
   color: #4b5563 !important;
 }
+html.light [data-admin-shell].text-ink-500,
+html.light [data-admin-shell].text-ink-600,
 html.light [data-admin-shell] .text-ink-500,
 html.light [data-admin-shell] .text-ink-600 {
   color: #6b7280 !important;

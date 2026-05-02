@@ -62,8 +62,8 @@ export default async function AdminShellLayout({
       className="h-screen overflow-hidden bg-surface-dark text-ink-100 flex flex-col"
     >
       <header className="flex-none bg-ink-900 border-b border-ink-700 sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6 min-w-0">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 min-h-14 py-2 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 overflow-hidden">
             <Link
               href="/admin"
               className="font-bold text-ink-100 flex items-center gap-1.5 whitespace-nowrap"
@@ -72,12 +72,12 @@ export default async function AdminShellLayout({
               <span className="hidden md:inline">오즈랩페이</span>
               <span className="md:hidden">OZ</span>
             </Link>
-            <nav className="flex items-center gap-4 text-sm whitespace-nowrap">
+            <nav className="flex min-w-0 items-center gap-3 sm:gap-4 overflow-x-auto text-sm whitespace-nowrap">
               {mainMenu.map((m) => (
                 <Link
                   key={m.href}
                   href={m.href}
-                  className="text-ink-300 hover:text-ink-100 transition-colors"
+                  className="shrink-0 text-ink-300 hover:text-ink-100 transition-colors"
                 >
                   {m.label}
                 </Link>
@@ -86,13 +86,13 @@ export default async function AdminShellLayout({
               <Link
                 href="/"
                 target="_blank"
-                className="text-ink-400 hover:text-ink-100 transition-colors"
+                className="shrink-0 text-ink-400 hover:text-ink-100 transition-colors"
               >
                 사이트 ↗
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm whitespace-nowrap">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3 text-sm whitespace-nowrap">
             <AdminThemeToggle />
             <span className="hidden lg:flex items-center gap-1.5 text-ink-200">
               <span title={ROLE_LABELS[profile.role]}>{ROLE_EMOJI[profile.role]}</span>
@@ -107,7 +107,7 @@ export default async function AdminShellLayout({
         </div>
       </header>
       <main className="flex-1 min-h-0 overflow-y-auto">
-        <div className="max-w-[1280px] mx-auto px-6 py-8">{children}</div>
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">{children}</div>
       </main>
 
       {/* 우하단 floating 도움말 버튼 */}

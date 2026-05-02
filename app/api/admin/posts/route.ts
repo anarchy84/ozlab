@@ -10,6 +10,15 @@ import { guardApi } from '@/lib/admin/auth-helpers'
 import { calcSeoScore, serializeScoreCache } from '@/lib/seo-score'
 import { NextRequest, NextResponse } from 'next/server'
 
+function adminClientOrResponse() {
+  try {
+    return { admin: createAdminClient(), response: null }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Supabase admin client init failed'
+    return { admin: null, response: NextResponse.json({ error: message }, { status: 500 }) }
+  }
+}
+
 // slug 자동 생성
 function makeSlug(title: string): string {
   return title
@@ -28,7 +37,12 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status') // 'published' | 'draft' | 'all'
 
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) {
+    if (process.env.NODE_ENV === 'development') return NextResponse.json([])
+    return response
+  }
+
   let query = admin
     .from('content_posts')
     .select(
@@ -72,7 +86,9 @@ export async function POST(request: NextRequest) {
     updatedAt: new Date().toISOString(),
   })
 
-  const admin = createAdminClient()
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) return response
+
   const { data, error } = await admin
     .from('content_posts')
     .insert({

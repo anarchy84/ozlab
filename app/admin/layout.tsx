@@ -15,5 +15,29 @@ export default function AdminRootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+(function () {
+  try {
+    var theme = window.localStorage.getItem('admin-theme');
+    if (theme !== 'dark' && theme !== 'light') {
+      theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark';
+    }
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.toggle('light', theme === 'light');
+  } catch (e) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+          `,
+        }}
+      />
+      {children}
+    </>
+  )
 }

@@ -41,7 +41,10 @@ export function AdminThemeProvider({
   rootElement = 'html',
   defaultTheme = DEFAULT_THEME,
 }: AdminThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme)
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof document === 'undefined') return defaultTheme
+    return document.documentElement.classList.contains('light') ? 'light' : defaultTheme
+  })
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {

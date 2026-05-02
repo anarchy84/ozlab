@@ -86,15 +86,15 @@ export default function ContentManager({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-ink-100">콘텐츠 관리</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="text-2xl font-bold text-ink-100 break-keep">콘텐츠 관리</h1>
         {canWrite && (
           <button
             onClick={() => {
               setEditingId(null)
               setShowEditor(true)
             }}
-            className="px-4 py-2 bg-naver-green hover:bg-naver-dark text-white text-sm font-bold rounded-lg transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-naver-green hover:bg-naver-dark text-white text-sm font-bold rounded-lg transition-colors"
           >
             + 새 글 작성
           </button>

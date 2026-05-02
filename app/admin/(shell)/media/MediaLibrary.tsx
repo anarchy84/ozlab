@@ -71,13 +71,13 @@ export default function MediaLibrary({ canWrite }: { canWrite: boolean }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-ink-100">미디어 라이브러리</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h1 className="text-2xl font-bold text-ink-100 break-keep">미디어 라이브러리</h1>
         {canWrite && (
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="px-4 py-2 bg-naver-green hover:bg-naver-dark disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-naver-green hover:bg-naver-dark disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
           >
             {uploading ? '업로드 중...' : '+ 이미지 업로드'}
           </button>
