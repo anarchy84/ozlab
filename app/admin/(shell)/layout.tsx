@@ -18,6 +18,8 @@ import { ROLE_LABELS, ROLE_EMOJI, isSuperAdmin } from '@/lib/admin/permissions'
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton'
 import { SettingsDropdown } from '@/components/admin/SettingsDropdown'
 import { HelpFloatingButton } from '@/components/admin/HelpFloatingButton'
+import { AdminThemeProvider } from '@/components/admin/ThemeProvider'
+import { AdminThemeToggle } from '@/components/admin/ThemeToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,8 +56,12 @@ export default async function AdminShellLayout({
     : []
 
   return (
-    <div className="min-h-screen bg-surface-dark text-ink-100">
-      <header className="bg-ink-900 border-b border-ink-700 sticky top-0 z-30">
+    <AdminThemeProvider>
+    <div
+      data-admin-shell
+      className="h-screen overflow-hidden bg-surface-dark text-ink-100 flex flex-col"
+    >
+      <header className="flex-none bg-ink-900 border-b border-ink-700 sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6 min-w-0">
             <Link
@@ -87,6 +93,7 @@ export default async function AdminShellLayout({
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm whitespace-nowrap">
+            <AdminThemeToggle />
             <span className="hidden lg:flex items-center gap-1.5 text-ink-200">
               <span title={ROLE_LABELS[profile.role]}>{ROLE_EMOJI[profile.role]}</span>
               <span className="font-medium truncate max-w-[120px]">
@@ -99,10 +106,13 @@ export default async function AdminShellLayout({
           </div>
         </div>
       </header>
-      <main className="max-w-[1280px] mx-auto px-6 py-8">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-[1280px] mx-auto px-6 py-8">{children}</div>
+      </main>
 
       {/* 우하단 floating 도움말 버튼 */}
       <HelpFloatingButton />
     </div>
+    </AdminThemeProvider>
   )
 }

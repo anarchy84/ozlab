@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import TipTapEditor from '@/components/admin/TipTapEditor'
 import SeoPanel from '@/components/admin/SeoPanel'
+import MediaLibraryPicker, { type MediaSelection } from '@/components/admin/MediaLibraryPicker'
 
 const CATEGORIES = [
   { value: 'guide', label: '가이드' },
@@ -62,6 +63,7 @@ export default function ContentEditor({
   const [saving, setSaving] = useState(false)
   const [loadingData, setLoadingData] = useState(isEdit)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  const [coverPickerOpen, setCoverPickerOpen] = useState(false)
 
   useEffect(() => {
     if (isEdit && postId) {
@@ -139,21 +141,8 @@ export default function ContentEditor({
     setSaving(false)
   }
 
-  // 미디어 라이브러리에서 이미지 URL 가져와 cover_image 로 설정
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('alt_text', form.title || file.name)
-    const res = await fetch('/api/admin/media', { method: 'POST', body: formData })
-    if (res.ok) {
-      const media = await res.json()
-      setForm((prev) => ({ ...prev, cover_image: media.webp_path || media.storage_path }))
-    } else {
-      alert('대표 이미지 업로드 실패')
-    }
-    e.target.value = ''
+  const handleCoverSelect = (selection: MediaSelection) => {
+    setForm((prev) => ({ ...prev, cover_image: selection.url }))
   }
 
   if (loadingData) {
@@ -163,7 +152,7 @@ export default function ContentEditor({
   return (
     <div>
       {/* 상단 바 */}
-      <div className="flex items-center justify-between mb-6 sticky top-14 z-20 bg-surface-dark py-3 -mx-6 px-6 border-b border-ink-700">
+      <div className="flex items-center justify-between mb-6 sticky top-0 z-40 bg-surface-dark py-3 -mx-6 px-6 border-b border-ink-700">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
@@ -307,15 +296,13 @@ export default function ContentEditor({
                   placeholder="https://..."
                   className="flex-1 px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-naver-green"
                 />
-                <label className="px-3 py-2 bg-ink-700 hover:bg-ink-600 text-ink-100 text-xs rounded cursor-pointer flex items-center">
-                  업로드
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleCoverUpload}
-                    className="hidden"
-                  />
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setCoverPickerOpen(true)}
+                  className="px-3 py-2 bg-ink-700 hover:bg-ink-600 text-ink-100 text-xs rounded transition-colors"
+                >
+                  라이브러리
+                </button>
               </div>
               {form.cover_image && (
                 <img
@@ -346,6 +333,13 @@ export default function ContentEditor({
           />
         </div>
       </div>
+
+      <MediaLibraryPicker
+        isOpen={coverPickerOpen}
+        title="대표 이미지 선택"
+        onClose={() => setCoverPickerOpen(false)}
+        onSelect={handleCoverSelect}
+      />
     </div>
   )
 }

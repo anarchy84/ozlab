@@ -10,6 +10,7 @@ import type { Config } from 'tailwindcss'
 //   - extend 로만 구성 (Tailwind 기본 유틸 유지)
 // ─────────────────────────────────────────────
 const config: Config = {
+  darkMode: 'class',
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',

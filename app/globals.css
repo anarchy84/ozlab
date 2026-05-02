@@ -314,6 +314,245 @@
   .btn.sm { @apply px-4 py-2 text-sm; }
 }
 
+/* ─── 어드민 라이트모드 보정 레이어 ───
+   오즈랩 어드민은 기존 다크 유틸리티가 넓게 박혀 있어서, 라이트모드에서만
+   data-admin-shell 아래의 표면/글자/테두리를 밝은 토큰으로 치환한다. */
+html.light [data-admin-shell] {
+  color-scheme: light;
+}
+html.light [data-admin-shell] .bg-surface-dark {
+  background-color: #f3f4f6 !important;
+}
+html.light [data-admin-shell] .bg-surface-darkSoft,
+html.light [data-admin-shell] .bg-ink-900,
+html.light [data-admin-shell] [class~="bg-ink-900/80"] {
+  background-color: #ffffff !important;
+}
+html.light [data-admin-shell] .bg-ink-800,
+html.light [data-admin-shell] [class~="bg-ink-800/50"],
+html.light [data-admin-shell] [class~="bg-ink-800/40"],
+html.light [data-admin-shell] [class~="bg-ink-800/30"] {
+  background-color: #f9fafb !important;
+}
+html.light [data-admin-shell] .bg-ink-700,
+html.light [data-admin-shell] [class~="bg-ink-700/50"] {
+  background-color: #e5e7eb !important;
+}
+html.light [data-admin-shell] .bg-ink-600,
+html.light [data-admin-shell] .hover\:bg-ink-700:hover,
+html.light [data-admin-shell] [class~="hover:bg-ink-700/50"]:hover {
+  background-color: #d1d5db !important;
+}
+html.light [data-admin-shell] .hover\:bg-ink-900:hover,
+html.light [data-admin-shell] .hover\:bg-ink-800:hover,
+html.light [data-admin-shell] [class~="hover:bg-ink-800/50"]:hover,
+html.light [data-admin-shell] [class~="hover:bg-ink-800/40"]:hover,
+html.light [data-admin-shell] [class~="hover:bg-ink-800/30"]:hover {
+  background-color: #f3f4f6 !important;
+}
+html.light [data-admin-shell] .hover\:bg-ink-600:hover {
+  background-color: #cbd5e1 !important;
+}
+html.light [data-admin-shell] .border-ink-800,
+html.light [data-admin-shell] [class~="border-ink-800/50"] {
+  border-color: #e5e7eb !important;
+}
+html.light [data-admin-shell] .border-ink-700,
+html.light [data-admin-shell] [class~="border-ink-700/50"],
+html.light [data-admin-shell] .divide-ink-700 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #d1d5db !important;
+}
+html.light [data-admin-shell] .border-ink-600,
+html.light [data-admin-shell] .border-ink-500 {
+  border-color: #cbd5e1 !important;
+}
+html.light [data-admin-shell] .text-white,
+html.light [data-admin-shell] .text-ink-100 {
+  color: #111827 !important;
+}
+html.light [data-admin-shell] .text-ink-200 {
+  color: #1f2937 !important;
+}
+html.light [data-admin-shell] .text-ink-300 {
+  color: #374151 !important;
+}
+html.light [data-admin-shell] .text-ink-400 {
+  color: #4b5563 !important;
+}
+html.light [data-admin-shell] .text-ink-500,
+html.light [data-admin-shell] .text-ink-600 {
+  color: #6b7280 !important;
+}
+html.light [data-admin-shell] .text-naver-neon {
+  color: #019544 !important;
+}
+html.light [data-admin-shell] .hover\:text-ink-100:hover,
+html.light [data-admin-shell] .hover\:text-ink-200:hover,
+html.light [data-admin-shell] .hover\:text-white:hover {
+  color: #111827 !important;
+}
+html.light [data-admin-shell] .hover\:text-naver-neon:hover {
+  color: #019544 !important;
+}
+html.light [data-admin-shell] .placeholder-ink-600::placeholder,
+html.light [data-admin-shell] .placeholder-ink-500::placeholder {
+  color: #9ca3af !important;
+}
+html.light [data-admin-shell] .disabled\:bg-ink-900:disabled {
+  background-color: #f3f4f6 !important;
+}
+html.light [data-admin-shell] .bg-naver-green.text-white,
+html.light [data-admin-shell] .hover\:bg-naver-dark:hover.text-white,
+html.light [data-admin-shell] .bg-accent-red.text-white,
+html.light [data-admin-shell] .bg-red-600.text-white,
+html.light [data-admin-shell] .bg-emerald-600.text-white,
+html.light [data-admin-shell] .bg-amber-600.text-white,
+html.light [data-admin-shell] .bg-blue-600.text-white {
+  color: #ffffff !important;
+}
+html.light [data-admin-shell] .bg-naver-neon.text-ink-900 {
+  color: #0a0a0a !important;
+}
+html.light [data-admin-shell] input,
+html.light [data-admin-shell] textarea,
+html.light [data-admin-shell] select {
+  color-scheme: light;
+}
+html.light [data-admin-shell] option {
+  background-color: #ffffff;
+  color: #111827;
+}
+html.light [data-admin-shell] .ProseMirror,
+html.light [data-admin-shell] .ProseMirror p,
+html.light [data-admin-shell] .ProseMirror li,
+html.light [data-admin-shell] .ProseMirror blockquote {
+  color: #111827 !important;
+}
+html.light [data-admin-shell] .ProseMirror h1,
+html.light [data-admin-shell] .ProseMirror h2,
+html.light [data-admin-shell] .ProseMirror h3,
+html.light [data-admin-shell] .ProseMirror h4 {
+  color: #111827 !important;
+}
+html.light [data-admin-shell] .ProseMirror blockquote {
+  border-left-color: #d1d5db !important;
+  color: #374151 !important;
+}
+html.light [data-admin-shell] .ProseMirror code {
+  background: #f3f4f6 !important;
+  color: #b45309 !important;
+}
+html.light [data-admin-shell] .ProseMirror pre {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+}
+html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
+  background: #ffffff !important;
+}
+
+/* ─── TipTap 에디터 ─── */
+.ProseMirror {
+  color: #f5f5f5;
+  min-height: 400px;
+}
+.ProseMirror p,
+.ProseMirror li,
+.ProseMirror blockquote {
+  color: #f5f5f5;
+}
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4 {
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+.ProseMirror h2 { font-size: 1.5em; }
+.ProseMirror h3 { font-size: 1.25em; }
+.ProseMirror h4 { font-size: 1.1em; }
+.ProseMirror p { margin: 0.6em 0; line-height: 1.7; }
+.ProseMirror ul,
+.ProseMirror ol { padding-left: 1.5em; margin: 0.6em 0; }
+.ProseMirror ul { list-style: disc; }
+.ProseMirror ol { list-style: decimal; }
+.ProseMirror blockquote {
+  border-left: 3px solid #404040;
+  padding-left: 1em;
+  color: #e5e5e5;
+  font-style: italic;
+  margin: 0.8em 0;
+}
+.ProseMirror code {
+  color: #facc15;
+  background: #1a1a1a;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.ProseMirror pre {
+  background: #0a0a0a;
+  color: #f5f5f5;
+  padding: 0.8em 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+.ProseMirror pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+.ProseMirror img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 0.8em 0;
+}
+.ProseMirror [data-resize-container][data-node="image"] {
+  margin: 0.8em 0;
+}
+.ProseMirror [data-resize-container][data-node="image"] img {
+  display: block;
+  margin: 0;
+}
+.ProseMirror [data-resize-wrapper] {
+  max-width: 100%;
+}
+.ProseMirror [data-resize-handle] {
+  width: 12px;
+  height: 12px;
+  margin: -6px;
+  border: 2px solid #03c75a;
+  border-radius: 9999px;
+  background: #0a0a0a;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.ProseMirror [data-resize-container][data-node="image"]:hover [data-resize-handle],
+.ProseMirror [data-resize-container][data-resize-state="true"] [data-resize-handle] {
+  opacity: 1;
+}
+.ProseMirror [data-resize-handle="top-left"],
+.ProseMirror [data-resize-handle="bottom-right"] {
+  cursor: nwse-resize;
+}
+.ProseMirror [data-resize-handle="top-right"],
+.ProseMirror [data-resize-handle="bottom-left"] {
+  cursor: nesw-resize;
+}
+.ProseMirror a {
+  color: #17e06d;
+  text-decoration: underline;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #6b6b6b;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 /* ─────────────────────────────────────────────
    @layer utilities — 한국어 조판 & 하이라이트
    ───────────────────────────────────────────── */

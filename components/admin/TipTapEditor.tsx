@@ -10,7 +10,8 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useCallback, useRef } from 'react'
+import { useCallback, useState } from 'react'
+import MediaLibraryPicker, { type MediaSelection } from '@/components/admin/MediaLibraryPicker'
 
 interface TipTapEditorProps {
   content: string
@@ -23,14 +24,24 @@ export default function TipTapEditor({
   onChange,
   placeholder = '본문을 작성하세요...',
 }: TipTapEditorProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3, 4] },
       }),
-      Image.configure({ inline: false, allowBase64: false }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        resize: {
+          enabled: true,
+          directions: ['bottom-left', 'bottom-right', 'top-left', 'top-right'],
+          minWidth: 120,
+          minHeight: 80,
+          alwaysPreserveAspectRatio: true,
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: { class: 'text-naver-neon underline' },
@@ -41,6 +52,7 @@ export default function TipTapEditor({
     onUpdate: ({ editor: e }) => {
       onChange(e.getHTML())
     },
+    shouldRerenderOnTransaction: true,
     editorProps: {
       attributes: {
         class:
@@ -51,35 +63,31 @@ export default function TipTapEditor({
   })
 
   const addImage = useCallback(
-    async (file: File) => {
+    (selection: MediaSelection) => {
       if (!editor) return
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('alt_text', file.name.replace(/\.[^/.]+$/, ''))
-
-      try {
-        const res = await fetch('/api/admin/media', { method: 'POST', body: formData })
-        if (!res.ok) throw new Error('Upload failed')
-        const media = await res.json()
-        editor
-          .chain()
-          .focus()
-          .setImage({ src: media.webp_path || media.storage_path, alt: media.alt_text })
-          .run()
-      } catch {
-        alert('이미지 업로드에 실패했습니다.')
-      }
+      editor.chain().focus().setImage({ src: selection.url, alt: selection.altText }).run()
     },
     [editor]
   )
 
-  const handleImageClick = () => fileInputRef.current?.click()
+  const handleImageClick = () => setMediaPickerOpen(true)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) addImage(file)
-    e.target.value = ''
+  const imageAttrs = editor?.isActive('image') ? editor.getAttributes('image') : null
+  const imageWidth = getImageWidth(imageAttrs?.width)
+
+  const handleImageWidthChange = (value: string) => {
+    const nextWidth = Number.parseInt(value, 10)
+    if (!Number.isFinite(nextWidth)) {
+      editor?.chain().focus().updateAttributes('image', { width: null, height: null }).run()
+      return
+    }
+
+    editor
+      ?.chain()
+      .focus()
+      .updateAttributes('image', { width: clampImageWidth(nextWidth), height: null })
+      .run()
   }
 
   const addLink = useCallback(() => {
@@ -93,9 +101,9 @@ export default function TipTapEditor({
   if (!editor) return null
 
   return (
-    <div className="border border-ink-700 rounded-lg overflow-hidden bg-ink-900">
+    <div className="relative border border-ink-700 rounded-lg bg-ink-900">
       {/* 툴바 */}
-      <div className="flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-ink-700 bg-ink-800">
+      <div className="sticky top-14 z-30 isolate flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-ink-700 bg-ink-800 rounded-t-lg shadow-sm">
         <ToolBtn
           active={editor.isActive('heading', { level: 2 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -153,7 +161,25 @@ export default function TipTapEditor({
         />
         <Divider />
         <ToolBtn active={editor.isActive('link')} onClick={addLink} label="링크" />
-        <ToolBtn active={false} onClick={handleImageClick} label="🖼 이미지" />
+        <ToolBtn active={false} onClick={handleImageClick} label="이미지" />
+        {editor.isActive('image') && (
+          <>
+            <Divider />
+            <label className="flex items-center gap-1 rounded bg-ink-900 px-2 py-1 text-xs text-ink-400">
+              W
+              <input
+                type="number"
+                min={120}
+                max={1200}
+                value={imageWidth ?? ''}
+                onChange={(event) => handleImageWidthChange(event.target.value)}
+                placeholder="auto"
+                className="h-5 w-16 bg-transparent text-right text-ink-100 placeholder-ink-600 focus:outline-none"
+              />
+              px
+            </label>
+          </>
+        )}
         <Divider />
         <ToolBtn
           active={false}
@@ -170,16 +196,27 @@ export default function TipTapEditor({
       {/* 본문 */}
       <EditorContent editor={editor} />
 
-      {/* 숨겨진 파일 인풋 */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
+      <MediaLibraryPicker
+        isOpen={mediaPickerOpen}
+        title="본문 이미지 선택"
+        onClose={() => setMediaPickerOpen(false)}
+        onSelect={addImage}
       />
     </div>
   )
+}
+
+function getImageWidth(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+  return null
+}
+
+function clampImageWidth(value: number) {
+  return Math.min(1200, Math.max(120, value))
 }
 
 function Divider() {
