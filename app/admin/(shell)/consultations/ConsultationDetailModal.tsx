@@ -55,6 +55,8 @@ export interface ConsultationFull {
   contract_period: string | null
   is_favorite: boolean
   is_blacklisted: boolean
+  last_contacted_at?: string | null
+  assigned_at?: string | null
   ip_address: string | null
 }
 

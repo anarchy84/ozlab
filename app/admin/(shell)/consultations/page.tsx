@@ -107,7 +107,7 @@ export default async function ConsultationsListPage({
        gclid, fbclid, referer, landing_page_path,
        inferred_channel, inferred_keyword, inferred_creative, inferred_landing_title, referer_domain,
        db_group_label, counselor_id, callable_time, device_type, contract_period,
-       is_favorite, is_blacklisted, ip_address`,
+       is_favorite, is_blacklisted, ip_address, last_contacted_at`,
       { count: 'exact' },
     )
     .order('created_at', { ascending: false })
