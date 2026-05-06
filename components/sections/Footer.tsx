@@ -27,6 +27,7 @@ export function Footer({ blocks, ctas }: Props) {
     { key: 'home.footer.service.v2.tableorder', label: '테이블오더', href: '/business/torder' },
     { key: 'home.footer.service.v2.cctv', label: 'CCTV', href: '/business/cctv' },
     { key: 'home.footer.service.v2.marketing', label: '사업자 마케팅지원', href: '/marketing-support' },
+    { key: 'home.footer.service.v2.tips', label: '꿀팁', href: '/tips' },
     { key: 'home.footer.service.v2.blog', label: '블로그', href: '/blog' },
   ]
 

@@ -28,6 +28,7 @@ export function Nav({ blocks, ctas }: Props) {
     { key: 'home.nav.v2.tableorder', label: '테이블오더', href: '/business/torder' },
     { key: 'home.nav.v2.cctv', label: 'CCTV', href: '/business/cctv' },
     { key: 'home.nav.v2.marketing', label: '사업자 마케팅지원', href: '/marketing-support' },
+    { key: 'home.nav.v2.tips', label: '꿀팁', href: '/tips' },
     { key: 'home.nav.v2.pricing', label: '가격', href: '/#pricing' },
     { key: 'home.nav.v2.faq', label: 'FAQ', href: '/#faq' },
   ]

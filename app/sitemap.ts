@@ -27,6 +27,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}/tips`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/internet`,
       lastModified: now,
       changeFrequency: 'weekly',
@@ -52,6 +58,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...slugs.map((slug) => ({
       url: `${SITE_URL}/blog/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+    ...slugs.map((slug) => ({
+      url: `${SITE_URL}/tips/${slug}`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
