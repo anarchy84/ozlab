@@ -1,7 +1,12 @@
 import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { ServiceLanding } from '@/components/sections/ServiceLanding'
+import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { servicePages } from '@/lib/service-pages'
+import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { blocksMapToRecord } from '@/lib/content-blocks'
+
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: '사업자 인터넷',
@@ -10,10 +15,18 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://ozlabpay.kr/internet' },
 }
 
-export default function InternetPage() {
+export default async function InternetPage() {
+  const blocksMap = await getBlocksForPage('/internet')
+  const blocks = blocksMapToRecord(blocksMap)
   return (
     <PublicPageFrame>
-      <ServiceLanding data={servicePages.internet} />
+      <BlocksProvider blocks={blocks}>
+        <ServiceLanding
+          data={servicePages.internet}
+          pageKey="internet"
+          pagePath="/internet"
+        />
+      </BlocksProvider>
     </PublicPageFrame>
   )
 }

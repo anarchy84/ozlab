@@ -1,9 +1,13 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
+import { BlocksProvider } from '@/components/editable/BlocksProvider'
+import { EditableText } from '@/components/editable/EditableText'
+import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { blocksMapToRecord, pickTextOrUndef } from '@/lib/content-blocks'
 import { getCategoryLabel, listPublishedPosts, type ContentPost } from '@/lib/posts'
 
-export const revalidate = 600
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: '꿀팁',
@@ -73,30 +77,66 @@ export default async function TipsPage({
   const activeCategory = isKnownCategory(searchParams?.category)
     ? searchParams?.category
     : 'all'
-  const posts = await listPublishedPosts(activeCategory === 'all' ? undefined : activeCategory)
+  const [posts, blocksMap] = await Promise.all([
+    listPublishedPosts(activeCategory === 'all' ? undefined : activeCategory),
+    getBlocksForPage('/tips'),
+  ])
+  const blocks = blocksMapToRecord(blocksMap)
   const featured = posts[0]
   const rest = featured ? posts.slice(1) : posts
 
   return (
     <PublicPageFrame>
+      <BlocksProvider blocks={blocks}>
       <div className="bg-white text-ink-900">
         <section className="relative overflow-hidden bg-surface-dark py-section-tight text-white">
           <div className="pointer-events-none absolute right-[-12%] top-[-30%] h-[560px] w-[560px] rounded-full bg-naver-green/20 blur-[120px]" />
           <div className="pointer-events-none absolute bottom-[-35%] left-[-16%] h-[420px] w-[420px] rounded-full bg-white/10 blur-[110px]" />
           <div className="container-oz relative">
             <div className="max-w-[760px]">
-              <span className="eyebrow-dark">사업자 꿀팁</span>
+              <EditableText
+                as="span"
+                blockKey="tips.hero.eyebrow"
+                fallback="사업자 꿀팁"
+                value={pickTextOrUndef(blocks, 'tips.hero.eyebrow')}
+                pagePath="/tips"
+                className="eyebrow-dark"
+              />
               <h1 className="mt-5 text-display text-white break-keep">
-                사장님들이
+                <EditableText
+                  as="span"
+                  blockKey="tips.hero.title.line1"
+                  fallback="사장님들이"
+                  value={pickTextOrUndef(blocks, 'tips.hero.title.line1')}
+                  pagePath="/tips"
+                />
                 <br />
-                <mark className="hl-solid">꼭 알아야 할</mark>
+                <mark className="hl-solid">
+                  <EditableText
+                    as="span"
+                    blockKey="tips.hero.title.highlight"
+                    fallback="꼭 알아야 할"
+                    value={pickTextOrUndef(blocks, 'tips.hero.title.highlight')}
+                    pagePath="/tips"
+                  />
+                </mark>
                 <br />
-                매장 운영 꿀팁
+                <EditableText
+                  as="span"
+                  blockKey="tips.hero.title.line3"
+                  fallback="매장 운영 꿀팁"
+                  value={pickTextOrUndef(blocks, 'tips.hero.title.line3')}
+                  pagePath="/tips"
+                />
               </h1>
-              <p className="mt-6 max-w-[620px] text-lg-fluid text-white/65 break-keep">
-                결제, 리뷰, 플레이스, 단말기, 매장 마케팅까지. 오즈랩페이가 실제 상담과
-                운영에서 자주 마주치는 질문을 글로 정리했습니다.
-              </p>
+              <EditableText
+                as="p"
+                blockKey="tips.hero.description"
+                fallback="결제, 리뷰, 플레이스, 단말기, 매장 마케팅까지. 오즈랩페이가 실제 상담과 운영에서 자주 마주치는 질문을 글로 정리했습니다."
+                value={pickTextOrUndef(blocks, 'tips.hero.description')}
+                pagePath="/tips"
+                className="mt-6 max-w-[620px] text-lg-fluid text-white/65 break-keep"
+              />
             </div>
           </div>
         </section>
@@ -236,23 +276,45 @@ export default async function TipsPage({
         <section className="bg-ink-50 py-section-tight">
           <div className="container-oz">
             <div className="rounded-xl bg-surface-dark p-8 text-center text-white md:p-12">
-              <span className="eyebrow-dark">질문이 더 급하다면</span>
-              <h2 className="mt-4 text-h1 text-white break-keep">
-                글보다 빠르게,
-                <br />
-                매장 상황을 상담받으세요.
-              </h2>
-              <p className="mx-auto mt-4 max-w-[620px] text-lg-fluid text-white/65 break-keep">
-                단말기, 리뷰 자동화, 플레이스 노출, 마케팅 지원까지 한 번에 확인해드립니다.
-              </p>
+              <EditableText
+                as="span"
+                blockKey="tips.cta.eyebrow"
+                fallback="질문이 더 급하다면"
+                value={pickTextOrUndef(blocks, 'tips.cta.eyebrow')}
+                pagePath="/tips"
+                className="eyebrow-dark"
+              />
+              <EditableText
+                as="h2"
+                blockKey="tips.cta.title"
+                fallback={'글보다 빠르게,\n매장 상황을 상담받으세요.'}
+                value={pickTextOrUndef(blocks, 'tips.cta.title')}
+                pagePath="/tips"
+                className="mt-4 text-h1 text-white break-keep whitespace-pre-line"
+              />
+              <EditableText
+                as="p"
+                blockKey="tips.cta.description"
+                fallback="단말기, 리뷰 자동화, 플레이스 노출, 마케팅 지원까지 한 번에 확인해드립니다."
+                value={pickTextOrUndef(blocks, 'tips.cta.description')}
+                pagePath="/tips"
+                className="mx-auto mt-4 max-w-[620px] text-lg-fluid text-white/65 break-keep"
+              />
               <Link href="/#apply" className="btn btn-primary lg mt-8">
-                상담 신청하기
+                <EditableText
+                  as="span"
+                  blockKey="tips.cta.button"
+                  fallback="상담 신청하기"
+                  value={pickTextOrUndef(blocks, 'tips.cta.button')}
+                  pagePath="/tips"
+                />
                 <ArrowIcon size={18} />
               </Link>
             </div>
           </div>
         </section>
       </div>
+      </BlocksProvider>
     </PublicPageFrame>
   )
 }

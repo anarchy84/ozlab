@@ -4,8 +4,12 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { listPublishedPosts, getCategoryLabel } from '@/lib/posts'
+import { BlocksProvider } from '@/components/editable/BlocksProvider'
+import { EditableText } from '@/components/editable/EditableText'
+import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { blocksMapToRecord, pickTextOrUndef } from '@/lib/content-blocks'
 
-export const revalidate = 600 // 10분 ISR
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: '블로그',
@@ -27,19 +31,36 @@ const FORMAT_KST = new Intl.DateTimeFormat('ko-KR', {
 })
 
 export default async function BlogListPage() {
-  const posts = await listPublishedPosts()
+  const [posts, blocksMap] = await Promise.all([
+    listPublishedPosts(),
+    getBlocksForPage('/blog'),
+  ])
+  const blocks = blocksMapToRecord(blocksMap)
 
   return (
+    <BlocksProvider blocks={blocks}>
     <div className="bg-white text-ink-900 min-h-screen">
       <header className="bg-surface-dark text-white py-16">
         <div className="container-oz">
           <Link href="/" className="text-naver-neon text-sm hover:underline">
             ← 오즈랩페이 홈
           </Link>
-          <h1 className="text-h1 font-extrabold mt-4">오즈랩페이 블로그</h1>
-          <p className="text-ink-300 mt-3 text-lg-fluid break-keep">
-            자영업자·매장 운영자를 위한 결제·POS·플레이스 광고·리뷰 자동화 실전 가이드
-          </p>
+          <EditableText
+            as="h1"
+            blockKey="blog.hero.title"
+            fallback="오즈랩페이 블로그"
+            value={pickTextOrUndef(blocks, 'blog.hero.title')}
+            pagePath="/blog"
+            className="text-h1 font-extrabold mt-4"
+          />
+          <EditableText
+            as="p"
+            blockKey="blog.hero.description"
+            fallback="자영업자·매장 운영자를 위한 결제·POS·플레이스 광고·리뷰 자동화 실전 가이드"
+            value={pickTextOrUndef(blocks, 'blog.hero.description')}
+            pagePath="/blog"
+            className="text-ink-300 mt-3 text-lg-fluid break-keep"
+          />
         </div>
       </header>
 
@@ -95,20 +116,37 @@ export default async function BlogListPage() {
 
         {/* CTA */}
         <div className="mt-16 bg-surface-dark text-white rounded-lg p-8 md:p-12 text-center">
-          <h2 className="text-h2 font-extrabold mb-3">
-            글 읽고 마음에 들었다면
-          </h2>
-          <p className="text-ink-300 mb-6">
-            오즈랩페이 단말기 0원으로 시작해 보세요. 약정 없음.
-          </p>
+          <EditableText
+            as="h2"
+            blockKey="blog.cta.title"
+            fallback="글 읽고 마음에 들었다면"
+            value={pickTextOrUndef(blocks, 'blog.cta.title')}
+            pagePath="/blog"
+            className="text-h2 font-extrabold mb-3"
+          />
+          <EditableText
+            as="p"
+            blockKey="blog.cta.description"
+            fallback="오즈랩페이 단말기 0원으로 시작해 보세요. 약정 없음."
+            value={pickTextOrUndef(blocks, 'blog.cta.description')}
+            pagePath="/blog"
+            className="text-ink-300 mb-6"
+          />
           <Link
             href="/#apply"
             className="inline-block px-6 py-3 bg-naver-green text-white rounded font-bold hover:bg-naver-dark transition-colors"
           >
-            지금 신청하기 →
+            <EditableText
+              as="span"
+              blockKey="blog.cta.button"
+              fallback="지금 신청하기 →"
+              value={pickTextOrUndef(blocks, 'blog.cta.button')}
+              pagePath="/blog"
+            />
           </Link>
         </div>
       </main>
     </div>
+    </BlocksProvider>
   )
 }

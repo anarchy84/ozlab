@@ -1,6 +1,11 @@
 import type { Metadata } from 'next'
 import { MarketingSupportLanding } from '@/components/sections/MarketingSupportLanding'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
+import { BlocksProvider } from '@/components/editable/BlocksProvider'
+import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { blocksMapToRecord } from '@/lib/content-blocks'
+
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: '사업자 마케팅지원',
@@ -9,10 +14,14 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://ozlabpay.kr/marketing-support' },
 }
 
-export default function MarketingSupportPage() {
+export default async function MarketingSupportPage() {
+  const blocksMap = await getBlocksForPage('/marketing-support')
+  const blocks = blocksMapToRecord(blocksMap)
   return (
     <PublicPageFrame>
-      <MarketingSupportLanding />
+      <BlocksProvider blocks={blocks}>
+        <MarketingSupportLanding />
+      </BlocksProvider>
     </PublicPageFrame>
   )
 }

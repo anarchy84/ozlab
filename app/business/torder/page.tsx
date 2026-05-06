@@ -1,7 +1,12 @@
 import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { ServiceLanding } from '@/components/sections/ServiceLanding'
+import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { servicePages } from '@/lib/service-pages'
+import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { blocksMapToRecord } from '@/lib/content-blocks'
+
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: '테이블오더',
@@ -10,10 +15,18 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://ozlabpay.kr/business/torder' },
 }
 
-export default function TableOrderPage() {
+export default async function TableOrderPage() {
+  const blocksMap = await getBlocksForPage('/business/torder')
+  const blocks = blocksMapToRecord(blocksMap)
   return (
     <PublicPageFrame>
-      <ServiceLanding data={servicePages.tableOrder} />
+      <BlocksProvider blocks={blocks}>
+        <ServiceLanding
+          data={servicePages.tableOrder}
+          pageKey="tableOrder"
+          pagePath="/business/torder"
+        />
+      </BlocksProvider>
     </PublicPageFrame>
   )
 }

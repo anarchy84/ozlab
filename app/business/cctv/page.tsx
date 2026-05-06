@@ -1,7 +1,12 @@
 import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { ServiceLanding } from '@/components/sections/ServiceLanding'
+import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { servicePages } from '@/lib/service-pages'
+import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { blocksMapToRecord } from '@/lib/content-blocks'
+
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'CCTV',
@@ -10,10 +15,18 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://ozlabpay.kr/business/cctv' },
 }
 
-export default function CctvPage() {
+export default async function CctvPage() {
+  const blocksMap = await getBlocksForPage('/business/cctv')
+  const blocks = blocksMapToRecord(blocksMap)
   return (
     <PublicPageFrame>
-      <ServiceLanding data={servicePages.cctv} />
+      <BlocksProvider blocks={blocks}>
+        <ServiceLanding
+          data={servicePages.cctv}
+          pageKey="cctv"
+          pagePath="/business/cctv"
+        />
+      </BlocksProvider>
     </PublicPageFrame>
   )
 }
