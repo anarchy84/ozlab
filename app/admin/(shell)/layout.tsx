@@ -63,6 +63,12 @@ export default async function AdminShellLayout({
     >
       <header className="flex-none bg-ink-900 border-b border-ink-700 sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 min-h-14 py-2 flex items-center justify-between gap-3">
+          {/*
+            좌측 그룹 — 로고 + 메인 nav.
+            overflow-hidden 은 nav 의 가로 스크롤 클리핑용으로 유지.
+            SettingsDropdown 은 이 안에 두면 absolute 메뉴가 잘리므로
+            우측 그룹으로 옮긴다.
+          */}
           <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 overflow-hidden">
             <Link
               href="/admin"
@@ -72,10 +78,6 @@ export default async function AdminShellLayout({
               <span className="hidden md:inline">오즈랩페이</span>
               <span className="md:hidden">OZ</span>
             </Link>
-            {/*
-              nav 는 overflow-x-auto 라 absolute 드롭다운을 잘라먹는다.
-              → SettingsDropdown 은 nav 외부 sibling 으로 분리.
-            */}
             <nav className="flex min-w-0 items-center gap-3 sm:gap-4 overflow-x-auto text-sm whitespace-nowrap">
               {mainMenu.map((m) => (
                 <Link
@@ -94,13 +96,10 @@ export default async function AdminShellLayout({
                 사이트 ↗
               </Link>
             </nav>
-            {settingsMenu.length > 0 && (
-              <div className="shrink-0">
-                <SettingsDropdown items={settingsMenu} />
-              </div>
-            )}
           </div>
+          {/* 우측 그룹 — 설정 드롭다운(overflow 영향권 밖) + 테마 + 사용자 + 로그아웃 */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3 text-sm whitespace-nowrap">
+            {settingsMenu.length > 0 && <SettingsDropdown items={settingsMenu} />}
             <AdminThemeToggle />
             <span className="hidden lg:flex items-center gap-1.5 text-ink-200">
               <span title={ROLE_LABELS[profile.role]}>{ROLE_EMOJI[profile.role]}</span>

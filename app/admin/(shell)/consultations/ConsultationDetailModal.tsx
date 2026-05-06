@@ -301,7 +301,12 @@ export function ConsultationDetailModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 overflow-y-auto py-8 px-4"
-      onClick={onClose}
+      // 진짜 backdrop 영역(div 자기 자신) 클릭만 닫기.
+      // 자식 모달(RevenueModal 등)에서 올라오는 click 버블링이
+      // onClose 를 호출하지 않도록 currentTarget 가드.
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
     >
       <div
         className="bg-surface-darkSoft border border-ink-700 rounded-lg shadow-2xl w-full max-w-5xl my-auto"

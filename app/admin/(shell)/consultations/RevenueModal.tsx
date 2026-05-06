@@ -134,7 +134,12 @@ export default function RevenueModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4"
+      // 부모 모달(ConsultationDetailModal)로 click 이 버블되면
+      // 부모 backdrop 핸들러가 닫아버리므로 여기서 차단.
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="bg-surface-dark border border-ink-700 rounded-lg p-6 w-full max-w-lg space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-ink-100">
