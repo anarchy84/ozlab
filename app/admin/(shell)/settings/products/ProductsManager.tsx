@@ -8,6 +8,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import type { AdminRole } from '@/lib/admin/types'
+import BulkUploadModal from './BulkUploadModal'
 
 interface Category {
   id: string
@@ -39,6 +40,7 @@ export default function ProductsManager({ myRole: _myRole }: { myRole: AdminRole
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCatCode, setActiveCatCode] = useState<string>('')
+  const [showBulkUpload, setShowBulkUpload] = useState(false)
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -69,13 +71,20 @@ export default function ProductsManager({ myRole: _myRole }: { myRole: AdminRole
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-3">
         <div>
           <h1 className="text-2xl font-bold text-ink-100">상품·카테고리 관리</h1>
           <p className="text-sm text-ink-400 mt-1">
             카테고리(좌)와 상품(우)을 함께 관리합니다. 상품은 매출 등록 모달의 드롭다운으로 노출됩니다.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setShowBulkUpload(true)}
+          className="shrink-0 px-3 py-2 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark"
+        >
+          📥 CSV 일괄 업로드
+        </button>
       </div>
 
       <div className="grid md:grid-cols-[260px_1fr] gap-6">
@@ -95,6 +104,13 @@ export default function ProductsManager({ myRole: _myRole }: { myRole: AdminRole
           onChanged={fetchAll}
         />
       </div>
+
+      {showBulkUpload && (
+        <BulkUploadModal
+          onClose={() => setShowBulkUpload(false)}
+          onDone={fetchAll}
+        />
+      )}
     </div>
   )
 }
