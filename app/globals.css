@@ -299,6 +299,32 @@
   .floating-cta .close {
     @apply w-7 h-7 rounded-full bg-ink-100 text-ink-500 flex items-center justify-center text-lg leading-none;
   }
+  .floating-cta [data-cta-placement='floating'] {
+    @apply shrink-0 whitespace-nowrap;
+  }
+  .floating-cta [data-cta-placement='floating'] > span {
+    @apply whitespace-nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .floating-cta {
+      @apply bottom-4 w-[calc(100%-32px)] max-w-[360px] items-stretch gap-3 rounded-[28px] px-4 py-4;
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .floating-cta .msg {
+      @apply pr-9 text-[14px] leading-relaxed;
+    }
+    .floating-cta [data-cta-placement='floating'] {
+      @apply h-12 w-full rounded-pill px-6 py-0 text-[15px];
+    }
+    .floating-cta [data-cta-placement='floating'] > span {
+      @apply w-full justify-center;
+    }
+    .floating-cta .close {
+      @apply absolute right-4 top-4 h-8 w-8;
+    }
+  }
 
   /* ── 버튼 (최소 세트 — btn-primary/ghost/lg) ── */
   .btn {

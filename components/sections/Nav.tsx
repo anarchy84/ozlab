@@ -21,24 +21,26 @@ interface Props {
 }
 
 export function Nav({ blocks, ctas }: Props) {
-  // 메뉴 링크 5개 — 각각 블록으로 관리
+  // 오래된 GNB 편집값이 남아 있어도 새 메뉴 구성이 우선 적용되도록 신규 블록 키를 사용한다.
   const menuLinks = [
-    { key: 'home.nav.link1', label: '기능', href: '#features' },
-    { key: 'home.nav.link2', label: '리뷰 자동화', href: '#review' },
-    { key: 'home.nav.link3', label: 'place+', href: '#placeplus' },
-    { key: 'home.nav.link4', label: '가격', href: '#pricing' },
-    { key: 'home.nav.link5', label: 'FAQ', href: '#faq' },
+    { key: 'home.nav.v2.features', label: '기능', href: '/#features' },
+    { key: 'home.nav.v2.internet', label: '사업자 인터넷', href: '/internet' },
+    { key: 'home.nav.v2.tableorder', label: '테이블오더', href: '/business/torder' },
+    { key: 'home.nav.v2.cctv', label: 'CCTV', href: '/business/cctv' },
+    { key: 'home.nav.v2.marketing', label: '사업자 마케팅지원', href: '/marketing-support' },
+    { key: 'home.nav.v2.pricing', label: '가격', href: '/#pricing' },
+    { key: 'home.nav.v2.faq', label: 'FAQ', href: '/#faq' },
   ]
 
   return (
     <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-ink-100">
       <div className="container-oz flex items-center justify-between h-16">
-        <a href="#" aria-label="오즈랩페이" className="flex items-center">
+        <a href="/" aria-label="오즈랩페이" className="flex items-center">
           <OzLogo size={28} />
         </a>
 
-        {/* 메뉴 — 태블릿 이상에서 노출 */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* 메뉴 — 데스크톱에서 노출 */}
+        <div className="hidden lg:flex items-center gap-5 xl:gap-7">
           {menuLinks.map((l) => (
             <EditableLink
               key={l.key}
@@ -46,7 +48,7 @@ export function Nav({ blocks, ctas }: Props) {
               fallback={{ label: l.label, href: l.href, target: '_self' }}
               value={pickLinkOrUndef(blocks, l.key)}
               pagePath="/"
-              className="text-[15px] font-semibold text-ink-700 hover:text-naver-green transition-colors"
+              className="whitespace-nowrap text-[14px] xl:text-[15px] font-semibold text-ink-700 hover:text-naver-green transition-colors"
             />
           ))}
         </div>
@@ -70,7 +72,7 @@ export function Nav({ blocks, ctas }: Props) {
           <DynamicCTA
             placement="nav"
             ctas={ctas}
-            fallback={{ label: '지금 신청하기', href: '#apply' }}
+            fallback={{ label: '지금 신청하기', href: '/#apply' }}
             className="btn btn-primary sm"
           />
         </div>

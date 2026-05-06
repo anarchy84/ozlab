@@ -22,18 +22,19 @@ interface Props {
 
 export function Footer({ blocks, ctas }: Props) {
   const serviceLinks = [
-    { key: 'home.footer.service.link1', label: '기능 소개', href: '#features' },
-    { key: 'home.footer.service.link2', label: '리뷰 자동화', href: '#review' },
-    { key: 'home.footer.service.link3', label: 'place+ 마크', href: '#placeplus' },
-    { key: 'home.footer.service.link4', label: '가격 안내', href: '#pricing' },
-    { key: 'home.footer.service.link5', label: '블로그', href: '/blog' },
+    { key: 'home.footer.service.v2.ozlab', label: '오즈랩페이 기능', href: '/#features' },
+    { key: 'home.footer.service.v2.internet', label: '사업자 인터넷', href: '/internet' },
+    { key: 'home.footer.service.v2.tableorder', label: '테이블오더', href: '/business/torder' },
+    { key: 'home.footer.service.v2.cctv', label: 'CCTV', href: '/business/cctv' },
+    { key: 'home.footer.service.v2.marketing', label: '사업자 마케팅지원', href: '/marketing-support' },
+    { key: 'home.footer.service.v2.blog', label: '블로그', href: '/blog' },
   ]
 
   // supportLinks 의 "상담 신청"은 DynamicCTA 로 별도 처리 (어트리뷰션 추적)
   const supportLinks = [
-    { key: 'home.footer.support.link1', label: '1588-0000 (평일 9–18시)', href: 'tel:1588-0000' },
-    { key: 'home.footer.support.link3', label: '자주 묻는 질문', href: '#faq' },
-    { key: 'home.footer.support.link4', label: '이용약관 · 개인정보처리방침', href: '#' },
+    { key: 'home.footer.support.v2.phone', label: '1588-0000 (평일 9–18시)', href: 'tel:1588-0000' },
+    { key: 'home.footer.support.v2.faq', label: '자주 묻는 질문', href: '/#faq' },
+    { key: 'home.footer.support.v2.privacy', label: '이용약관 · 개인정보처리방침', href: '#' },
   ]
 
   return (
