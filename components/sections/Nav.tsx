@@ -77,6 +77,25 @@ export function Nav({ blocks, ctas }: Props) {
           />
         </div>
       </div>
+
+      {/* 모바일 GNB — 메뉴가 사라지지 않도록 상단 가로 스트립으로 노출 */}
+      <div className="lg:hidden border-t border-ink-100 bg-white/95">
+        <div
+          className="container-oz flex h-11 items-center gap-5 overflow-x-auto"
+          aria-label="모바일 주요 메뉴"
+        >
+          {menuLinks.map((l) => (
+            <EditableLink
+              key={`mobile-${l.key}`}
+              blockKey={l.key}
+              fallback={{ label: l.label, href: l.href, target: '_self' }}
+              value={pickLinkOrUndef(blocks, l.key)}
+              pagePath="/"
+              className="shrink-0 whitespace-nowrap text-[13px] font-bold text-ink-700 hover:text-naver-green transition-colors"
+            />
+          ))}
+        </div>
+      </div>
     </nav>
   )
 }
