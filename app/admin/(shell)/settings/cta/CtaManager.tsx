@@ -8,11 +8,23 @@ import { useState, useTransition } from 'react'
 import {
   CTA_PLACEMENTS,
   CTA_STYLES,
+  CTA_TYPES,
   type CtaButton,
   type CtaPerformanceRow,
   type CtaPlacement,
   type CtaStyle,
+  type CtaType,
 } from '@/lib/admin/types'
+import { CtaWizardModal } from './CtaWizardModal'
+
+const CTA_TYPE_SHORT: Record<CtaType, string> = {
+  inline_anchor: '앵커',
+  inline_form: '인라인폼',
+  modal_form: '모달',
+  floating_button: '플로팅',
+  sticky_bar: 'Sticky',
+  toast: '토스트',
+}
 
 const STYLE_LABELS: Record<CtaStyle, string> = {
   primary: '메인 (그린)',
@@ -49,6 +61,8 @@ export function CtaManager({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
+  const [wizardCta, setWizardCta] = useState<CtaButton | null>(null)
+  const [wizardCreate, setWizardCreate] = useState(false)
 
   async function patch<K extends keyof CtaButton>(
     id: number,
@@ -94,13 +108,22 @@ export function CtaManager({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm text-ink-500">총 {ctas.length}개 CTA</span>
-        <button
-          type="button"
-          onClick={() => setShowAdd(true)}
-          className="px-3 py-1.5 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark transition-colors"
-        >
-          + CTA 추가
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAdd(true)}
+            className="px-3 py-1.5 text-sm font-medium border border-ink-700 text-ink-200 rounded hover:bg-ink-800 transition-colors"
+          >
+            + 빠른 추가
+          </button>
+          <button
+            type="button"
+            onClick={() => setWizardCreate(true)}
+            className="px-3 py-1.5 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark transition-colors"
+          >
+            🪄 폼 빌더 마법사
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -115,6 +138,7 @@ export function CtaManager({
             <tr>
               <th className="px-2 py-2 text-left font-semibold w-14">순서</th>
               <th className="px-2 py-2 text-left font-semibold">위치</th>
+              <th className="px-2 py-2 text-left font-semibold">타입</th>
               <th className="px-2 py-2 text-left font-semibold">라벨</th>
               <th className="px-2 py-2 text-left font-semibold">목적지</th>
               <th className="px-2 py-2 text-left font-semibold">UTM 캠페인</th>
@@ -129,7 +153,7 @@ export function CtaManager({
           <tbody>
             {ctas.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-4 py-8 text-center text-ink-500">
+                <td colSpan={12} className="px-4 py-8 text-center text-ink-500">
                   CTA 가 없습니다.
                 </td>
               </tr>
@@ -158,6 +182,19 @@ export function CtaManager({
                       {CTA_PLACEMENTS.map((p) => (
                         <option key={p} value={p}>
                           {PLACEMENT_LABELS[p]}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-2 py-2">
+                    <select
+                      defaultValue={c.cta_type}
+                      onChange={(e) => patch(c.id, 'cta_type', e.target.value as CtaType)}
+                      className="px-1 py-0.5 text-xs bg-ink-900 border border-ink-700 text-ink-100 rounded"
+                    >
+                      {CTA_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {CTA_TYPE_SHORT[t]}
                         </option>
                       ))}
                     </select>
@@ -226,7 +263,14 @@ export function CtaManager({
                       className="w-4 h-4 cursor-pointer"
                     />
                   </td>
-                  <td className="px-2 py-2 text-center">
+                  <td className="px-2 py-2 text-center whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => setWizardCta(c)}
+                      className="text-xs text-naver-neon hover:text-naver-green mr-2"
+                    >
+                      🪄 편집
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(c.id, c.label)}
@@ -249,6 +293,31 @@ export function CtaManager({
           onCreated={(c) => {
             setCtas((s) => [...s, c])
             setShowAdd(false)
+            startTransition(() => router.refresh())
+          }}
+        />
+      )}
+
+      {wizardCreate && (
+        <CtaWizardModal
+          mode="create"
+          onClose={() => setWizardCreate(false)}
+          onSaved={(c) => {
+            setCtas((s) => [...s, c])
+            setWizardCreate(false)
+            startTransition(() => router.refresh())
+          }}
+        />
+      )}
+
+      {wizardCta && (
+        <CtaWizardModal
+          mode="edit"
+          initial={wizardCta}
+          onClose={() => setWizardCta(null)}
+          onSaved={(c) => {
+            setCtas((s) => s.map((x) => (x.id === c.id ? c : x)))
+            setWizardCta(null)
             startTransition(() => router.refresh())
           }}
         />

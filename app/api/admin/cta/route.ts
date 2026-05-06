@@ -3,11 +3,18 @@
 //
 // GET  : 목록 (어드민 진입자 누구나 — 페이지 렌더는 비인증도 가능)
 // POST : 신규 추가 (super_admin)
+//
+// Phase 2B :
+//   cta_type / form_fields / trigger_config / display_config / page_paths 추가 입력
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { guardApi } from '@/lib/admin/auth-helpers'
-import { CTA_PLACEMENTS, CTA_STYLES } from '@/lib/admin/types'
+import {
+  CTA_PLACEMENTS,
+  CTA_STYLES,
+  CTA_TYPES,
+} from '@/lib/admin/types'
 import type { CtaButtonInput } from '@/lib/admin/types'
 
 export const dynamic = 'force-dynamic'
@@ -58,6 +65,12 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     )
   }
+  if (body.cta_type && !CTA_TYPES.includes(body.cta_type)) {
+    return NextResponse.json(
+      { error: `유효하지 않은 cta_type: ${body.cta_type}` },
+      { status: 400 },
+    )
+  }
 
   const supabase = createClient()
   const { data, error } = await supabase
@@ -75,6 +88,12 @@ export async function POST(req: NextRequest) {
       style: body.style ?? 'primary',
       is_active: body.is_active ?? true,
       note: body.note ?? null,
+      // Phase 2B
+      cta_type: body.cta_type ?? 'inline_anchor',
+      form_fields: body.form_fields ?? [],
+      trigger_config: body.trigger_config ?? { type: 'immediate' },
+      display_config: body.display_config ?? {},
+      page_paths: body.page_paths ?? null,
     })
     .select()
     .single()

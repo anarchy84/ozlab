@@ -161,6 +161,63 @@ export type CtaPlacement = (typeof CTA_PLACEMENTS)[number]
 export const CTA_STYLES = ['primary', 'secondary', 'ghost', 'outline', 'floating'] as const
 export type CtaStyle = (typeof CTA_STYLES)[number]
 
+// ─── Phase 2B: CTA 노출 방식 ────────────────────
+export const CTA_TYPES = [
+  'inline_anchor',     // 기존 — a 태그, #apply 스크롤
+  'inline_form',       // 인라인 폼 (페이지 내 위치)
+  'modal_form',        // 클릭 시 모달 폼
+  'floating_button',   // 우하단 떠다니는 둥근 버튼 → 클릭 시 모달
+  'sticky_bar',        // 상단/하단 고정 띠
+  'toast',             // 우하단 슬라이드인 카드
+] as const
+export type CtaType = (typeof CTA_TYPES)[number]
+
+// ─── Phase 2B: 폼 필드 정의 ────────────────────
+export const CTA_FIELD_TYPES = [
+  'text', 'phone', 'email', 'textarea', 'select', 'checkbox',
+] as const
+export type CtaFieldType = (typeof CTA_FIELD_TYPES)[number]
+
+export interface CtaFormField {
+  /** 필드 식별자 — consultations.custom_fields 키 또는 표준 컬럼명 */
+  id: string
+  /** 화면 라벨 */
+  label: string
+  /** 입력 타입 */
+  type: CtaFieldType
+  /** 필수 여부 */
+  required?: boolean
+  /** placeholder */
+  placeholder?: string
+  /** select 옵션 */
+  options?: string[]
+  /** phone 마스크 등 */
+  mask?: string
+}
+
+// ─── Phase 2B: 트리거 설정 ────────────────────
+export type CtaTriggerType = 'immediate' | 'scroll_pct' | 'time_sec' | 'exit_intent'
+
+export interface CtaTriggerConfig {
+  type: CtaTriggerType
+  value?: number   // scroll_pct (0~100) / time_sec (초)
+}
+
+// ─── Phase 2B: 디자인 설정 ────────────────────
+export type CtaPosition =
+  | 'top' | 'bottom'
+  | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  | 'center'
+
+export interface CtaDisplayConfig {
+  title?: string
+  description?: string
+  button_color?: string
+  bg_color?: string
+  position?: CtaPosition
+  show_close?: boolean
+}
+
 export interface CtaButton {
   id: number
   placement: CtaPlacement
@@ -177,6 +234,12 @@ export interface CtaButton {
   note: string | null
   created_at: string
   updated_at: string
+  // Phase 2B 폼 빌더 필드
+  cta_type: CtaType
+  form_fields: CtaFormField[]
+  trigger_config: CtaTriggerConfig
+  display_config: CtaDisplayConfig
+  page_paths: string[] | null
 }
 
 export type CtaButtonInput = Omit<CtaButton, 'id' | 'created_at' | 'updated_at'>

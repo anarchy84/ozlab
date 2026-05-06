@@ -31,6 +31,8 @@ export async function PATCH(
     'placement', 'sort_order', 'label', 'target_href', 'target_blank',
     'utm_source', 'utm_medium', 'utm_campaign', 'utm_content',
     'style', 'is_active', 'note',
+    // Phase 2B
+    'cta_type', 'form_fields', 'trigger_config', 'display_config', 'page_paths',
   ]
   const update: Partial<CtaButtonInput> = {}
   for (const key of allowed) {

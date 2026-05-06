@@ -53,7 +53,16 @@ interface ConsultationInput {
   // 유입 경로 (클라가 보낸 First-touch 우선)
   referer?: string
   landing_page_path?: string
+  // Phase 2B: CTA 폼 빌더에서 추가된 비표준 필드 답변
+  custom_fields?: Record<string, unknown>
+  // Phase 2B: 어느 CTA 에서 제출됐는지 (선택)
+  cta_id?: number
 }
+
+// 표준 컬럼명 — custom_fields 에서 동일 이름이 들어오면 표준 컬럼으로 승격
+const STANDARD_FIELD_IDS = new Set([
+  'name', 'phone', 'store_name', 'industry', 'region', 'message',
+])
 
 // -------------------------------------------------------------
 // 헬퍼 : 길이 트림 + 빈문자열 → null 변환
@@ -160,6 +169,27 @@ export async function POST(req: NextRequest) {
   const referer = clean(body.referer, 500) ?? (headerReferer ? headerReferer.slice(0, 500) : null)
   const landingPagePath = clean(body.landing_page_path, 500)
 
+  // 3-1) Phase 2B: custom_fields 처리
+  //   - 표준 컬럼명(name/phone/...)이 들어오면 표준 컬럼으로 승격 (덮어쓰기는 X — body 우선)
+  //   - 그 외 키는 그대로 jsonb 에 저장
+  const customRaw = body.custom_fields && typeof body.custom_fields === 'object'
+    ? body.custom_fields
+    : {}
+  const customFields: Record<string, unknown> = {}
+  // 표준 필드는 본문에 없을 때만 custom 에서 끌어다 씀
+  const promotedStore = body.store_name ?? (typeof customRaw.store_name === 'string' ? customRaw.store_name : undefined)
+  const promotedIndustry = body.industry ?? (typeof customRaw.industry === 'string' ? customRaw.industry : undefined)
+  const promotedRegion = body.region ?? (typeof customRaw.region === 'string' ? customRaw.region : undefined)
+  const promotedMessage = body.message ?? (typeof customRaw.message === 'string' ? customRaw.message : undefined)
+  for (const [k, v] of Object.entries(customRaw)) {
+    if (STANDARD_FIELD_IDS.has(k)) continue   // 표준 필드는 위에서 흡수
+    if (typeof k !== 'string' || k.length === 0 || k.length > 60) continue
+    if (v === null || v === undefined) continue
+    // 값 길이 제한 — 안전
+    if (typeof v === 'string' && v.length > 2000) continue
+    customFields[k] = v
+  }
+
   // 4) Supabase insert
   //    inferred_channel/keyword/creative/landing_title/referer_domain 은
   //    DB trigger 가 INSERT 시 자동으로 채움 (fill_attribution_inferred)
@@ -172,10 +202,11 @@ export async function POST(req: NextRequest) {
       name,
       phone,
       consent_privacy: true,
-      store_name: clean(body.store_name, 80),
-      industry: clean(body.industry, 40),
-      region: clean(body.region, 40),
-      message: clean(body.message, 2000),
+      store_name: clean(promotedStore, 80),
+      industry: clean(promotedIndustry, 40),
+      region: clean(promotedRegion, 40),
+      message: clean(promotedMessage, 2000),
+      custom_fields: customFields,
       ip_address: ip,
       user_agent: ua ? ua.slice(0, 1000) : null,
       referer,

@@ -72,6 +72,10 @@ export default async function AdminShellLayout({
               <span className="hidden md:inline">오즈랩페이</span>
               <span className="md:hidden">OZ</span>
             </Link>
+            {/*
+              nav 는 overflow-x-auto 라 absolute 드롭다운을 잘라먹는다.
+              → SettingsDropdown 은 nav 외부 sibling 으로 분리.
+            */}
             <nav className="flex min-w-0 items-center gap-3 sm:gap-4 overflow-x-auto text-sm whitespace-nowrap">
               {mainMenu.map((m) => (
                 <Link
@@ -82,7 +86,6 @@ export default async function AdminShellLayout({
                   {m.label}
                 </Link>
               ))}
-              {settingsMenu.length > 0 && <SettingsDropdown items={settingsMenu} />}
               <Link
                 href="/"
                 target="_blank"
@@ -91,6 +94,11 @@ export default async function AdminShellLayout({
                 사이트 ↗
               </Link>
             </nav>
+            {settingsMenu.length > 0 && (
+              <div className="shrink-0">
+                <SettingsDropdown items={settingsMenu} />
+              </div>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3 text-sm whitespace-nowrap">
             <AdminThemeToggle />

@@ -33,6 +33,7 @@ import { FAQ } from '@/components/sections/FAQ'
 import { ApplyForm } from '@/components/sections/ApplyForm'
 import { Footer } from '@/components/sections/Footer'
 import { FloatingCTA } from '@/components/sections/FloatingCTA'
+import { CtaTriggerHost } from '@/components/cta/CtaTriggerHost'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -40,6 +41,8 @@ interface Props {
 }
 
 export default function HomeClient({ blocks, ctasByPlacement }: Props) {
+  // 자동 트리거 CTA (modal_form/floating_button/sticky_bar/toast) 모두 평탄화
+  const allCtas = Object.values(ctasByPlacement).flat().filter(Boolean) as CtaButton[]
   return (
     <>
       <PromoStrip blocks={blocks} />
@@ -58,6 +61,8 @@ export default function HomeClient({ blocks, ctasByPlacement }: Props) {
       <ApplyForm blocks={blocks} />
       <Footer blocks={blocks} ctas={ctasByPlacement.footer} />
       <FloatingCTA blocks={blocks} ctas={ctasByPlacement.floating} />
+      {/* Phase 2B: cta_type 자동 트리거 (modal_form / floating_button / sticky_bar / toast) */}
+      <CtaTriggerHost ctas={allCtas} pathname="/" />
     </>
   )
 }
