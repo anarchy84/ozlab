@@ -204,3 +204,85 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(mediaRecord, { status: 201 })
 }
+
+// ─── DELETE : 전체 비우기 (super_admin only) ───────
+//
+// 미디어 라이브러리의 모든 row + Storage 파일 일괄 삭제.
+// UI 에서 강한 confirm 받은 뒤 호출해야 함.
+// 확인 키워드 'CONFIRM_DELETE_ALL' 을 query 또는 body 에 넣어야만 동작.
+//
+// public URL → storage path 추출 헬퍼 (동일 로직, /[id] route 와 일치)
+function publicUrlToStoragePath(url: string | null | undefined): string | null {
+  if (!url) return null
+  const marker = `/object/public/${BUCKET}/`
+  const idx = url.indexOf(marker)
+  if (idx < 0) return null
+  return decodeURIComponent(url.slice(idx + marker.length))
+}
+
+export async function DELETE(req: NextRequest) {
+  const guard = await guardApi(['super_admin'])
+  if (!guard.ok) return guard.response
+
+  // 안전장치 — confirm 토큰 검증
+  const url = new URL(req.url)
+  const confirmToken =
+    url.searchParams.get('confirm') ||
+    (await req.json().catch(() => ({})))?.confirm
+  if (confirmToken !== 'CONFIRM_DELETE_ALL') {
+    return NextResponse.json(
+      { error: '전체 비움은 confirm=CONFIRM_DELETE_ALL 토큰이 필요합니다.' },
+      { status: 400 },
+    )
+  }
+
+  const { admin, response } = adminClientOrResponse()
+  if (!admin) return response
+
+  // 1) 모든 row 조회 (path 추출용)
+  const { data: rows, error: selErr } = await admin
+    .from('media')
+    .select('id, storage_path, webp_path')
+  if (selErr) {
+    return NextResponse.json({ error: selErr.message }, { status: 500 })
+  }
+  if (!rows || rows.length === 0) {
+    return NextResponse.json({ success: true, deletedRows: 0, deletedFiles: 0 })
+  }
+
+  // 2) Storage 파일 모두 수집
+  const paths: string[] = []
+  for (const r of rows) {
+    const o = publicUrlToStoragePath(r.storage_path)
+    const w = publicUrlToStoragePath(r.webp_path)
+    if (o) paths.push(o)
+    if (w) paths.push(w)
+  }
+
+  // 3) Storage 일괄 삭제 (best-effort, 100개 단위 chunk)
+  let removedFiles = 0
+  for (let i = 0; i < paths.length; i += 100) {
+    const chunk = paths.slice(i, i + 100)
+    const { error: rmErr } = await admin.storage.from(BUCKET).remove(chunk)
+    if (rmErr) {
+      console.warn('[media DELETE all] storage remove chunk failed', rmErr.message)
+    } else {
+      removedFiles += chunk.length
+    }
+  }
+
+  // 4) DB row 일괄 삭제
+  const { error: delErr } = await admin
+    .from('media')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000') // truthy WHERE 필요
+  if (delErr) {
+    return NextResponse.json({ error: delErr.message }, { status: 500 })
+  }
+
+  return NextResponse.json({
+    success: true,
+    deletedRows: rows.length,
+    deletedFiles: removedFiles,
+  })
+}

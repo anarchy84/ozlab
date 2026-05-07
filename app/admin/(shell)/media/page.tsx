@@ -12,6 +12,7 @@ export default async function AdminMediaPage() {
     profile.role === 'super_admin' ||
     profile.role === 'admin' ||
     profile.role === 'marketer'
+  const isSuperAdmin = profile.role === 'super_admin'
 
-  return <MediaLibrary canWrite={canWrite} />
+  return <MediaLibrary canWrite={canWrite} isSuperAdmin={isSuperAdmin} />
 }
