@@ -8,20 +8,21 @@ import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { EditableText } from '@/components/editable/EditableText'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord, pickTextOrUndef } from '@/lib/content-blocks'
+import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbJsonLd, collectionPageJsonLd, publicMetadata } from '@/lib/seo'
 
 export const revalidate = 0
 
-export const metadata: Metadata = {
+const PAGE_DESCRIPTION =
+  '자영업자·매장 운영자를 위한 결제·POS·플레이스 광고·리뷰 자동화 가이드. 오즈랩페이가 직접 정리한 실전 노하우.'
+
+export const metadata: Metadata = publicMetadata({
   title: '블로그',
-  description:
-    '자영업자·매장 운영자를 위한 결제·POS·플레이스 광고·리뷰 자동화 가이드. 오즈랩페이가 직접 정리한 실전 노하우.',
-  alternates: { canonical: 'https://ozlabpay.kr/blog' },
-  openGraph: {
-    title: '오즈랩페이 블로그 — 자영업 매장 운영 가이드',
-    description: '결제·POS·플레이스·리뷰 자동화 실전 가이드.',
-    type: 'website',
-  },
-}
+  description: PAGE_DESCRIPTION,
+  path: '/blog',
+  keywords: ['오즈랩페이 블로그', '자영업자 POS', '플레이스 광고', '리뷰 자동화'],
+})
 
 const FORMAT_KST = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
@@ -32,12 +33,27 @@ const FORMAT_KST = new Intl.DateTimeFormat('ko-KR', {
 
 export default async function BlogListPage() {
   const [posts, blocksMap] = await Promise.all([
-    listPublishedPosts(),
+    listPublishedPosts('blog'),
     getBlocksForPage('/blog'),
   ])
   const blocks = blocksMapToRecord(blocksMap)
 
   return (
+    <PublicPageFrame>
+    <JsonLd
+      data={[
+        breadcrumbJsonLd([
+          { name: '홈', path: '/' },
+          { name: '블로그', path: '/blog' },
+        ]),
+        collectionPageJsonLd({
+          name: '오즈랩페이 블로그',
+          description: PAGE_DESCRIPTION,
+          path: '/blog',
+          posts,
+        }),
+      ]}
+    />
     <BlocksProvider blocks={blocks}>
     <div className="bg-white text-ink-900 min-h-screen">
       <header className="bg-surface-dark text-white py-16">
@@ -148,5 +164,6 @@ export default async function BlogListPage() {
       </main>
     </div>
     </BlocksProvider>
+    </PublicPageFrame>
   )
 }

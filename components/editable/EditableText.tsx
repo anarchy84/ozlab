@@ -27,7 +27,7 @@ import React from 'react'
 import { EditOverlay } from './EditOverlay'
 import type { TextValue } from '@/lib/content-blocks'
 
-type TextTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div'
+type TextTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div' | 'dt' | 'dd'
 
 interface EditableTextProps {
   /** DB block_key (도트 표기법) */
@@ -46,7 +46,7 @@ interface EditableTextProps {
 
 // block-level 태그 목록 — 이들은 래퍼를 div 로 감싸야 원래 레이아웃이 유지됨
 // span 안에 block 을 넣으면 mt·mx·max-w 등 block 레이아웃이 깨짐
-const BLOCK_TAGS: readonly TextTag[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div'] as const
+const BLOCK_TAGS: readonly TextTag[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'dt', 'dd'] as const
 
 export function EditableText({
   blockKey,

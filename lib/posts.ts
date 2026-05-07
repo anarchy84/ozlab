@@ -25,6 +25,8 @@ export interface ContentPost {
   updated_at: string
 }
 
+export type ContentPostCategory = ContentPost['category']
+
 const CATEGORY_LABELS: Record<ContentPost['category'], string> = {
   blog: '블로그',
   news: '뉴스',
@@ -37,7 +39,9 @@ export function getCategoryLabel(c: ContentPost['category']): string {
   return CATEGORY_LABELS[c] ?? c
 }
 
-export async function listPublishedPosts(category?: string): Promise<ContentPost[]> {
+export async function listPublishedPosts(
+  category?: ContentPostCategory | ContentPostCategory[]
+): Promise<ContentPost[]> {
   const supabase = createClient()
   let q = supabase
     .from('content_posts')
@@ -46,7 +50,8 @@ export async function listPublishedPosts(category?: string): Promise<ContentPost
     .order('is_pinned', { ascending: false })
     .order('published_at', { ascending: false })
     .limit(50)
-  if (category) q = q.eq('category', category)
+  if (Array.isArray(category)) q = q.in('category', category)
+  else if (category) q = q.eq('category', category)
   const { data, error } = await q
   if (error) {
     console.error('[listPublishedPosts]', error)
@@ -67,11 +72,29 @@ export async function getPostBySlug(slug: string): Promise<ContentPost | null> {
   return (data as ContentPost | null) ?? null
 }
 
-export async function getAllPostSlugs(): Promise<string[]> {
+export async function getPostBySlugAndCategory(
+  slug: string,
+  category: ContentPostCategory
+): Promise<ContentPost | null> {
   const supabase = createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
+    .from('content_posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('category', category)
+    .eq('is_published', true)
+    .single()
+  if (error) return null
+  return (data as ContentPost | null) ?? null
+}
+
+export async function getAllPostSlugs(category?: ContentPostCategory): Promise<string[]> {
+  const supabase = createClient()
+  let q = supabase
     .from('content_posts')
     .select('slug')
     .eq('is_published', true)
+  if (category) q = q.eq('category', category)
+  const { data } = await q
   return (data ?? []).map((r: { slug: string }) => r.slug)
 }

@@ -6,6 +6,8 @@ import { EditorModal } from '@/components/editable/EditorModal'
 // (EditOverlay 가 수십 개 깔릴 때 NavigatorLock 경쟁 방지)
 import { AdminGuardProvider } from '@/components/editable/AdminGuardProvider'
 import { AttributionTracker } from '@/components/AttributionTracker'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { organizationJsonLd, SITE_DESCRIPTION, SITE_URL, websiteJsonLd } from '@/lib/seo'
 import './globals.css'
 
 // ─────────────────────────────────────────────
@@ -14,13 +16,12 @@ import './globals.css'
 // - OG 이미지·favicon 은 P6 단계에서 제작
 // ─────────────────────────────────────────────
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ozlabpay.kr'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: '오즈랩페이 | 네이버페이 연동 POS · 카드 단말기',
     template: '%s | 오즈랩페이',
   },
-  description:
-    '손님이 바글바글한 가게는 모두 오즈랩페이를 씁니다. POS + 카드 단말기 0원, 네이버페이 연동, 리뷰 자동화까지 한 번에.',
+  description: SITE_DESCRIPTION,
   keywords: [
     '네이버페이 단말기',
     'POS 단말기',
@@ -30,16 +31,32 @@ export const metadata: Metadata = {
     '자영업자 POS',
     '매장 결제',
     '소상공인 단말기',
+    '플레이스 마케팅',
+    'N커넥트 단말기',
   ],
+  applicationName: '오즈랩페이',
   authors: [{ name: '오즈랩페이' }],
   creator: '오즈랩페이',
+  publisher: '오즈랩페이',
+  category: 'business',
+  alternates: {
+    canonical: '/',
+    languages: {
+      'ko-KR': '/',
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
     siteName: '오즈랩페이',
     title: '오즈랩페이 | 네이버페이 연동 POS · 카드 단말기',
-    description:
-      'POS + 카드 단말기 0원, 네이버페이 연동, 리뷰 자동화까지 한 번에.',
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '오즈랩페이 | 네이버페이 연동 POS · 카드 단말기',
+    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,
@@ -49,6 +66,15 @@ export const metadata: Metadata = {
       follow: true,
       'max-image-preview': 'large',
       'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: {
+      'naver-site-verification': process.env.NAVER_SITE_VERIFICATION
+        ? [process.env.NAVER_SITE_VERIFICATION]
+        : [],
     },
   },
 }
@@ -78,6 +104,7 @@ export default function RootLayout({
         */}
         <AdminGuardProvider>
           <EditorProvider>
+            <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
             {/* 사이트 첫 진입 시 First-touch 어트리뷰션 30일 보존 */}
             <AttributionTracker />
             <main className="flex-1">{children}</main>

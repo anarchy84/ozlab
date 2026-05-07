@@ -283,7 +283,7 @@ export function MarketingSupportLanding() {
                 <div>
                   <dt className="text-sm font-bold text-ink-400">지원대상</dt>
                   <EditableText
-                    as="p"
+                    as="dd"
                     blockKey={k('summary.target')}
                     fallback="이벤트 기간 내 N커넥트페이 단말기 신청, 교체하신 모든 고객님들"
                     value={pickTextOrUndef(blocks, k('summary.target'))}
@@ -294,7 +294,7 @@ export function MarketingSupportLanding() {
                 <div>
                   <dt className="text-sm font-bold text-ink-400">지원기간</dt>
                   <EditableText
-                    as="p"
+                    as="dd"
                     blockKey={k('summary.period')}
                     fallback="5월 한 달간"
                     value={pickTextOrUndef(blocks, k('summary.period'))}
@@ -305,7 +305,7 @@ export function MarketingSupportLanding() {
                 <div>
                   <dt className="text-sm font-bold text-ink-400">지원내용</dt>
                   <EditableText
-                    as="p"
+                    as="dd"
                     blockKey={k('summary.content')}
                     fallback="플레이스 최적화 세팅 + 유료광고비 + 블로그리뷰 10건"
                     value={pickTextOrUndef(blocks, k('summary.content'))}

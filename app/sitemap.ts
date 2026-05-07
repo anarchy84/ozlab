@@ -5,12 +5,16 @@
 //   - 홈 / 블로그 목록 / 블로그 글 (모든 published)
 // ─────────────────────────────────────────────
 import type { MetadataRoute } from 'next'
-import { getAllPostSlugs } from '@/lib/posts'
+import { listPublishedPosts, type ContentPostCategory } from '@/lib/posts'
+import { SITE_URL } from '@/lib/seo'
 
-const SITE_URL = 'https://ozlabpay.kr'
+const TIP_CATEGORIES: ContentPostCategory[] = ['guide', 'case_study', 'news', 'faq']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getAllPostSlugs()
+  const [blogPosts, tipPosts] = await Promise.all([
+    listPublishedPosts('blog'),
+    listPublishedPosts(TIP_CATEGORIES),
+  ])
   const now = new Date()
 
   return [
@@ -56,17 +60,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    ...slugs.map((slug) => ({
-      url: `${SITE_URL}/blog/${slug}`,
-      lastModified: now,
+    ...blogPosts.map((post) => ({
+      url: `${SITE_URL}/blog/${post.slug}`,
+      lastModified: post.updated_at ? new Date(post.updated_at) : now,
       changeFrequency: 'monthly' as const,
-      priority: 0.7,
+      priority: post.is_pinned ? 0.75 : 0.7,
     })),
-    ...slugs.map((slug) => ({
-      url: `${SITE_URL}/tips/${slug}`,
-      lastModified: now,
+    ...tipPosts.map((post) => ({
+      url: `${SITE_URL}/tips/${post.slug}`,
+      lastModified: post.updated_at ? new Date(post.updated_at) : now,
       changeFrequency: 'monthly' as const,
-      priority: 0.7,
+      priority: post.is_pinned ? 0.75 : 0.7,
     })),
   ]
 }

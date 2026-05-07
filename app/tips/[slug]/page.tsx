@@ -1,9 +1,11 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { getCategoryLabel, getPostBySlug, listPublishedPosts } from '@/lib/posts'
 import { renderMarkdown } from '@/lib/markdown'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, postCanonicalPath } from '@/lib/seo'
 
 export const revalidate = 600
 
@@ -14,7 +16,8 @@ interface Params {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const post = await getPostBySlug(params.slug)
   if (!post) return { title: '글을 찾을 수 없습니다' }
-  const url = `https://ozlabpay.kr/tips/${post.slug}`
+  const canonicalPath = postCanonicalPath(post)
+  const url = absoluteUrl(canonicalPath)
   return {
     title: post.meta_title ?? post.title,
     description: post.meta_description ?? post.excerpt ?? undefined,
@@ -28,7 +31,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       modifiedTime: post.updated_at,
       authors: [post.author_name],
       tags: post.tags,
-      ...(post.cover_image && { images: [post.cover_image] }),
+      ...(post.cover_image && { images: [absoluteUrl(post.cover_image)] }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.meta_title ?? post.title,
+      description: post.meta_description ?? post.excerpt ?? undefined,
+      ...(post.cover_image && { images: [absoluteUrl(post.cover_image)] }),
     },
   }
 }
@@ -57,6 +66,7 @@ function ArrowIcon({ size = 16 }: { size?: number }) {
 export default async function TipPostPage({ params }: Params) {
   const post = await getPostBySlug(params.slug)
   if (!post) notFound()
+  if (post.category === 'blog') permanentRedirect(postCanonicalPath(post))
 
   const allInCategory = await listPublishedPosts(post.category)
   const related = allInCategory.filter((p) => p.id !== post.id).slice(0, 3)
@@ -64,29 +74,18 @@ export default async function TipPostPage({ params }: Params) {
     ? post.body_html
     : renderMarkdown(post.body_md)
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.meta_description ?? post.excerpt,
-    author: { '@type': 'Organization', name: post.author_name },
-    publisher: {
-      '@type': 'Organization',
-      name: '오즈랩페이',
-      url: 'https://ozlabpay.kr',
-    },
-    datePublished: post.published_at,
-    dateModified: post.updated_at,
-    mainEntityOfPage: `https://ozlabpay.kr/tips/${post.slug}`,
-    keywords: post.tags.join(', '),
-  }
-
   return (
     <PublicPageFrame>
       <div className="bg-white text-ink-900">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        <JsonLd
+          data={[
+            breadcrumbJsonLd([
+              { name: '홈', path: '/' },
+              { name: '꿀팁', path: '/tips' },
+              { name: post.title, path: `/tips/${post.slug}` },
+            ]),
+            articleJsonLd(post),
+          ]}
         />
 
         <header className="bg-surface-dark py-12 text-white">
@@ -157,7 +156,7 @@ export default async function TipPostPage({ params }: Params) {
                     key={item.id}
                     className="rounded-lg border border-ink-150 p-4 transition-colors hover:border-naver-green/50"
                   >
-                    <Link href={`/tips/${item.slug}`}>
+                    <Link href={postCanonicalPath(item)}>
                       <span className="text-xs text-ink-500">
                         {getCategoryLabel(item.category)}
                       </span>

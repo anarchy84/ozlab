@@ -2,10 +2,13 @@
 // /blog/[slug] — 블로그 상세 (SSR + 메타 동적 + JSON-LD)
 // ─────────────────────────────────────────────
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getPostBySlug, listPublishedPosts, getCategoryLabel } from '@/lib/posts'
 import { renderMarkdown } from '@/lib/markdown'
+import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, postCanonicalPath } from '@/lib/seo'
 
 export const revalidate = 600
 
@@ -16,7 +19,8 @@ interface Params {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const post = await getPostBySlug(params.slug)
   if (!post) return { title: '글을 찾을 수 없습니다' }
-  const url = `https://ozlabpay.kr/blog/${post.slug}`
+  const canonicalPath = postCanonicalPath(post)
+  const url = absoluteUrl(canonicalPath)
   return {
     title: post.meta_title ?? post.title,
     description: post.meta_description ?? post.excerpt ?? undefined,
@@ -30,7 +34,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       modifiedTime: post.updated_at,
       authors: [post.author_name],
       tags: post.tags,
-      ...(post.cover_image && { images: [post.cover_image] }),
+      ...(post.cover_image && { images: [absoluteUrl(post.cover_image)] }),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.meta_title ?? post.title,
+      description: post.meta_description ?? post.excerpt ?? undefined,
+      ...(post.cover_image && { images: [absoluteUrl(post.cover_image)] }),
     },
   }
 }
@@ -45,6 +55,7 @@ const FORMAT_KST = new Intl.DateTimeFormat('ko-KR', {
 export default async function BlogPostPage({ params }: Params) {
   const post = await getPostBySlug(params.slug)
   if (!post) notFound()
+  if (post.category !== 'blog') permanentRedirect(postCanonicalPath(post))
 
   // 관련 글 — 같은 카테고리 최신 3건 (현재 글 제외)
   const allInCategory = await listPublishedPosts(post.category)
@@ -55,29 +66,18 @@ export default async function BlogPostPage({ params }: Params) {
     ? post.body_html
     : renderMarkdown(post.body_md)
 
-  // JSON-LD Article 구조화 데이터 (구글 리치 결과)
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.meta_description ?? post.excerpt,
-    author: { '@type': 'Organization', name: post.author_name },
-    publisher: {
-      '@type': 'Organization',
-      name: '오즈랩페이',
-      url: 'https://ozlabpay.kr',
-    },
-    datePublished: post.published_at,
-    dateModified: post.updated_at,
-    mainEntityOfPage: `https://ozlabpay.kr/blog/${post.slug}`,
-    keywords: post.tags.join(', '),
-  }
-
   return (
+    <PublicPageFrame>
     <div className="bg-white text-ink-900 min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: '홈', path: '/' },
+            { name: '블로그', path: '/blog' },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+          articleJsonLd(post),
+        ]}
       />
 
       <header className="bg-surface-dark text-white py-12">
@@ -170,5 +170,6 @@ export default async function BlogPostPage({ params }: Params) {
         )}
       </main>
     </div>
+    </PublicPageFrame>
   )
 }

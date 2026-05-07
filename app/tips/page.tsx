@@ -5,21 +5,26 @@ import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { EditableText } from '@/components/editable/EditableText'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord, pickTextOrUndef } from '@/lib/content-blocks'
-import { getCategoryLabel, listPublishedPosts, type ContentPost } from '@/lib/posts'
+import {
+  getCategoryLabel,
+  listPublishedPosts,
+  type ContentPost,
+  type ContentPostCategory,
+} from '@/lib/posts'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbJsonLd, collectionPageJsonLd, postCanonicalPath, publicMetadata } from '@/lib/seo'
 
 export const revalidate = 0
 
-export const metadata: Metadata = {
+const PAGE_DESCRIPTION =
+  '자영업자와 매장 운영자를 위한 오즈랩페이 꿀팁 게시판. POS, 카드 단말기, 리뷰 자동화, 플레이스 마케팅 실전 가이드를 확인하세요.'
+
+export const metadata: Metadata = publicMetadata({
   title: '꿀팁',
-  description:
-    '자영업자와 매장 운영자를 위한 오즈랩페이 꿀팁 게시판. POS, 카드 단말기, 리뷰 자동화, 플레이스 마케팅 실전 가이드를 확인하세요.',
-  alternates: { canonical: 'https://ozlabpay.kr/tips' },
-  openGraph: {
-    title: '오즈랩페이 꿀팁 — 매장 운영 실전 가이드',
-    description: 'POS·리뷰·플레이스·매장 마케팅 운영 팁을 한곳에 모았습니다.',
-    type: 'website',
-  },
-}
+  description: PAGE_DESCRIPTION,
+  path: '/tips',
+  keywords: ['자영업자 꿀팁', 'POS 가이드', '카드 단말기', '리뷰 자동화', '플레이스 마케팅'],
+})
 
 const FORMAT_KST = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
@@ -28,10 +33,11 @@ const FORMAT_KST = new Intl.DateTimeFormat('ko-KR', {
   day: '2-digit',
 })
 
-const CATEGORY_FILTERS: Array<{ key: 'all' | ContentPost['category']; label: string }> = [
+const TIP_CATEGORIES: ContentPostCategory[] = ['guide', 'case_study', 'news', 'faq']
+
+const CATEGORY_FILTERS: Array<{ key: 'all' | ContentPostCategory; label: string }> = [
   { key: 'all', label: '전체' },
   { key: 'guide', label: '가이드' },
-  { key: 'blog', label: '블로그' },
   { key: 'case_study', label: '사례' },
   { key: 'news', label: '뉴스' },
   { key: 'faq', label: 'FAQ' },
@@ -42,7 +48,7 @@ function estimateReadMin(post: ContentPost): number {
   return Math.max(2, Math.ceil(source.replace(/<[^>]*>/g, '').length / 220))
 }
 
-function isKnownCategory(value: string | undefined): value is ContentPost['category'] {
+function isKnownCategory(value: string | undefined): value is ContentPostCategory {
   return CATEGORY_FILTERS.some((item) => item.key === value && item.key !== 'all')
 }
 
@@ -78,7 +84,7 @@ export default async function TipsPage({
     ? searchParams?.category
     : 'all'
   const [posts, blocksMap] = await Promise.all([
-    listPublishedPosts(activeCategory === 'all' ? undefined : activeCategory),
+    listPublishedPosts(activeCategory === 'all' ? TIP_CATEGORIES : activeCategory),
     getBlocksForPage('/tips'),
   ])
   const blocks = blocksMapToRecord(blocksMap)
@@ -87,6 +93,20 @@ export default async function TipsPage({
 
   return (
     <PublicPageFrame>
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: '홈', path: '/' },
+            { name: '꿀팁', path: '/tips' },
+          ]),
+          collectionPageJsonLd({
+            name: '오즈랩페이 꿀팁',
+            description: PAGE_DESCRIPTION,
+            path: '/tips',
+            posts,
+          }),
+        ]}
+      />
       <BlocksProvider blocks={blocks}>
       <div className="bg-white text-ink-900">
         <section className="relative overflow-hidden bg-surface-dark py-section-tight text-white">
@@ -177,7 +197,7 @@ export default async function TipsPage({
               <>
                 {featured && (
                   <Link
-                    href={`/tips/${featured.slug}`}
+                    href={postCanonicalPath(featured)}
                     className="group grid overflow-hidden rounded-xl border border-ink-150 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-naver-green/40 hover:shadow-md lg:grid-cols-[1fr_0.86fr]"
                   >
                     <div className="p-7 md:p-10">
@@ -238,7 +258,7 @@ export default async function TipsPage({
                   {rest.map((post) => (
                     <Link
                       key={post.id}
-                      href={`/tips/${post.slug}`}
+                      href={postCanonicalPath(post)}
                       className="group flex min-h-[260px] flex-col rounded-lg border border-ink-150 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-naver-green/40 hover:shadow-md"
                     >
                       <div className="mb-5 flex items-center justify-between gap-3">

@@ -28,6 +28,40 @@ const nextConfig = {
   // 디자인 레퍼런스 폴더는 빌드에서 완전히 제외
   // (Next.js 는 기본적으로 _ prefix 를 제외하지만 명시적으로 처리)
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+
+  async redirects() {
+    return [
+      { source: '/business/internet', destination: '/internet', permanent: true },
+      { source: '/internet-business', destination: '/internet', permanent: true },
+      { source: '/tableorder', destination: '/business/torder', permanent: true },
+      { source: '/table-order', destination: '/business/torder', permanent: true },
+      { source: '/business/table-order', destination: '/business/torder', permanent: true },
+      { source: '/cctv', destination: '/business/cctv', permanent: true },
+      { source: '/business/marketing', destination: '/marketing-support', permanent: true },
+      { source: '/marketing', destination: '/marketing-support', permanent: true },
+      { source: '/marketing-support-event', destination: '/marketing-support', permanent: true },
+    ]
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/admin/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
+      },
+      {
+        source: '/api/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig
