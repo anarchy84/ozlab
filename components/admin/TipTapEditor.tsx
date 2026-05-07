@@ -1,16 +1,22 @@
 'use client'
 
 // ─────────────────────────────────────────────
-// TipTap 리치 에디터 (이미지 업로드 → /api/admin/media)
-// 우리편(wooripen-web) TipTapEditor.tsx 패턴 그대로 + ozlab 다크 테마 적용
+// TipTapEditor — 본문 WYSIWYG (이미지·링크·정렬·코드블록)
+//
+// 우리편 admin-editor/TipTapEditor.tsx (commit b9dc13f) 이식.
+//   - chain().insertContent() 로 schema-safe 이미지 삽입 (drag/paste/모달 일관)
+//   - editorRef 패턴 (editorProps 클로저 stale 회피)
+//   - autoSelectOnUpload : 모달에서 업로드 즉시 본문 삽입+닫힘
+//   - TextAlign : paragraph/heading 좌·중앙·우 정렬 (style attr)
 // ─────────────────────────────────────────────
 
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useCallback, useState } from 'react'
+import TextAlign from '@tiptap/extension-text-align'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import MediaLibraryPicker, { type MediaSelection } from '@/components/admin/MediaLibraryPicker'
 
 interface TipTapEditorProps {
@@ -19,12 +25,37 @@ interface TipTapEditorProps {
   placeholder?: string
 }
 
-export default function TipTapEditor({
-  content,
-  onChange,
-  placeholder = '본문을 작성하세요...',
-}: TipTapEditorProps) {
+// ── 본문 직접 업로드 헬퍼 ────────────────────────────────
+// 클립보드/드래그한 File 을 /api/admin/media 에 보내서 URL 받기
+async function uploadImageFile(file: File): Promise<string | null> {
+  if (!file.type.startsWith('image/')) return null
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('alt_text', file.name.replace(/\.[^/.]+$/, ''))
+  formData.append('preset', 'content')   // 본문용 — max 1600 종횡비 유지
+
+  try {
+    const res = await fetch('/api/admin/media', { method: 'POST', body: formData })
+    if (!res.ok) {
+      console.error('[TipTap upload]', await res.text())
+      return null
+    }
+    const data = await res.json()
+    // webp_path 우선, 없으면 storage_path
+    return (data.webp_path as string) || (data.storage_path as string) || null
+  } catch (err) {
+    console.error('[TipTap upload]', err)
+    return null
+  }
+}
+
+export default function TipTapEditor({ content, onChange, placeholder = '내용을 입력하세요...' }: TipTapEditorProps) {
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
+  // 본문 drop/paste 업로드 진행 상태
+  const [uploadingInline, setUploadingInline] = useState(false)
+  // editorProps 안에서 클로저로 직접 editor 변수를 못 잡으므로 ref 로 전달.
+  // schema-safe 한 chain().insertContent() 호출에 필요.
+  const editorRef = useRef<Editor | null>(null)
 
   const editor = useEditor({
     extensions: [
@@ -44,9 +75,16 @@ export default function TipTapEditor({
       }),
       Link.configure({
         openOnClick: false,
-        HTMLAttributes: { class: 'text-naver-neon underline' },
+        HTMLAttributes: { class: 'text-blue-400 underline' },
       }),
       Placeholder.configure({ placeholder }),
+      // 정렬 — paragraph/heading 에 text-align style 박음.
+      // 게시물 페이지 prose CSS 가 [&_p[style*='text-align:_center']] 등으로 매칭해서 적용.
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+        defaultAlignment: 'left',
+      }),
     ],
     content,
     onUpdate: ({ editor: e }) => {
@@ -55,21 +93,103 @@ export default function TipTapEditor({
     shouldRerenderOnTransaction: true,
     editorProps: {
       attributes: {
+        // prose : 라이트모드 기본 텍스트 / dark:prose-invert : 다크모드 흰색 계열
+        // tailwindcss/typography 플러그인이 색상·간격·줄높이 자동 처리
         class:
-          'prose prose-invert prose-sm md:prose-base max-w-none min-h-[400px] px-4 py-3 focus:outline-none',
+          'prose dark:prose-invert prose-sm max-w-none min-h-[300px] px-4 py-3 focus:outline-none',
+      },
+      // 본문에 이미지 끌어다 놓으면 자동 업로드 + 삽입
+      // ⚠️ view.state.tr.insert(pos, node) 직접 조작은 schema 위반(paragraph 안에 block image)
+      //    상황에서 노드가 무시될 수 있음 → editor.chain().insertContent() 로 schema-safe 처리.
+      handleDrop(view, event, _slice, moved) {
+        if (moved) return false
+        const dt = (event as DragEvent).dataTransfer
+        if (!dt || !dt.files || dt.files.length === 0) return false
+        const imageFiles = Array.from(dt.files).filter((f) => f.type.startsWith('image/'))
+        if (imageFiles.length === 0) return false
+        event.preventDefault()
+        const coords = view.posAtCoords({ left: (event as DragEvent).clientX, top: (event as DragEvent).clientY })
+        const dropPos = coords?.pos ?? view.state.selection.from
+        ;(async () => {
+          setUploadingInline(true)
+          const ed = editorRef.current
+          if (ed) {
+            // 드롭 위치에 selection 박고 그 자리부터 순차 삽입
+            ed.commands.setTextSelection(dropPos)
+            for (const file of imageFiles) {
+              const url = await uploadImageFile(file)
+              if (url) {
+                ed.chain()
+                  .focus()
+                  .insertContent({
+                    type: 'image',
+                    attrs: { src: url, alt: file.name },
+                  })
+                  .run()
+              }
+            }
+          }
+          setUploadingInline(false)
+        })()
+        return true
+      },
+      // 클립보드 이미지(스크린샷·복사된 이미지) 붙여넣기 — schema-safe insertContent 사용
+      handlePaste(_view, event) {
+        const items = event.clipboardData?.items
+        if (!items) return false
+        const imageFiles: File[] = []
+        for (const item of Array.from(items)) {
+          if (item.kind === 'file' && item.type.startsWith('image/')) {
+            const file = item.getAsFile()
+            if (file) imageFiles.push(file)
+          }
+        }
+        if (imageFiles.length === 0) return false
+        event.preventDefault()
+        ;(async () => {
+          setUploadingInline(true)
+          const ed = editorRef.current
+          if (ed) {
+            for (const file of imageFiles) {
+              const url = await uploadImageFile(file)
+              if (url) {
+                ed.chain()
+                  .focus()
+                  .insertContent({
+                    type: 'image',
+                    attrs: { src: url, alt: file.name },
+                  })
+                  .run()
+              }
+            }
+          }
+          setUploadingInline(false)
+        })()
+        return true
       },
     },
-    immediatelyRender: false, // SSR 호환
   })
 
-  const addImage = useCallback(
-    (selection: MediaSelection) => {
-      if (!editor) return
+  // editor 인스턴스를 ref 에도 저장 — editorProps 핸들러에서 사용.
+  // (useEditor 의 editorProps 는 정의 시점 클로저라 editor 변수를 직접 못 잡음)
+  useEffect(() => {
+    editorRef.current = editor
+  }, [editor])
 
-      editor.chain().focus().setImage({ src: selection.url, alt: selection.altText }).run()
-    },
-    [editor]
-  )
+  // 모달에서 선택/업로드한 이미지 → 본문 삽입.
+  // setImage 가 아닌 insertContent 사용 — drag/paste 와 동일 경로 (schema-safe)
+  const addImage = useCallback((selection: MediaSelection) => {
+    if (!editor) return
+
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'image',
+        attrs: { src: selection.url, alt: selection.altText },
+      })
+      .run()
+  }, [editor])
 
   const handleImageClick = () => setMediaPickerOpen(true)
 
@@ -92,7 +212,7 @@ export default function TipTapEditor({
 
   const addLink = useCallback(() => {
     if (!editor) return
-    const url = window.prompt('URL을 입력하세요 (외부는 https://, 내부는 /로 시작)')
+    const url = window.prompt('URL을 입력하세요')
     if (url) {
       editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     }
@@ -101,9 +221,8 @@ export default function TipTapEditor({
   if (!editor) return null
 
   return (
-    <div className="relative border border-ink-700 rounded-lg bg-ink-900">
-      {/* 툴바 */}
-      <div className="sticky top-14 z-30 isolate flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-ink-700 bg-ink-800 rounded-t-lg shadow-sm">
+    <div className="relative border border-gray-700 rounded-lg bg-gray-800">
+      <div className="sticky top-0 z-30 isolate flex flex-wrap gap-0.5 px-2 py-1.5 border-b border-gray-700 bg-gray-900 rounded-t-lg shadow-sm">
         <ToolBtn
           active={editor.isActive('heading', { level: 2 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -114,12 +233,7 @@ export default function TipTapEditor({
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           label="H3"
         />
-        <ToolBtn
-          active={editor.isActive('heading', { level: 4 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-          label="H4"
-        />
-        <Divider />
+        <div className="w-px bg-gray-700 mx-1" />
         <ToolBtn
           active={editor.isActive('bold')}
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -138,7 +252,7 @@ export default function TipTapEditor({
           label="S"
           className="line-through"
         />
-        <Divider />
+        <div className="w-px bg-gray-700 mx-1" />
         <ToolBtn
           active={editor.isActive('bulletList')}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -154,18 +268,36 @@ export default function TipTapEditor({
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           label="인용"
         />
+        <div className="w-px bg-gray-700 mx-1" />
+        {/* 정렬 — 본문 paragraph/heading 에 적용. 게시물에서도 그대로 보임 */}
+        <ToolBtn
+          active={editor.isActive({ textAlign: 'left' })}
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          label="⇤"
+        />
+        <ToolBtn
+          active={editor.isActive({ textAlign: 'center' })}
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          label="↔"
+        />
+        <ToolBtn
+          active={editor.isActive({ textAlign: 'right' })}
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          label="⇥"
+        />
         <ToolBtn
           active={editor.isActive('codeBlock')}
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           label="코드"
         />
-        <Divider />
+        <div className="w-px bg-gray-700 mx-1" />
         <ToolBtn active={editor.isActive('link')} onClick={addLink} label="링크" />
-        <ToolBtn active={false} onClick={handleImageClick} label="이미지" />
+        {/* 이미지 — 모달 하나로 통합. 모달 안에서 라이브러리 선택 + 새로 업로드 둘 다 가능. */}
+        <ToolBtn active={false} onClick={handleImageClick} label="🖼 이미지" />
         {editor.isActive('image') && (
           <>
-            <Divider />
-            <label className="flex items-center gap-1 rounded bg-ink-900 px-2 py-1 text-xs text-ink-400">
+            <div className="w-px bg-gray-700 mx-1" />
+            <label className="flex items-center gap-1 rounded bg-gray-800 px-2 py-1 text-xs text-gray-400">
               W
               <input
                 type="number"
@@ -174,31 +306,46 @@ export default function TipTapEditor({
                 value={imageWidth ?? ''}
                 onChange={(event) => handleImageWidthChange(event.target.value)}
                 placeholder="auto"
-                className="h-5 w-16 bg-transparent text-right text-ink-100 placeholder-ink-600 focus:outline-none"
+                className="h-5 w-16 bg-transparent text-right text-gray-100 placeholder-gray-600 focus:outline-none"
               />
               px
             </label>
           </>
         )}
-        <Divider />
+        <div className="w-px bg-gray-700 mx-1" />
         <ToolBtn
           active={false}
           onClick={() => editor.chain().focus().undo().run()}
-          label="↶"
+          label="↩"
         />
         <ToolBtn
           active={false}
           onClick={() => editor.chain().focus().redo().run()}
-          label="↷"
+          label="↪"
         />
       </div>
 
-      {/* 본문 */}
-      <EditorContent editor={editor} />
+      {/* 에디터 본문 — drop/paste 업로드 시 오버레이 표시 */}
+      <div className="relative">
+        <EditorContent editor={editor} />
+        {uploadingInline && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-blue-500/10 backdrop-blur-[1px]">
+            <div className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-lg">
+              이미지 업로드 중…
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 본문 이미지 삽입 안내 — 3가지 경로 */}
+      <p className="border-t border-gray-700 px-3 py-1.5 text-[11px] text-gray-500">
+        💡 본문에 이미지 <strong>드래그</strong>·<strong>Cmd/Ctrl+V</strong> 붙여넣기·툴바 <strong>🖼 이미지</strong> 버튼 — 셋 다 즉시 업로드 + 삽입.
+      </p>
 
       <MediaLibraryPicker
         isOpen={mediaPickerOpen}
         title="본문 이미지 선택"
+        autoSelectOnUpload
         onClose={() => setMediaPickerOpen(false)}
         onSelect={addImage}
       />
@@ -219,10 +366,6 @@ function clampImageWidth(value: number) {
   return Math.min(1200, Math.max(120, value))
 }
 
-function Divider() {
-  return <div className="w-px bg-ink-700 mx-1 my-1" />
-}
-
 function ToolBtn({
   active,
   onClick,
@@ -240,8 +383,8 @@ function ToolBtn({
       onClick={onClick}
       className={`px-2 py-1 text-xs rounded transition-colors ${className} ${
         active
-          ? 'bg-naver-green/30 text-naver-neon'
-          : 'text-ink-300 hover:text-ink-100 hover:bg-ink-700'
+          ? 'bg-blue-600/30 text-blue-400'
+          : 'text-gray-400 hover:text-white hover:bg-gray-700'
       }`}
     >
       {label}

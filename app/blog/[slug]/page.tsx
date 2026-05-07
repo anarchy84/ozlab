@@ -110,8 +110,19 @@ export default async function BlogPostPage({ params }: Params) {
       </header>
 
       <main className="container-oz max-w-3xl mx-auto py-12">
+        {/*
+          prose 기본은 text-align style 무시.
+          TipTap 에디터에서 사용자가 가운데/오른쪽 정렬한 paragraph·heading 이
+          게시글에서도 그대로 보이도록 attribute selector 로 적용.
+          이미지는 사용자 지정 width 보존을 위해 max-w 캡 추가하지 않는다.
+        */}
         <article
-          className="prose prose-lg max-w-none"
+          className="prose prose-lg max-w-none
+            [&_p[style*='text-align:_center']]:text-center
+            [&_p[style*='text-align:_right']]:text-right
+            [&_p[style*='text-align:_left']]:text-left
+            [&_h2[style*='text-align:_center']]:text-center
+            [&_h3[style*='text-align:_center']]:text-center"
           dangerouslySetInnerHTML={{ __html: html }}
         />
 

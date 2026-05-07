@@ -327,3 +327,20 @@ export type RevenueRecordInput = Omit<
   RevenueRecord,
   'id' | 'net_amount' | 'recorded_at' | 'recorded_by'
 >
+
+// ----- 미디어 (이미지 업로드) -----
+// /api/admin/media POST 가 반환하는 row 타입.
+// MediaLibraryPicker · TipTapEditor 가 import 해서 사용.
+export interface Media {
+  id: string
+  file_name: string
+  storage_path: string                  // 원본 public URL
+  webp_path: string | null              // WebP 변환본 public URL
+  mime_type: string | null
+  file_size: number | null
+  width: number | null
+  height: number | null
+  alt_text: string | null
+  uploaded_by?: string | null
+  created_at: string
+}
