@@ -71,7 +71,7 @@ export default function ConsultationPolicyManager({ initialSettings }: Props) {
 
       <section className="rounded-lg border border-ink-700 bg-surface-darkSoft p-5">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <h2 className="text-lg font-bold text-ink-100">중복 DB 인정기간</h2>
             <p className="text-sm leading-relaxed text-ink-400">
               같은 연락처가 이 기간 안에 다시 접수되면 신규 DB로 저장하지 않고
@@ -79,7 +79,7 @@ export default function ConsultationPolicyManager({ initialSettings }: Props) {
             </p>
           </div>
           <span
-            className={`w-fit rounded-full px-3 py-1 text-xs font-bold ${
+            className={`w-fit shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${
               settings.source === 'database'
                 ? 'bg-naver-green/15 text-naver-neon'
                 : 'bg-amber-500/15 text-amber-300'
@@ -155,9 +155,9 @@ export default function ConsultationPolicyManager({ initialSettings }: Props) {
         )}
       </section>
 
-      <section className="rounded-lg border border-ink-700 bg-ink-900/60 p-4 text-sm leading-relaxed text-ink-400">
-        <h2 className="mb-2 font-semibold text-ink-200">정책 기준</h2>
-        <p>
+      <section className="rounded-lg border border-naver-green/20 bg-naver-green/5 p-4 text-sm leading-relaxed text-ink-300">
+        <h2 className="mb-2 font-bold text-ink-100">정책 기준</h2>
+        <p className="text-ink-400">
           중복 기준은 연락처 숫자만 비교합니다. 하이픈, 공백 등 입력 형태가 달라도
           같은 번호면 동일 DB로 판단합니다.
         </p>
