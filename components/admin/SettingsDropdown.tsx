@@ -8,6 +8,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils/cn'
 
 interface MenuItem {
   href: string
@@ -22,6 +24,8 @@ interface Props {
 export function SettingsDropdown({ items }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+  const active = items.some((item) => isActive(pathname, item.href))
 
   useEffect(() => {
     if (!open) return
@@ -44,9 +48,13 @@ export function SettingsDropdown({ items }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`text-sm transition-colors flex items-center gap-1 ${
-          open ? 'text-naver-neon' : 'text-ink-300 hover:text-ink-100'
-        }`}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'flex items-center gap-1 rounded-full px-3 py-1.5 text-sm transition-colors',
+          active || open
+            ? 'bg-naver-green/15 text-naver-neon font-bold'
+            : 'text-ink-300 hover:bg-ink-800 hover:text-ink-100',
+        )}
       >
         설정 <span className="text-[9px]">{open ? '▴' : '▾'}</span>
       </button>
@@ -55,22 +63,35 @@ export function SettingsDropdown({ items }: Props) {
           role="menu"
           className="absolute top-full mt-2 right-0 min-w-[260px] bg-ink-900 border border-ink-700 rounded-lg shadow-xl z-50 py-1.5"
         >
-          {items.map((m) => (
-            <Link
-              key={m.href}
-              href={m.href}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="block px-3 py-2 text-sm text-ink-200 hover:bg-ink-800 hover:text-naver-neon transition-colors"
-            >
-              <div className="font-medium">{m.label}</div>
-              {m.desc && (
-                <div className="text-[11px] text-ink-500 mt-0.5">{m.desc}</div>
-              )}
-            </Link>
-          ))}
+          {items.map((m) => {
+            const itemActive = isActive(pathname, m.href)
+            return (
+              <Link
+                key={m.href}
+                href={m.href}
+                role="menuitem"
+                aria-current={itemActive ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'block px-3 py-2 text-sm transition-colors',
+                  itemActive
+                    ? 'bg-naver-green/10 text-naver-neon'
+                    : 'text-ink-200 hover:bg-ink-800 hover:text-naver-neon',
+                )}
+              >
+                <div className="font-medium">{m.label}</div>
+                {m.desc && (
+                  <div className="text-[11px] text-ink-500 mt-0.5">{m.desc}</div>
+                )}
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
   )
+}
+
+function isActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`)
 }
