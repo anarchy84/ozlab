@@ -1,6 +1,6 @@
 export const CONSULTATION_POLICY_BLOCK_KEY = 'admin.consultation_policy.duplicate_phone_window_days'
 export const DEFAULT_DUPLICATE_PHONE_WINDOW_DAYS = 30
-export const MIN_DUPLICATE_PHONE_WINDOW_DAYS = 30
+export const MIN_DUPLICATE_PHONE_WINDOW_DAYS = 1
 export const MAX_DUPLICATE_PHONE_WINDOW_DAYS = 365
 
 // 기존 import 호환용. 실제 접수 API는 서버 설정값을 우선 사용한다.
