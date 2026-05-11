@@ -20,11 +20,13 @@
 //   200 { success: true, id }     — 정상 접수
 //   200 { success: true, skipped: true } — 봇 차단(honeypot)
 //   400 { error: '...' }           — 검증 실패
+//   409 { error: '...', duplicate: true } — 동일 연락처 중복 접수 제한
 //   500 { error: '...' }           — DB / 서버 에러
 // ─────────────────────────────────────────────
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { DUPLICATE_PHONE_WINDOW_DAYS, normalizePhone } from '@/lib/consultation-policy'
+import { normalizePhone } from '@/lib/consultation-policy'
+import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 // 봇 차단 — 이 라우트는 캐시 금지
@@ -208,9 +210,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, skipped: true })
   }
 
-  // 3-2) 동일 연락처 30일 중복 접수 제한
+  // 3-2) 동일 연락처 중복 접수 제한 — 어드민 설정값 우선, 없으면 기본 30일
+  const { duplicatePhoneWindowDays } = await getConsultationPolicySettings()
   const duplicateSince = new Date(
-    Date.now() - DUPLICATE_PHONE_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+    Date.now() - duplicatePhoneWindowDays * 24 * 60 * 60 * 1000,
   ).toISOString()
   const { data: recentRows } = await supabase
     .from('consultations')
@@ -222,7 +225,7 @@ export async function POST(req: NextRequest) {
   if (duplicate) {
     return NextResponse.json(
       {
-        error: `이미 최근 ${DUPLICATE_PHONE_WINDOW_DAYS}일 내 상담 신청이 접수된 연락처입니다. 급한 문의는 대표번호로 연락해주세요.`,
+        error: `이미 최근 ${duplicatePhoneWindowDays}일 내 상담 신청이 접수된 연락처입니다. 급한 문의는 대표번호로 연락해주세요.`,
         duplicate: true,
       },
       { status: 409 },
