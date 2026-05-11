@@ -3,6 +3,7 @@
 // ─────────────────────────────────────────────
 import { redirect } from 'next/navigation'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
+import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
 import DistributionManager from './DistributionManager'
 
 export const dynamic = 'force-dynamic'
@@ -13,5 +14,7 @@ export default async function DistributionPage() {
   if (!allowed.includes(profile.role)) {
     redirect('/admin?error=forbidden')
   }
-  return <DistributionManager />
+  const policySettings = await getConsultationPolicySettings()
+
+  return <DistributionManager initialPolicySettings={policySettings} />
 }

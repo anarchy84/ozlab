@@ -11,9 +11,10 @@ import type { ConsultationPolicySettings } from '@/lib/consultation-policy-serve
 
 interface Props {
   initialSettings: ConsultationPolicySettings
+  embedded?: boolean
 }
 
-export default function ConsultationPolicyManager({ initialSettings }: Props) {
+export default function ConsultationPolicyManager({ initialSettings, embedded = false }: Props) {
   const [settings, setSettings] = useState(initialSettings)
   const [days, setDays] = useState(String(initialSettings.duplicatePhoneWindowDays))
   const [saving, setSaving] = useState(false)
@@ -61,13 +62,15 @@ export default function ConsultationPolicyManager({ initialSettings }: Props) {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-ink-100">DB 접수 정책</h1>
-        <p className="mt-1 text-sm text-ink-400">
-          상담 신청 시 동일 연락처를 중복 DB로 판단하는 기간을 관리합니다.
-        </p>
-      </header>
+    <div className={embedded ? 'space-y-4' : 'max-w-3xl space-y-6'}>
+      {!embedded && (
+        <header>
+          <h1 className="text-2xl font-bold text-ink-100">DB 접수 정책</h1>
+          <p className="mt-1 text-sm text-ink-400">
+            상담 신청 시 동일 연락처를 중복 DB로 판단하는 기간을 관리합니다.
+          </p>
+        </header>
+      )}
 
       <section className="rounded-lg border border-ink-700 bg-surface-darkSoft p-5">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">

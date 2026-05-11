@@ -43,23 +43,22 @@ export default async function AdminShellLayout({
   ]
 
   // 설정 드롭다운 (super_admin 전체 / 일부 role 은 필요한 정책 메뉴만)
-  const canManageConsultationPolicy = ['super_admin', 'admin', 'marketing', 'tm_lead'].includes(profile.role)
+  const canManageDbPolicy = ['super_admin', 'admin', 'marketing', 'tm_lead'].includes(profile.role)
   const settingsMenu = [
     ...(isSuperAdmin(profile.role)
       ? [
         { href: '/admin/users', label: '사용자 관리', desc: '계정 초대·권한 변경' },
         { href: '/admin/settings/permissions', label: '권한 매트릭스', desc: 'role × permission 토글' },
         { href: '/admin/settings/statuses', label: '상태 관리', desc: '상담 상태·자동화 플래그' },
-        { href: '/admin/settings/consultation-policy', label: 'DB 정책', desc: '중복 접수 인정기간' },
         { href: '/admin/settings/cta', label: 'CTA 관리', desc: '홈 버튼·utm 자동' },
         { href: '/admin/settings/products', label: '상품 관리', desc: '카탈로그·카테고리' },
-        { href: '/admin/settings/distribution', label: 'DB 분배', desc: '자동 배정·재분배' },
+        { href: '/admin/settings/distribution', label: 'DB 정책·분배', desc: '중복 기준·자동 배정' },
         { href: '/admin/settings/ad-sync', label: '광고 sync', desc: '시트 → ad_metrics' },
         { href: '/admin/help/utm', label: 'UTM 표준 가이드', desc: '광고대행사 핸드오프용' },
       ]
       : []),
-    ...(!isSuperAdmin(profile.role) && canManageConsultationPolicy
-      ? [{ href: '/admin/settings/consultation-policy', label: 'DB 정책', desc: '중복 접수 인정기간' }]
+    ...(!isSuperAdmin(profile.role) && canManageDbPolicy
+      ? [{ href: '/admin/settings/distribution', label: 'DB 정책·분배', desc: '중복 기준·자동 배정' }]
       : []),
   ]
 

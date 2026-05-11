@@ -14,14 +14,29 @@ export async function GET() {
   if (!guard.ok) return guard.response
 
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('distribution_rules')
-    .select('*')
-    .eq('id', 1)
-    .single()
+  const [{ data: rule, error }, { data: members, error: membersError }] = await Promise.all([
+    admin
+      .from('distribution_rules')
+      .select('*')
+      .eq('id', 1)
+      .single(),
+    admin
+      .from('admin_users')
+      .select(
+        `user_id, role, display_name, department, is_active,
+         distribution_enabled, distribution_pause_reason,
+         distribution_paused_until, distribution_note`,
+      )
+      .in('role', ['super_admin', 'admin', 'marketing', 'tm_lead', 'counselor'])
+      .order('display_name', { ascending: true, nullsFirst: false }),
+  ])
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  if (membersError) {
+    return NextResponse.json({ error: membersError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ rule, members: members ?? [] })
 }
 
 export async function PATCH(request: NextRequest) {
@@ -35,7 +50,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const admin = createAdminClient()
-  const { data, error } = await admin
+  const { data: rule, error } = await admin
     .from('distribution_rules')
     .update(update)
     .eq('id', 1)
@@ -43,5 +58,5 @@ export async function PATCH(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  return NextResponse.json({ rule })
 }
