@@ -37,7 +37,7 @@ export function OzLogo({
         alignItems: 'center',
         gap: 8,
         fontWeight: 800,
-        letterSpacing: '-0.04em',
+        letterSpacing: 0,
       }}
     >
       <span
@@ -53,7 +53,7 @@ export function OzLogo({
           fontSize: size * 0.48,
           fontWeight: 900,
           fontFamily: "-apple-system, 'SF Pro Display', sans-serif",
-          letterSpacing: '-0.06em',
+          letterSpacing: 0,
         }}
       >
         Oz

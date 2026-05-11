@@ -100,6 +100,18 @@ interface MessageItem {
   error_message: string | null
 }
 
+interface CustomerDraft {
+  name: string
+  phone: string
+  store_name: string
+  industry: string
+  region: string
+  device_type: string
+  contract_period: string
+  callable_time: string
+  message: string
+}
+
 interface Props {
   consultation: ConsultationFull
   statuses: DbStatus[]
@@ -133,6 +145,8 @@ export function ConsultationDetailModal({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showBlockMenu, setShowBlockMenu] = useState(false)
+  const [customerEditing, setCustomerEditing] = useState(false)
+  const [customerDraft, setCustomerDraft] = useState<CustomerDraft>(() => toCustomerDraft(consultation))
 
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [messages, setMessages] = useState<MessageItem[]>([])
@@ -155,6 +169,8 @@ export function ConsultationDetailModal({
     setMemoForHistory('')
     setStatusId(consultation.status_id)
     setCounselorId(consultation.counselor_id)
+    setCustomerEditing(false)
+    setCustomerDraft(toCustomerDraft(consultation))
     setError(null)
     void loadHistory(consultation.id)
     void loadRevenues(consultation.id)
@@ -263,36 +279,78 @@ export function ConsultationDetailModal({
     await patch({ is_favorite: !c.is_favorite })
   }
 
+  async function saveCustomerInfo() {
+    const name = customerDraft.name.trim()
+    const phone = customerDraft.phone.trim()
+    if (!name) {
+      setError('고객명을 입력해주세요.')
+      return
+    }
+    if (!phone) {
+      setError('연락처를 입력해주세요.')
+      return
+    }
+    const ok = await patch({
+      name,
+      phone,
+      store_name: nullableText(customerDraft.store_name),
+      industry: nullableText(customerDraft.industry),
+      region: nullableText(customerDraft.region),
+      device_type: nullableText(customerDraft.device_type),
+      contract_period: nullableText(customerDraft.contract_period),
+      callable_time: nullableText(customerDraft.callable_time),
+      message: nullableText(customerDraft.message),
+    })
+    if (ok) {
+      setCustomerEditing(false)
+    }
+  }
+
   async function blockPhone() {
     setShowBlockMenu(false)
     if (!confirm(`${c.phone} 번호를 영구 차단할까요?`)) return
-    await patch({ is_blacklisted: true })
-    // abuse_blocklist 도 INSERT
     try {
       const res = await fetch(`/api/admin/consultations/${c.id}/block`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ block_type: 'phone' }),
       })
-      if (!res.ok) console.warn('blocklist insert failed', await res.text())
+      if (!res.ok) throw new Error(await res.text())
+      await patch({ is_blacklisted: true })
     } catch (e) {
-      console.warn(e)
+      setError(e instanceof Error ? e.message : '연락처 차단에 실패했습니다.')
     }
   }
 
   async function blockIp() {
     setShowBlockMenu(false)
     if (!confirm(`IP ${c.ip_address ?? '(없음)'} 를 영구 차단할까요?`)) return
-    await patch({ is_blacklisted: true })
     try {
       const res = await fetch(`/api/admin/consultations/${c.id}/block`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ block_type: 'ip' }),
       })
-      if (!res.ok) console.warn('blocklist insert failed', await res.text())
+      if (!res.ok) throw new Error(await res.text())
+      await patch({ is_blacklisted: true })
     } catch (e) {
-      console.warn(e)
+      setError(e instanceof Error ? e.message : 'IP 차단에 실패했습니다.')
+    }
+  }
+
+  async function unblockAll() {
+    setShowBlockMenu(false)
+    if (!confirm(`${c.name} 고객의 블랙리스트를 해제할까요?`)) return
+    try {
+      const res = await fetch(`/api/admin/consultations/${c.id}/block`, {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ block_type: 'all' }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      await patch({ is_blacklisted: false })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '블랙리스트 해제에 실패했습니다.')
     }
   }
 
@@ -340,6 +398,15 @@ export function ConsultationDetailModal({
               </button>
               {showBlockMenu && (
                 <div className="absolute top-full left-0 mt-1 bg-surface-darkSoft border border-ink-700 rounded shadow-lg py-1 z-10 w-44">
+                  {c.is_blacklisted && (
+                    <button
+                      type="button"
+                      onClick={unblockAll}
+                      className="block w-full text-left px-3 py-2 text-sm text-naver-neon hover:bg-ink-800"
+                    >
+                      블랙리스트 해제
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={blockPhone}
@@ -454,22 +521,112 @@ export function ConsultationDetailModal({
 
           {/* 고객 입력 */}
           <section className="space-y-2">
-            <h3 className="text-sm font-semibold text-ink-200 mb-2">고객이 남긴 정보</h3>
-            <Field label="연락처" value={c.phone} mono />
-            <Field label="매장명" value={c.store_name ?? '-'} />
-            <Field label="업종" value={c.industry ?? '-'} />
-            <Field label="지역" value={c.region ?? '-'} />
-            <Field label="단말기" value={c.device_type ?? '-'} />
-            <Field label="약정" value={c.contract_period ?? '-'} />
-            <Field label="통화가능시간" value={c.callable_time ?? '-'} />
-            <div>
-              <label className="block text-xs text-ink-500 mb-1">
-                고객 메시지 (read-only)
-              </label>
-              <div className="w-full px-2 py-1.5 text-sm bg-ink-900 border border-ink-700 text-ink-200 rounded min-h-[60px] whitespace-pre-wrap break-keep">
-                {c.message || <span className="text-ink-500">(없음)</span>}
-              </div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-ink-200">고객이 남긴 정보</h3>
+              {customerEditing ? (
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomerDraft(toCustomerDraft(c))
+                      setCustomerEditing(false)
+                    }}
+                    className="rounded border border-ink-700 px-2 py-1 text-xs text-ink-400 hover:bg-ink-800"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveCustomerInfo}
+                    disabled={saving}
+                    className="rounded bg-naver-green px-2 py-1 text-xs font-bold text-white hover:bg-naver-dark disabled:opacity-50"
+                  >
+                    저장
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setCustomerEditing(true)}
+                  className="rounded border border-ink-700 px-2 py-1 text-xs font-bold text-ink-300 hover:bg-ink-800 hover:text-ink-100"
+                >
+                  수정
+                </button>
+              )}
             </div>
+            {customerEditing ? (
+              <div className="space-y-2">
+                <CustomerInput
+                  label="고객명"
+                  value={customerDraft.name}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, name: value }))}
+                />
+                <CustomerInput
+                  label="연락처"
+                  value={customerDraft.phone}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, phone: value }))}
+                  mono
+                />
+                <CustomerInput
+                  label="매장명"
+                  value={customerDraft.store_name}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, store_name: value }))}
+                />
+                <CustomerInput
+                  label="업종"
+                  value={customerDraft.industry}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, industry: value }))}
+                />
+                <CustomerInput
+                  label="지역"
+                  value={customerDraft.region}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, region: value }))}
+                />
+                <CustomerInput
+                  label="단말기"
+                  value={customerDraft.device_type}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, device_type: value }))}
+                />
+                <CustomerInput
+                  label="약정"
+                  value={customerDraft.contract_period}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, contract_period: value }))}
+                />
+                <CustomerInput
+                  label="통화가능시간"
+                  value={customerDraft.callable_time}
+                  onChange={(value) => setCustomerDraft((prev) => ({ ...prev, callable_time: value }))}
+                />
+                <div>
+                  <label className="block text-xs text-ink-500 mb-1">고객 메시지</label>
+                  <textarea
+                    value={customerDraft.message}
+                    onChange={(e) => setCustomerDraft((prev) => ({ ...prev, message: e.target.value }))}
+                    rows={4}
+                    className="w-full rounded border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100 placeholder-ink-500"
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <Field label="고객명" value={c.name} />
+                <Field label="연락처" value={c.phone} mono />
+                <Field label="매장명" value={c.store_name ?? '-'} />
+                <Field label="업종" value={c.industry ?? '-'} />
+                <Field label="지역" value={c.region ?? '-'} />
+                <Field label="단말기" value={c.device_type ?? '-'} />
+                <Field label="약정" value={c.contract_period ?? '-'} />
+                <Field label="통화가능시간" value={c.callable_time ?? '-'} />
+                <div>
+                  <label className="block text-xs text-ink-500 mb-1">
+                    고객 메시지
+                  </label>
+                  <div className="w-full px-2 py-1.5 text-sm bg-ink-900 border border-ink-700 text-ink-200 rounded min-h-[72px] whitespace-pre-wrap break-words">
+                    {c.message || <span className="text-ink-500">(없음)</span>}
+                  </div>
+                </div>
+              </>
+            )}
           </section>
 
           {/* 메모 */}
@@ -681,7 +838,7 @@ function Field({
     <div>
       <label className="block text-xs text-ink-500 mb-1">{label}</label>
       <div
-        className={`w-full px-2 py-1.5 text-sm bg-ink-900 border border-ink-700 text-ink-200 rounded ${
+        className={`w-full px-2 py-1.5 text-sm bg-ink-900 border border-ink-700 text-ink-200 rounded break-words ${
           mono ? 'font-mono' : ''
         }`}
       >
@@ -689,6 +846,50 @@ function Field({
       </div>
     </div>
   )
+}
+
+function CustomerInput({
+  label,
+  value,
+  onChange,
+  mono = false,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  mono?: boolean
+}) {
+  return (
+    <label className="block">
+      <span className="block text-xs text-ink-500 mb-1">{label}</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full rounded border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100 placeholder-ink-500 ${
+          mono ? 'font-mono' : ''
+        }`}
+      />
+    </label>
+  )
+}
+
+function toCustomerDraft(c: ConsultationFull): CustomerDraft {
+  return {
+    name: c.name ?? '',
+    phone: c.phone ?? '',
+    store_name: c.store_name ?? '',
+    industry: c.industry ?? '',
+    region: c.region ?? '',
+    device_type: c.device_type ?? '',
+    contract_period: c.contract_period ?? '',
+    callable_time: c.callable_time ?? '',
+    message: c.message ?? '',
+  }
+}
+
+function nullableText(value: string): string | null {
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
 }
 
 // ─────────────────────────────────────────────

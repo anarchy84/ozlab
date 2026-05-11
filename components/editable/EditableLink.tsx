@@ -29,6 +29,7 @@ interface EditableLinkProps {
   value?: LinkValue
   pagePath?: string
   className?: string
+  ariaCurrent?: React.AriaAttributes['aria-current']
   /** 자식을 직접 주면 label 대신 사용 (버튼 안 아이콘 등 복잡 UI) */
   children?: React.ReactNode
 }
@@ -39,6 +40,7 @@ export function EditableLink({
   value,
   pagePath,
   className = '',
+  ariaCurrent,
   children,
 }: EditableLinkProps) {
   const current: LinkValue = value ?? fallback
@@ -65,6 +67,7 @@ export function EditableLink({
           target={current.target ?? '_self'}
           rel={externalRel}
           className={className}
+          aria-current={ariaCurrent}
         >
           {content}
         </a>
@@ -73,6 +76,7 @@ export function EditableLink({
           href={current.href || '#'}
           target={current.target ?? '_self'}
           className={className}
+          aria-current={ariaCurrent}
         >
           {content}
         </Link>

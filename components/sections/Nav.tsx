@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { OzLogo, Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function Nav({ blocks, ctas }: Props) {
+  const pathname = usePathname()
   // 오래된 GNB 편집값이 남아 있어도 새 메뉴 구성이 우선 적용되도록 신규 블록 키를 사용한다.
   const menuLinks = [
     { key: 'home.nav.v2.features', label: '기능', href: '/#features' },
@@ -33,6 +35,16 @@ export function Nav({ blocks, ctas }: Props) {
     { key: 'home.nav.v2.faq', label: 'FAQ', href: '/#faq' },
   ]
 
+  const linkClass = (href: string, mobile = false) => {
+    const active = isActiveMenu(pathname, href)
+    const base = mobile
+      ? 'shrink-0 whitespace-nowrap rounded-pill px-3 py-1.5 text-[13px] font-bold transition-colors'
+      : 'whitespace-nowrap rounded-pill px-3 py-1.5 text-[14px] xl:text-[15px] font-semibold transition-colors'
+    return active
+      ? `${base} bg-naver-soft text-naver-deep shadow-sm`
+      : `${base} text-ink-700 hover:bg-ink-50 hover:text-naver-green`
+  }
+
   return (
     <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-ink-100">
       <div className="container-oz flex items-center justify-between h-16">
@@ -42,16 +54,22 @@ export function Nav({ blocks, ctas }: Props) {
 
         {/* 메뉴 — 데스크톱에서 노출 */}
         <div className="hidden lg:flex items-center gap-5 xl:gap-7">
-          {menuLinks.map((l) => (
-            <EditableLink
-              key={l.key}
-              blockKey={l.key}
-              fallback={{ label: l.label, href: l.href, target: '_self' }}
-              value={pickLinkOrUndef(blocks, l.key)}
-              pagePath="/"
-              className="whitespace-nowrap text-[14px] xl:text-[15px] font-semibold text-ink-700 hover:text-naver-green transition-colors"
-            />
-          ))}
+          {menuLinks.map((l) => {
+            const current = pickLinkOrUndef(blocks, l.key)
+            const href = current?.href ?? l.href
+            const active = isActiveMenu(pathname, href)
+            return (
+              <EditableLink
+                key={l.key}
+                blockKey={l.key}
+                fallback={{ label: l.label, href: l.href, target: '_self' }}
+                value={current}
+                pagePath="/"
+                className={linkClass(href)}
+                ariaCurrent={active ? 'page' : undefined}
+              />
+            )
+          })}
         </div>
 
         <div className="flex items-center gap-2">
@@ -86,17 +104,56 @@ export function Nav({ blocks, ctas }: Props) {
           aria-label="모바일 주요 메뉴"
         >
           {menuLinks.map((l) => (
-            <EditableLink
+            <MobileMenuLink
               key={`mobile-${l.key}`}
-              blockKey={l.key}
-              fallback={{ label: l.label, href: l.href, target: '_self' }}
-              value={pickLinkOrUndef(blocks, l.key)}
-              pagePath="/"
-              className="shrink-0 whitespace-nowrap text-[13px] font-bold text-ink-700 hover:text-naver-green transition-colors"
+              item={l}
+              blocks={blocks}
+              pathname={pathname}
+              classNameFor={linkClass}
             />
           ))}
         </div>
       </div>
     </nav>
   )
+}
+
+function MobileMenuLink({
+  item,
+  blocks,
+  pathname,
+  classNameFor,
+}: {
+  item: { key: string; label: string; href: string }
+  blocks: Record<string, ContentBlock>
+  pathname: string
+  classNameFor: (href: string, mobile?: boolean) => string
+}) {
+  const current = pickLinkOrUndef(blocks, item.key)
+  const href = current?.href ?? item.href
+  const active = isActiveMenu(pathname, href)
+  return (
+    <EditableLink
+      blockKey={item.key}
+      fallback={{ label: item.label, href: item.href, target: '_self' }}
+      value={current}
+      pagePath="/"
+      className={classNameFor(href, true)}
+      ariaCurrent={active ? 'page' : undefined}
+    />
+  )
+}
+
+function isActiveMenu(pathname: string, href: string): boolean {
+  if (
+    !href ||
+    href.includes('#') ||
+    href.startsWith('tel:') ||
+    /^https?:\/\//i.test(href)
+  ) {
+    return false
+  }
+  const path = href.split('#')[0] || '/'
+  if (path === '/') return pathname === '/'
+  return pathname === path || pathname.startsWith(`${path}/`)
 }

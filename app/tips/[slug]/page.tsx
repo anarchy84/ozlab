@@ -128,10 +128,14 @@ export default async function TipPostPage({ params }: Params) {
             className="prose prose-lg max-w-none
               [&_p[style*='text-align:_center']]:text-center
               [&_p[style*='text-align:_right']]:text-right
+              [&_p[style*='text-align:_justify']]:text-justify
               [&_h2[style*='text-align:_center']]:text-center
               [&_h2[style*='text-align:_right']]:text-right
+              [&_h2[style*='text-align:_justify']]:text-justify
               [&_h3[style*='text-align:_center']]:text-center
-              [&_h3[style*='text-align:_right']]:text-right"
+              [&_h3[style*='text-align:_right']]:text-right
+              [&_h3[style*='text-align:_justify']]:text-justify
+              [&_img]:h-auto [&_img]:max-w-full"
             dangerouslySetInnerHTML={{ __html: html }}
           />
 

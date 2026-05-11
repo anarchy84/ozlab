@@ -15,6 +15,7 @@ import { useState, useEffect, FormEvent, ChangeEvent } from 'react'
 import { EditableText } from '@/components/editable/EditableText'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
+import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -232,23 +233,39 @@ export function ApplyForm({ blocks }: Props) {
         <div className="form-card">
           {sent ? (
             // 제출 성공 화면
-            <div className="text-center py-10 px-5">
-              <div className="text-5xl mb-3">✅</div>
-              <h3 className="text-h2">신청이 접수되었습니다</h3>
-              <p className="text-ink-500 mt-3 break-keep">
-                담당자가 영업일 24시간 내에 연락드릴게요.
-                <br />
-                감사합니다.
+            <div className="text-center py-10 px-5 text-ink-900">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-naver-soft text-4xl">
+                ✅
+              </div>
+              <h3 className="text-h2 text-ink-900">신청이 접수되었습니다</h3>
+              <p className="mx-auto mt-4 max-w-sm text-base leading-relaxed text-ink-700 break-keep">
+                담당자가 영업일 24시간 내에 연락드릴게요. 급한 문의는 대표번호나 카톡으로 바로 연결할 수 있습니다.
               </p>
+              <div className="mt-7 grid gap-2 sm:grid-cols-3">
+                <a href="/" className="btn btn-ghost w-full text-ink-800">
+                  홈으로 돌아가기
+                </a>
+                <a href={SITE_PHONE_HREF} className="btn btn-primary w-full">
+                  {SITE_PHONE} 전화하기
+                </a>
+                <a
+                  href={KAKAO_CHAT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn w-full border border-[#FEE500] bg-[#FEE500] text-[#111] hover:brightness-95"
+                >
+                  카톡 문의하기
+                </a>
+              </div>
               <button
                 type="button"
-                className="btn btn-ghost mt-5"
+                className="mt-5 text-sm font-semibold text-ink-500 underline-offset-4 hover:text-ink-900 hover:underline"
                 onClick={() => {
                   setSent(false)
                   setError(null)
                 }}
               >
-                다시 신청하기
+                정보를 다시 입력할게요
               </button>
             </div>
           ) : (

@@ -20,6 +20,7 @@ import { SettingsDropdown } from '@/components/admin/SettingsDropdown'
 import { HelpFloatingButton } from '@/components/admin/HelpFloatingButton'
 import { AdminThemeProvider } from '@/components/admin/ThemeProvider'
 import { AdminThemeToggle } from '@/components/admin/ThemeToggle'
+import { AdminTopNav } from '@/components/admin/AdminTopNav'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,24 +79,7 @@ export default async function AdminShellLayout({
               <span className="hidden md:inline">오즈랩페이</span>
               <span className="md:hidden">OZ</span>
             </Link>
-            <nav className="flex min-w-0 items-center gap-3 sm:gap-4 overflow-x-auto text-sm whitespace-nowrap">
-              {mainMenu.map((m) => (
-                <Link
-                  key={m.href}
-                  href={m.href}
-                  className="shrink-0 text-ink-300 hover:text-ink-100 transition-colors"
-                >
-                  {m.label}
-                </Link>
-              ))}
-              <Link
-                href="/"
-                target="_blank"
-                className="shrink-0 text-ink-400 hover:text-ink-100 transition-colors"
-              >
-                사이트 ↗
-              </Link>
-            </nav>
+            <AdminTopNav items={mainMenu} />
           </div>
           {/* 우측 그룹 — 설정 드롭다운(overflow 영향권 밖) + 테마 + 사용자 + 로그아웃 */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3 text-sm whitespace-nowrap">

@@ -7,11 +7,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { guardApi } from '@/lib/admin/auth-helpers'
+import { normalizePhone, phoneBlockValues } from '@/lib/consultation-policy'
 
 export const dynamic = 'force-dynamic'
 
 interface BlockBody {
-  block_type: 'phone' | 'ip'
+  block_type: 'phone' | 'ip' | 'all'
   reason?: string
 }
 
@@ -48,7 +49,7 @@ export async function POST(
 
   const value =
     body.block_type === 'phone'
-      ? c.phone
+      ? normalizePhone(c.phone)
       : c.ip_address?.toString() ?? null
   if (!value) {
     return NextResponse.json(
@@ -72,6 +73,71 @@ export async function POST(
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  return NextResponse.json({ success: true })
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } },
+) {
+  const guard = await guardApi(['super_admin', 'admin'])
+  if (!guard.ok) return guard.response
+
+  let body: BlockBody
+  try {
+    body = (await req.json()) as BlockBody
+  } catch {
+    body = { block_type: 'all' }
+  }
+
+  if (!['phone', 'ip', 'all'].includes(body.block_type)) {
+    return NextResponse.json({ error: 'block_type must be phone, ip, or all' }, { status: 400 })
+  }
+
+  const supabase = createClient()
+  const { data: c, error: cErr } = await supabase
+    .from('consultations')
+    .select('phone, ip_address')
+    .eq('id', params.id)
+    .single()
+  if (cErr || !c) {
+    return NextResponse.json({ error: cErr?.message ?? 'not found' }, { status: 404 })
+  }
+
+  const deleteTasks: Array<PromiseLike<{ error: unknown }>> = []
+  if (body.block_type === 'phone' || body.block_type === 'all') {
+    const values = phoneBlockValues(c.phone)
+    if (values.length > 0) {
+      deleteTasks.push(
+        supabase
+          .from('abuse_blocklist')
+          .delete()
+          .eq('block_type', 'phone')
+          .in('block_value', values),
+      )
+    }
+  }
+  if ((body.block_type === 'ip' || body.block_type === 'all') && c.ip_address) {
+    deleteTasks.push(
+      supabase
+        .from('abuse_blocklist')
+        .delete()
+        .eq('block_type', 'ip')
+        .eq('block_value', c.ip_address.toString()),
+    )
+  }
+
+  const results = await Promise.all(deleteTasks)
+  const failed = results.find((result) => result.error)
+  if (failed?.error) {
+    return NextResponse.json({ error: String(failed.error) }, { status: 500 })
+  }
+
+  await supabase
+    .from('consultations')
+    .update({ is_blacklisted: false })
+    .eq('id', params.id)
 
   return NextResponse.json({ success: true })
 }

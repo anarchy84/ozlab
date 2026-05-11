@@ -23,6 +23,15 @@ import { guardApi } from '@/lib/admin/auth-helpers'
 export const dynamic = 'force-dynamic'
 
 interface PatchBody {
+  name?: string
+  phone?: string
+  store_name?: string | null
+  industry?: string | null
+  region?: string | null
+  message?: string | null
+  callable_time?: string | null
+  device_type?: string | null
+  contract_period?: string | null
   status_id?: number
   status?: string
   internal_memo?: string | null
@@ -31,6 +40,13 @@ interface PatchBody {
   is_favorite?: boolean
   is_blacklisted?: boolean
   memo_for_history?: string  // 상태 변경 이력에 같이 저장할 메모
+}
+
+function cleanText(v: unknown, max: number): string | null {
+  if (v === null) return null
+  if (typeof v !== 'string') return null
+  const t = v.trim().slice(0, max)
+  return t.length > 0 ? t : null
 }
 
 export async function PATCH(
@@ -52,6 +68,24 @@ export async function PATCH(
 
   // ----- 업데이트 필드 조립 -----
   const update: Record<string, unknown> = {}
+
+  if (body.name !== undefined) {
+    const name = cleanText(body.name, 60)
+    if (!name) return NextResponse.json({ error: '고객명을 입력해주세요.' }, { status: 400 })
+    update.name = name
+  }
+  if (body.phone !== undefined) {
+    const phone = cleanText(body.phone, 30)
+    if (!phone) return NextResponse.json({ error: '연락처를 입력해주세요.' }, { status: 400 })
+    update.phone = phone
+  }
+  if (body.store_name !== undefined) update.store_name = cleanText(body.store_name, 80)
+  if (body.industry !== undefined) update.industry = cleanText(body.industry, 40)
+  if (body.region !== undefined) update.region = cleanText(body.region, 40)
+  if (body.message !== undefined) update.message = cleanText(body.message, 2000)
+  if (body.callable_time !== undefined) update.callable_time = cleanText(body.callable_time, 80)
+  if (body.device_type !== undefined) update.device_type = cleanText(body.device_type, 80)
+  if (body.contract_period !== undefined) update.contract_period = cleanText(body.contract_period, 80)
 
   // status_id 변경 시 db_statuses 에서 code 가져와 status (text) 도 같이 갱신
   let newStatusCode: string | null = null
@@ -112,7 +146,8 @@ export async function PATCH(
     .update(update)
     .eq('id', params.id)
     .select(
-      'id, status, status_id, contacted_at, done_at, assignee_note, internal_memo, counselor_id, is_favorite, is_blacklisted',
+      `id, name, phone, store_name, industry, region, message, callable_time, device_type, contract_period,
+       status, status_id, contacted_at, done_at, assignee_note, internal_memo, counselor_id, is_favorite, is_blacklisted`,
     )
     .single()
 

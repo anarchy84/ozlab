@@ -24,6 +24,7 @@
 // ─────────────────────────────────────────────
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { DUPLICATE_PHONE_WINDOW_DAYS, normalizePhone } from '@/lib/consultation-policy'
 import { NextRequest, NextResponse } from 'next/server'
 
 // 봇 차단 — 이 라우트는 캐시 금지
@@ -153,6 +154,10 @@ export async function POST(req: NextRequest) {
   if (!phone) {
     return NextResponse.json({ error: '연락처를 입력해주세요.' }, { status: 400 })
   }
+  const normalizedPhone = normalizePhone(phone)
+  if (normalizedPhone.length < 7) {
+    return NextResponse.json({ error: '연락처를 정확히 입력해주세요.' }, { status: 400 })
+  }
   if (body.consent_privacy !== true) {
     return NextResponse.json(
       { error: '개인정보 수집·이용 동의가 필요합니다.' },
@@ -168,8 +173,63 @@ export async function POST(req: NextRequest) {
   const headerReferer = req.headers.get('referer')
   const referer = clean(body.referer, 500) ?? (headerReferer ? headerReferer.slice(0, 500) : null)
   const landingPagePath = clean(body.landing_page_path, 500)
+  const supabase = createAdminClient()
 
-  // 3-1) Phase 2B: custom_fields 처리
+  // 3-1) 블랙리스트 사전 차단 — DB 에 저장하지 않고 조용히 성공 처리
+  //      연락처는 하이픈/공백 차이를 없애기 위해 숫자만 비교한다.
+  const [{ data: phoneBlocks }, { data: ipBlocks }] = await Promise.all([
+    supabase
+      .from('abuse_blocklist')
+      .select('id, block_value, hit_count, expires_at')
+      .eq('block_type', 'phone'),
+    ip
+      ? supabase
+          .from('abuse_blocklist')
+          .select('id, block_value, hit_count, expires_at')
+          .eq('block_type', 'ip')
+          .eq('block_value', ip)
+      : Promise.resolve({ data: [] }),
+  ])
+  const nowMs = Date.now()
+  const activePhoneBlock = (phoneBlocks ?? []).find((row) => {
+    const expiresAt = row.expires_at ? new Date(row.expires_at).getTime() : null
+    return (!expiresAt || expiresAt > nowMs) && normalizePhone(row.block_value) === normalizedPhone
+  })
+  const activeIpBlock = (ipBlocks ?? []).find((row) => {
+    const expiresAt = row.expires_at ? new Date(row.expires_at).getTime() : null
+    return !expiresAt || expiresAt > nowMs
+  })
+  const activeBlock = activePhoneBlock ?? activeIpBlock
+  if (activeBlock) {
+    await supabase
+      .from('abuse_blocklist')
+      .update({ hit_count: Number(activeBlock.hit_count ?? 0) + 1 })
+      .eq('id', activeBlock.id)
+    return NextResponse.json({ success: true, skipped: true })
+  }
+
+  // 3-2) 동일 연락처 30일 중복 접수 제한
+  const duplicateSince = new Date(
+    Date.now() - DUPLICATE_PHONE_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString()
+  const { data: recentRows } = await supabase
+    .from('consultations')
+    .select('id, phone, created_at')
+    .gte('created_at', duplicateSince)
+    .order('created_at', { ascending: false })
+    .limit(1000)
+  const duplicate = (recentRows ?? []).find((row) => normalizePhone(row.phone) === normalizedPhone)
+  if (duplicate) {
+    return NextResponse.json(
+      {
+        error: `이미 최근 ${DUPLICATE_PHONE_WINDOW_DAYS}일 내 상담 신청이 접수된 연락처입니다. 급한 문의는 대표번호로 연락해주세요.`,
+        duplicate: true,
+      },
+      { status: 409 },
+    )
+  }
+
+  // 3-3) Phase 2B: custom_fields 처리
   //   - 표준 컬럼명(name/phone/...)이 들어오면 표준 컬럼으로 승격 (덮어쓰기는 X — body 우선)
   //   - 그 외 키는 그대로 jsonb 에 저장
   const customRaw = body.custom_fields && typeof body.custom_fields === 'object'
@@ -195,7 +255,6 @@ export async function POST(req: NextRequest) {
   //    DB trigger 가 INSERT 시 자동으로 채움 (fill_attribution_inferred)
   //    trigger 안에서 content_posts SELECT 가 필요해서 service_role 사용
   //    (RLS 우회 — 폼 제출은 honeypot+consent 로 검증)
-  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('consultations')
     .insert({

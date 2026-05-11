@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import type { ContentPost } from '@/lib/posts'
+import { SITE_PHONE } from '@/lib/contact'
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ozlabpay.kr').replace(/\/$/, '')
 export const SITE_NAME = '오즈랩페이'
 export const SITE_DESCRIPTION =
   'POS + 카드 단말기 0원, 네이버페이 연동, 리뷰 자동화, 플레이스 마케팅까지 매장 운영을 한 번에 연결합니다.'
-export const SITE_PHONE = '1588-0000'
 
 export function absoluteUrl(path = '/'): string {
   if (/^https?:\/\//i.test(path)) return path

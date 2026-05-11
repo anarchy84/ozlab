@@ -76,16 +76,16 @@ const config: Config = {
       // 사용 예 : text-display, text-h1, text-h2, text-h3, text-lg-fluid
       fontSize: {
         'display': [
-          'clamp(40px, 6.2vw, 76px)',
-          { lineHeight: '1.08', letterSpacing: '-0.035em', fontWeight: '800' },
+          'clamp(36px, 7vw, 72px)',
+          { lineHeight: '1.08', letterSpacing: '0', fontWeight: '800' },
         ],
         'h1': [
-          'clamp(32px, 4.4vw, 52px)',
-          { lineHeight: '1.15', letterSpacing: '-0.03em', fontWeight: '800' },
+          'clamp(28px, 5.6vw, 50px)',
+          { lineHeight: '1.15', letterSpacing: '0', fontWeight: '800' },
         ],
         'h2': [
-          'clamp(24px, 3vw, 36px)',
-          { lineHeight: '1.25', letterSpacing: '-0.025em', fontWeight: '700' },
+          'clamp(22px, 3.8vw, 34px)',
+          { lineHeight: '1.25', letterSpacing: '0', fontWeight: '700' },
         ],
         'h3': [
           'clamp(18px, 1.6vw, 22px)',

@@ -94,6 +94,18 @@ export default async function AdminDashboardPage() {
     const st = statuses.find((s) => s.code === f.status_code)
     return st?.show_in_dashboard ?? true
   })
+  const orderedDashboardRows = dashFunnel
+    .map((row, index) => ({ row, index, order: getDashboardStatusOrder(row) }))
+    .sort((a, b) => a.order.group - b.order.group || a.order.rank - b.order.rank || a.index - b.index)
+  const contactActionRows = orderedDashboardRows
+    .filter((item) => item.order.group === 0)
+    .map((item) => item.row)
+  const pipelineRows = orderedDashboardRows
+    .filter((item) => item.order.group === 1)
+    .map((item) => item.row)
+  const etcRows = orderedDashboardRows
+    .filter((item) => item.order.group > 1)
+    .map((item) => item.row)
 
   const statusMap = new Map<number, DbStatus>()
   for (const s of statuses) statusMap.set(s.id, s)
@@ -115,28 +127,22 @@ export default async function AdminDashboardPage() {
             (상태 마스터 자동 동기화)
           </span>
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {dashFunnel.map((f) => (
-            <div
-              key={f.status_code}
-              className="bg-surface-darkSoft border border-ink-700 rounded-lg p-4 hover:border-ink-600 transition-colors"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span
-                  className="inline-block w-3 h-3 rounded-full"
-                  style={{ backgroundColor: f.status_color }}
-                  aria-hidden
-                />
-                <p className="text-xs text-ink-400">{f.status_label}</p>
-              </div>
-              <p className="text-2xl font-extrabold text-ink-100">
-                {Number(f.total_count).toLocaleString()}
-              </p>
-              <p className="text-[10px] text-ink-500 mt-1">
-                오늘 +{Number(f.today_count)} · 7일 +{Number(f.week_count)}
-              </p>
+        <div className="space-y-3">
+          {contactActionRows.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+              {contactActionRows.map((f) => <KpiCard key={f.status_code} row={f} />)}
             </div>
-          ))}
+          )}
+          {pipelineRows.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+              {pipelineRows.map((f) => <KpiCard key={f.status_code} row={f} />)}
+            </div>
+          )}
+          {etcRows.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
+              {etcRows.map((f) => <KpiCard key={f.status_code} row={f} />)}
+            </div>
+          )}
         </div>
       </div>
 
@@ -346,6 +352,56 @@ export default async function AdminDashboardPage() {
           </p>
         </Link>
       </div>
+    </div>
+  )
+}
+
+function getDashboardStatusOrder(row: ConsultationFunnelRow): { group: number; rank: number } {
+  const code = row.status_code
+  const label = row.status_label.replace(/\s/g, '')
+  const contactOrder = [
+    ['absent_1', 'no_answer_1', '부재1'],
+    ['absent_2', 'no_answer_2', '부재2'],
+    ['absent_3', 'no_answer_3', '부재3'],
+    ['absent_4', 'no_answer_4', '부재4'],
+    ['absent_5_plus', 'absent_5', 'no_answer_5', '부재5+', '부재5'],
+    ['recall', 'recall_wait', '재통화대기'],
+  ]
+  const pipelineOrder = [
+    ['new', '신규'],
+    ['promising', '가망'],
+    ['contacted', '연락중'],
+    ['consulting', '상담중'],
+    ['done', 'conversion', '개통완료'],
+  ]
+
+  const contactRank = contactOrder.findIndex((keys) => keys.includes(code) || keys.includes(label))
+  if (contactRank >= 0) return { group: 0, rank: contactRank }
+  if (code === 'no_answer' || label === '부재') return { group: 0, rank: 0 }
+
+  const pipelineRank = pipelineOrder.findIndex((keys) => keys.includes(code) || keys.includes(label))
+  if (pipelineRank >= 0) return { group: 1, rank: pipelineRank }
+
+  return { group: 2, rank: 999 }
+}
+
+function KpiCard({ row }: { row: ConsultationFunnelRow }) {
+  return (
+    <div className="bg-surface-darkSoft border border-ink-700 rounded-lg p-4 hover:border-ink-600 transition-colors">
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className="inline-block w-3 h-3 rounded-full"
+          style={{ backgroundColor: row.status_color }}
+          aria-hidden
+        />
+        <p className="text-xs text-ink-400">{row.status_label}</p>
+      </div>
+      <p className="text-2xl font-extrabold text-ink-100">
+        {Number(row.total_count).toLocaleString()}
+      </p>
+      <p className="text-[10px] text-ink-500 mt-1">
+        오늘 +{Number(row.today_count)} · 7일 +{Number(row.week_count)}
+      </p>
     </div>
   )
 }

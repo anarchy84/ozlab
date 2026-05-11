@@ -17,6 +17,7 @@
 import { useEffect, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
+import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 
 const STANDARD_IDS = new Set([
   'name', 'phone', 'store_name', 'industry', 'region', 'message',
@@ -135,16 +136,40 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     >
       {sent ? (
         <div className="text-center py-8 px-4">
-          <div className="text-5xl mb-3">✅</div>
-          <h3 className="text-lg font-bold text-white">신청이 접수되었습니다</h3>
-          <p className="text-sm text-white/70 mt-2 break-keep">
-            담당자가 영업일 24시간 내에 연락드릴게요.
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-naver-green/15 text-4xl">
+            ✅
+          </div>
+          <h3 className="text-2xl font-extrabold text-white">신청이 접수되었습니다</h3>
+          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/78 break-keep">
+            담당자가 영업일 24시간 내에 연락드릴게요. 급한 문의는 바로 연결해 주세요.
           </p>
+          <div className="mt-6 grid gap-2">
+            <a
+              href="/"
+              className="rounded-full border border-white/20 px-4 py-2.5 text-sm font-bold text-white hover:bg-white/10"
+            >
+              홈으로 돌아가기
+            </a>
+            <a
+              href={SITE_PHONE_HREF}
+              className="rounded-full bg-naver-green px-4 py-2.5 text-sm font-bold text-white hover:bg-naver-dark"
+            >
+              {SITE_PHONE} 전화하기
+            </a>
+            <a
+              href={KAKAO_CHAT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-[#FEE500] px-4 py-2.5 text-sm font-bold text-[#111] hover:brightness-95"
+            >
+              카톡 문의하기
+            </a>
+          </div>
           {!inline && onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="mt-5 px-4 py-2 rounded text-sm bg-white/10 hover:bg-white/20 text-white"
+              className="mt-5 text-sm font-semibold text-white/60 underline-offset-4 hover:text-white hover:underline"
             >
               닫기
             </button>
