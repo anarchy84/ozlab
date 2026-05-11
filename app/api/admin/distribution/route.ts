@@ -14,7 +14,11 @@ export async function GET() {
   if (!guard.ok) return guard.response
 
   const admin = createAdminClient()
-  const [{ data: rule, error }, { data: members, error: membersError }] = await Promise.all([
+  const [
+    { data: rule, error },
+    { data: members, error: membersError },
+    { data: statuses, error: statusesError },
+  ] = await Promise.all([
     admin
       .from('distribution_rules')
       .select('*')
@@ -25,18 +29,28 @@ export async function GET() {
       .select(
         `user_id, role, display_name, department, is_active,
          distribution_enabled, distribution_pause_reason,
-         distribution_paused_until, distribution_note`,
+         distribution_paused_until, distribution_note,
+         distribution_weight, distribution_score`,
       )
-      .in('role', ['super_admin', 'admin', 'marketing', 'tm_lead', 'counselor'])
+      .in('role', ['tm_lead', 'counselor'])
+      .eq('is_active', true)
+      .order('role', { ascending: false })
       .order('display_name', { ascending: true, nullsFirst: false }),
+    admin
+      .from('db_statuses')
+      .select('id, code, label, sort_order')
+      .order('sort_order', { ascending: true }),
   ])
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (membersError) {
     return NextResponse.json({ error: membersError.message }, { status: 500 })
   }
+  if (statusesError) {
+    return NextResponse.json({ error: statusesError.message }, { status: 500 })
+  }
 
-  return NextResponse.json({ rule, members: members ?? [] })
+  return NextResponse.json({ rule, members: members ?? [], statuses: statuses ?? [] })
 }
 
 export async function PATCH(request: NextRequest) {
@@ -45,8 +59,17 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json()
   const update: Record<string, unknown> = { updated_at: new Date().toISOString(), updated_by: guard.profile.user_id }
-  for (const k of ['is_enabled', 'mode', 'eligible_roles']) {
-    if (body[k] !== undefined) update[k] = body[k]
+  if (body.is_enabled !== undefined) {
+    update.is_enabled = Boolean(body.is_enabled)
+  }
+  if (body.mode !== undefined) {
+    update.mode = body.mode === 'manual_only' ? 'manual_only' : 'round_robin'
+  }
+  if (body.eligible_roles !== undefined) {
+    const roles = Array.isArray(body.eligible_roles)
+      ? body.eligible_roles.filter((role: unknown) => role === 'counselor' || role === 'tm_lead')
+      : []
+    update.eligible_roles = roles.length ? roles : ['counselor', 'tm_lead']
   }
 
   const admin = createAdminClient()

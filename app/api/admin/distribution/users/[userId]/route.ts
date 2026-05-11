@@ -6,13 +6,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
 import { NextRequest, NextResponse } from 'next/server'
 
-const REASONS = new Set(['manual', 'leave', 'busy', 'other'])
-
 interface PatchBody {
   distribution_enabled?: unknown
-  distribution_pause_reason?: unknown
-  distribution_paused_until?: unknown
-  distribution_note?: unknown
+  distribution_weight?: unknown
 }
 
 export async function PATCH(
@@ -27,41 +23,20 @@ export async function PATCH(
 
   if (body.distribution_enabled !== undefined) {
     update.distribution_enabled = Boolean(body.distribution_enabled)
+    update.distribution_pause_reason = null
+    update.distribution_paused_until = null
+    update.distribution_note = null
   }
 
-  if (body.distribution_pause_reason !== undefined) {
-    const reason =
-      typeof body.distribution_pause_reason === 'string'
-        ? body.distribution_pause_reason
-        : ''
-    update.distribution_pause_reason = REASONS.has(reason) ? reason : null
-  }
-
-  if (body.distribution_paused_until !== undefined) {
-    const value =
-      typeof body.distribution_paused_until === 'string'
-        ? body.distribution_paused_until.trim()
-        : ''
-    if (!value) {
-      update.distribution_paused_until = null
-    } else {
-      const date = new Date(value)
-      if (Number.isNaN(date.getTime())) {
-        return NextResponse.json(
-          { error: '분배 중지 종료일이 올바르지 않습니다.' },
-          { status: 400 },
-        )
-      }
-      update.distribution_paused_until = date.toISOString()
+  if (body.distribution_weight !== undefined) {
+    const weight = Number(body.distribution_weight)
+    if (![0.5, 1, 2].includes(weight)) {
+      return NextResponse.json(
+        { error: '분배 배수는 1/2배수, 1배수, 2배수만 가능합니다.' },
+        { status: 400 },
+      )
     }
-  }
-
-  if (body.distribution_note !== undefined) {
-    const note =
-      typeof body.distribution_note === 'string'
-        ? body.distribution_note.trim().slice(0, 500)
-        : ''
-    update.distribution_note = note.length ? note : null
+    update.distribution_weight = weight
   }
 
   const admin = createAdminClient()
@@ -72,7 +47,8 @@ export async function PATCH(
     .select(
       `user_id, role, display_name, department, is_active,
        distribution_enabled, distribution_pause_reason,
-       distribution_paused_until, distribution_note`,
+       distribution_paused_until, distribution_note,
+       distribution_weight, distribution_score`,
     )
     .single()
 

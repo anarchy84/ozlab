@@ -395,7 +395,10 @@ html.light [data-admin-shell].bg-surface-darkSoft,
 html.light [data-admin-shell].bg-ink-900,
 html.light [data-admin-shell] .bg-surface-darkSoft,
 html.light [data-admin-shell] .bg-ink-900,
-html.light [data-admin-shell] [class~="bg-ink-900/80"] {
+html.light [data-admin-shell] [class~="bg-ink-900/80"],
+html.light [data-admin-shell] [class~="bg-ink-900/60"],
+html.light [data-admin-shell] [class~="bg-ink-900/50"],
+html.light [data-admin-shell] [class~="bg-ink-900/40"] {
   background-color: #ffffff !important;
 }
 html.light [data-admin-shell].bg-ink-800,
