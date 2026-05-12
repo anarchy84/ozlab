@@ -69,10 +69,19 @@ export async function POST(
   if (error) {
     // unique 위반은 OK (이미 차단됨)
     if (error.code === '23505') {
+      await supabase
+        .from('consultations')
+        .update({ is_blacklisted: true })
+        .eq('id', params.id)
       return NextResponse.json({ success: true, already_blocked: true })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  await supabase
+    .from('consultations')
+    .update({ is_blacklisted: true })
+    .eq('id', params.id)
 
   return NextResponse.json({ success: true })
 }

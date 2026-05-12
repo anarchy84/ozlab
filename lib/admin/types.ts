@@ -273,6 +273,30 @@ export interface ConsultationByCounselorRow {
   unapproved_rate_pct: string | null
 }
 
+// ----- 블랙리스트 -----
+export const ABUSE_BLOCK_TYPES = ['phone', 'ip', 'email', 'user_agent_pattern'] as const
+export type AbuseBlockType = (typeof ABUSE_BLOCK_TYPES)[number]
+
+export interface AbuseBlocklistEntry {
+  id: number
+  block_type: AbuseBlockType
+  block_value: string
+  reason: string | null
+  blocked_by: string | null
+  blocked_at: string
+  expires_at: string | null
+  source_consultation_id: string | null
+  hit_count: number
+  source_consultation?: {
+    id: string
+    name: string | null
+    phone: string | null
+    store_name: string | null
+    is_blacklisted: boolean | null
+    created_at: string | null
+  } | null
+}
+
 // ----- 상품 카탈로그 -----
 export const PRODUCT_CATEGORIES = [
   '단말기',

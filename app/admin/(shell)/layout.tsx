@@ -14,7 +14,12 @@
 // ─────────────────────────────────────────────
 import Link from 'next/link'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
-import { ROLE_LABELS, ROLE_EMOJI, isSuperAdmin } from '@/lib/admin/permissions'
+import {
+  ROLE_LABELS,
+  ROLE_EMOJI,
+  canManageBlocklist,
+  isSuperAdmin,
+} from '@/lib/admin/permissions'
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton'
 import { SettingsDropdown } from '@/components/admin/SettingsDropdown'
 import { HelpFloatingButton } from '@/components/admin/HelpFloatingButton'
@@ -44,6 +49,7 @@ export default async function AdminShellLayout({
 
   // 설정 드롭다운 (super_admin 전체 / 일부 role 은 필요한 정책 메뉴만)
   const canManageDbPolicy = ['super_admin', 'admin', 'marketing', 'tm_lead'].includes(profile.role)
+  const canUseBlacklist = canManageBlocklist(profile.role)
   const settingsMenu = [
     ...(isSuperAdmin(profile.role)
       ? [
@@ -53,12 +59,16 @@ export default async function AdminShellLayout({
         { href: '/admin/settings/cta', label: 'CTA 관리', desc: '홈 버튼·utm 자동' },
         { href: '/admin/settings/products', label: '상품 관리', desc: '카탈로그·카테고리' },
         { href: '/admin/settings/distribution', label: 'DB 정책·분배', desc: '중복 기준·자동 배정' },
+        { href: '/admin/settings/blacklist', label: '블랙리스트 관리', desc: '차단 연락처·IP 해제' },
         { href: '/admin/settings/ad-sync', label: '광고 sync', desc: '시트 → ad_metrics' },
         { href: '/admin/help/utm', label: 'UTM 표준 가이드', desc: '광고대행사 핸드오프용' },
       ]
       : []),
     ...(!isSuperAdmin(profile.role) && canManageDbPolicy
       ? [{ href: '/admin/settings/distribution', label: 'DB 정책·분배', desc: '중복 기준·자동 배정' }]
+      : []),
+    ...(!isSuperAdmin(profile.role) && canUseBlacklist
+      ? [{ href: '/admin/settings/blacklist', label: '블랙리스트 관리', desc: '차단 연락처·IP 해제' }]
       : []),
   ]
 
