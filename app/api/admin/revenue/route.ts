@@ -9,6 +9,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
+import { sendGa4Purchase } from '@/lib/tracking/ga-measurement-protocol'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -78,5 +79,49 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // ─────────────────────────────────────────────
+  // GA4 Measurement Protocol — 실 net 마진 동적 보정
+  //   · consultations 에서 ga_client_id + utm/광고 클릭 ID 조회
+  //   · purchase 이벤트 fire-and-forget (await 안 함 — API 응답 지연 방지)
+  //   · 매출 row 의 net_amount = amount - gift_amount (DB 가 자동 계산)
+  //   · GA4_MEASUREMENT_ID / GA4_API_SECRET env 없으면 sendGa4Purchase 가 no-op
+  // ─────────────────────────────────────────────
+  try {
+    const { data: consult } = await admin
+      .from('consultations')
+      .select(
+        'id, ga_client_id, ga_session_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid',
+      )
+      .eq('id', body.consultation_id)
+      .single()
+
+    const netValue =
+      typeof data.net_amount === 'number'
+        ? data.net_amount
+        : Number(data.amount) - Number(data.gift_amount ?? 0)
+
+    // fire-and-forget — Promise 안 기다림 (API 응답 빠르게 반환)
+    void sendGa4Purchase({
+      clientId: consult?.ga_client_id ?? null,
+      sessionId: consult?.ga_session_id ?? null,
+      transactionId: data.id,
+      leadId: body.consultation_id,
+      value: netValue,
+      currency: 'KRW',
+      utm_source: consult?.utm_source ?? null,
+      utm_medium: consult?.utm_medium ?? null,
+      utm_campaign: consult?.utm_campaign ?? null,
+      utm_content: consult?.utm_content ?? null,
+      utm_term: consult?.utm_term ?? null,
+      gclid: consult?.gclid ?? null,
+      fbclid: consult?.fbclid ?? null,
+      productLabel: productLabel,
+    })
+  } catch (e) {
+    // 매출 입력 자체는 이미 성공. 트래킹 실패는 콘솔만.
+    console.warn('[revenue POST] GA4 MP trigger error', e instanceof Error ? e.message : e)
+  }
+
   return NextResponse.json(data, { status: 201 })
 }
