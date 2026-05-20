@@ -93,6 +93,37 @@ export function getGaSessionId(measurementId?: string): string | null {
 }
 
 /**
+ * Meta CAPI 매칭률 향상용 _fbp 쿠키 파싱
+ *   _fbp = 'fb.1.{timestamp}.{random}'  → 그대로 사용 (Meta 가 그대로 받음)
+ *   모든 픽셀 방문자 보유 (광고 클릭 안 했어도 박힘)
+ */
+export function getFbp(): string | null {
+  if (typeof document === 'undefined') return null
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)_fbp=([^;]+)/)
+    return m ? m[1] : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Meta _fbc 쿠키 파싱 (Facebook Click ID)
+ *   Meta 광고 클릭 시 URL fbclid → 픽셀이 _fbc 쿠키로 보관
+ *   _fbc = 'fb.1.{timestamp}.{fbclid}'
+ *   광고 안 거치고 직접 들어온 사용자는 null
+ */
+export function getFbc(): string | null {
+  if (typeof document === 'undefined') return null
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)_fbc=([^;]+)/)
+    return m ? m[1] : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * 폼 제출 추정 매출 (1건당 추정 net 마진, KRW)
  *   - 운영하면서 평균값 조정 가능
  *   - env NEXT_PUBLIC_LEAD_DEFAULT_VALUE 로 override

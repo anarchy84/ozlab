@@ -10,6 +10,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
 import { sendGa4Purchase } from '@/lib/tracking/ga-measurement-protocol'
+import { sendMetaPurchase } from '@/lib/tracking/meta-capi'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
     const { data: consult } = await admin
       .from('consultations')
       .select(
-        'id, ga_client_id, ga_session_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid',
+        'id, phone, ga_client_id, ga_session_id, meta_fbp, meta_fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid, landing_page_path',
       )
       .eq('id', body.consultation_id)
       .single()
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
         ? data.net_amount
         : Number(data.amount) - Number(data.gift_amount ?? 0)
 
-    // fire-and-forget — Promise 안 기다림 (API 응답 빠르게 반환)
+    // ── GA4 Measurement Protocol — fire-and-forget
     void sendGa4Purchase({
       clientId: consult?.ga_client_id ?? null,
       sessionId: consult?.ga_session_id ?? null,
@@ -118,9 +119,26 @@ export async function POST(request: NextRequest) {
       fbclid: consult?.fbclid ?? null,
       productLabel: productLabel,
     })
+
+    // ── Meta CAPI Purchase — fire-and-forget
+    //   · event_id = revenue_records.id (재실행 dedupe)
+    //   · user_data: phone 해시 + fbp/fbc → Meta 매칭률 ↑
+    //   · GTM 안 픽셀 Purchase 태그도 같은 event_id 박으면 듀얼 발사·dedupe 가능
+    void sendMetaPurchase({
+      eventId: data.id,
+      transactionId: data.id,
+      eventSourceUrl: consult?.landing_page_path
+        ? `https://www.ozlabpay.kr${consult.landing_page_path}`
+        : null,
+      fbp: consult?.meta_fbp ?? null,
+      fbc: consult?.meta_fbc ?? null,
+      phone: consult?.phone ?? null,
+      value: netValue,
+      productLabel: productLabel,
+    })
   } catch (e) {
     // 매출 입력 자체는 이미 성공. 트래킹 실패는 콘솔만.
-    console.warn('[revenue POST] GA4 MP trigger error', e instanceof Error ? e.message : e)
+    console.warn('[revenue POST] tracking trigger error', e instanceof Error ? e.message : e)
   }
 
   return NextResponse.json(data, { status: 201 })

@@ -18,7 +18,7 @@ import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
-import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, pushEvent } from '@/lib/tracking/datalayer'
+import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 const STANDARD_IDS = new Set([
   'name', 'phone', 'store_name', 'industry', 'region', 'message',
@@ -74,6 +74,11 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     const gaSession = getGaSessionId()
     if (gaClient)  u.ga_client_id  = gaClient
     if (gaSession) u.ga_session_id = gaSession
+    // Meta CAPI 매칭용 쿠키
+    const fbp = getFbp()
+    const fbc = getFbc()
+    if (fbp) u.meta_fbp = fbp
+    if (fbc) u.meta_fbc = fbc
     setAttribution(u)
   }, [cta.id, cta.utm_source, cta.utm_medium, cta.utm_campaign, cta.utm_content])
 

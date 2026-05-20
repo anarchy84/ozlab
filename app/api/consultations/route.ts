@@ -27,6 +27,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizePhone } from '@/lib/consultation-policy'
 import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
+import { sendMetaLead } from '@/lib/tracking/meta-capi'
 import { NextRequest, NextResponse } from 'next/server'
 
 // 봇 차단 — 이 라우트는 캐시 금지
@@ -56,6 +57,9 @@ interface ConsultationInput {
   // GA4 식별자 — 폼 제출 ↔ 매출 입력 시 동일 사용자 매칭용 (GA4 MP 보정)
   ga_client_id?: string
   ga_session_id?: string
+  // Meta CAPI 매칭용 쿠키 (Purchase 서버 이벤트 시 user_data 로 전송)
+  meta_fbp?: string
+  meta_fbc?: string
   // 유입 경로 (클라가 보낸 First-touch 우선)
   referer?: string
   landing_page_path?: string
@@ -286,6 +290,9 @@ export async function POST(req: NextRequest) {
       // GA4 식별자 — 매출 입력 시 GA4 Measurement Protocol 로 동일 사용자 보정용
       ga_client_id:  clean(body.ga_client_id, 100),
       ga_session_id: clean(body.ga_session_id, 100),
+      // Meta CAPI 매칭용 쿠키
+      meta_fbp: clean(body.meta_fbp, 200),
+      meta_fbc: clean(body.meta_fbc, 200),
     })
     .select('id, name, phone, store_name, industry, region, message, inferred_channel')
     .single()
@@ -307,6 +314,24 @@ export async function POST(req: NextRequest) {
     industry: data.industry,
     region: data.region,
     message: data.message,
+  })
+
+  // 6) Meta CAPI Lead — 서버 측 이벤트 (브라우저 픽셀 Lead 와 event_id 로 dedupe)
+  //    · event_id = consultations.id (GTM 픽셀 Lead 태그 도 같은 값 박아야 dedupe 됨 — 가이드 참고)
+  //    · user_data: phone(해시) + fbp/fbc + IP + UA → Meta 매칭률 ↑
+  //    · LEAD_DEFAULT_VALUE 환경변수 (없으면 30000) 를 추정값으로 같이 전송
+  //    · META_PIXEL_ID / META_CAPI_TOKEN env 없으면 sendMetaLead 가 no-op
+  void sendMetaLead({
+    eventId: data.id,
+    eventSourceUrl: body.landing_page_path
+      ? `https://www.ozlabpay.kr${body.landing_page_path}`
+      : null,
+    clientIp: ip,
+    clientUserAgent: ua,
+    fbp: body.meta_fbp ?? null,
+    fbc: body.meta_fbc ?? null,
+    phone: data.phone,
+    value: Number(process.env.NEXT_PUBLIC_LEAD_DEFAULT_VALUE ?? 30000),
   })
 
   return NextResponse.json({ success: true, id: data.id })

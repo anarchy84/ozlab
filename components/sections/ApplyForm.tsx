@@ -16,7 +16,7 @@ import { EditableText } from '@/components/editable/EditableText'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
-import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, pushEvent } from '@/lib/tracking/datalayer'
+import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -94,6 +94,12 @@ export function ApplyForm({ blocks }: Props) {
     const gaSession = getGaSessionId()
     if (gaClient)  u.ga_client_id  = gaClient
     if (gaSession) u.ga_session_id = gaSession
+
+    // Meta CAPI 매칭용 쿠키 (서버에서 Purchase 이벤트 보낼 때 user_data 로 같이 전송)
+    const fbp = getFbp()
+    const fbc = getFbc()
+    if (fbp) u.meta_fbp = fbp
+    if (fbc) u.meta_fbc = fbc
 
     setAttribution(u)
   }, [])
