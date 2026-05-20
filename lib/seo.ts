@@ -7,6 +7,12 @@ export const SITE_NAME = '오즈랩페이'
 export const SITE_DESCRIPTION =
   'POS + 카드 단말기 0원, 네이버페이 연동, 리뷰 자동화, 플레이스 마케팅까지 매장 운영을 한 번에 연결합니다.'
 
+// GTM (Google Tag Manager) 컨테이너 ID
+//   - env 로 override 가능 (Vercel 에 NEXT_PUBLIC_GTM_ID 등록 권장)
+//   - fallback 으로 운영 컨테이너 GTM-N3HSNZPJ 박아둠 (env 누락돼도 안전)
+//   - 추후 어드민 사이트 설정에서 동적 편집 기능 만들 때까지 이 패턴 유지
+export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? 'GTM-N3HSNZPJ'
+
 export function absoluteUrl(path = '/'): string {
   if (/^https?:\/\//i.test(path)) return path
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`

@@ -7,7 +7,8 @@ import { EditorModal } from '@/components/editable/EditorModal'
 import { AdminGuardProvider } from '@/components/editable/AdminGuardProvider'
 import { AttributionTracker } from '@/components/AttributionTracker'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { organizationJsonLd, SITE_DESCRIPTION, SITE_URL, websiteJsonLd } from '@/lib/seo'
+import { GoogleTagManager } from '@/components/seo/GoogleTagManager'
+import { GTM_ID, organizationJsonLd, SITE_DESCRIPTION, SITE_URL, websiteJsonLd } from '@/lib/seo'
 import './globals.css'
 
 // ─────────────────────────────────────────────
@@ -96,6 +97,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col antialiased bg-white text-[#101828]">
+        {/*
+          GTM (Google Tag Manager)
+            - 모든 퍼블릭 페이지에 박힘. /admin/* 경로는 컴포넌트 내부에서 자동 차단.
+            - script + noscript iframe 모두 이 컴포넌트가 책임.
+            - body 최상단에 둬야 GTM 표준 권장 위치(noscript 가 body 시작점)에 맞음.
+        */}
+        <GoogleTagManager gtmId={GTM_ID} />
         {/*
           AdminGuardProvider : 앱 전체에서 Supabase auth 체크를 1회로 묶음
             - 바깥쪽에 둬서 EditorProvider/EditorModal 등이 모두 같은 context 를 읽게 함
