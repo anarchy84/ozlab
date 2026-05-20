@@ -59,6 +59,17 @@ export function HelpFloatingButton() {
               매체별 utm 파라미터 표준 (광고대행사 핸드오프용)
             </div>
           </Link>
+          <Link
+            href="/admin/help/tracking"
+            target="_blank"
+            onClick={() => setOpen(false)}
+            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-naver-neon transition-colors"
+          >
+            <div className="font-medium">📊 광고 추적 인프라</div>
+            <div className="text-[11px] text-ink-500 mt-0.5">
+              GTM·GA4·픽셀·전환가치 동적 매핑 — 광고 ON 모드 셋업
+            </div>
+          </Link>
           <div className="border-t border-ink-700 mt-1.5 pt-1.5 px-3 pb-2">
             <p className="text-[11px] text-ink-500">
               막힌 부분 있으면 슈퍼어드민에게 문의하세요.

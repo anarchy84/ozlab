@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>광고 추적 인프라 가이드 — 오즈랩페이</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --bg: #0b1220;
+    --surface: #131c2e;
+    --surface-2: #1a2440;
+    --border: #2a3556;
+    --ink-100: #f4f7fb;
+    --ink-300: #b6c1d8;
+    --ink-500: #7e8aa8;
+    --ink-700: #4a5470;
+    --naver: #00c73c;
+    --amber: #fbbf24;
+    --red: #ef4444;
+    --violet: #a78bfa;
+    --blue: #60a5fa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink-100);
+    line-height: 1.6;
+    word-break: keep-all;
+    padding: 40px 28px 80px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  h1 + .sub { color: var(--ink-300); margin-bottom: 4px; }
+  .meta { color: var(--ink-500); font-size: 12px; margin-bottom: 32px; }
+
+  h2 {
+    font-size: 20px; font-weight: 700;
+    margin: 36px 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--naver);
+    display: flex; align-items: center; gap: 8px;
+  }
+  h3 {
+    font-size: 15px; font-weight: 700;
+    margin: 18px 0 8px;
+    color: var(--ink-100);
+  }
+  h4 {
+    font-size: 13px; font-weight: 700;
+    margin: 14px 0 6px;
+    color: var(--ink-300);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  p { margin-bottom: 10px; color: var(--ink-300); font-size: 14px; }
+  strong { color: var(--ink-100); }
+  code {
+    background: var(--surface-2); color: var(--naver);
+    padding: 1px 6px; border-radius: 3px;
+    font-size: 12px; font-family: ui-monospace, 'SF Mono', monospace;
+  }
+  pre {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-size: 12px;
+    color: var(--ink-100);
+    font-family: ui-monospace, 'SF Mono', monospace;
+    margin: 8px 0;
+    line-height: 1.55;
+  }
+  pre .com { color: var(--ink-500); font-style: italic; }
+  pre .key { color: var(--blue); }
+  pre .val { color: var(--amber); }
+
+  ul, ol { margin: 8px 0 12px 20px; color: var(--ink-300); font-size: 14px; }
+  li { margin-bottom: 4px; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px;
+  }
+  th, td {
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+    text-align: left; vertical-align: top;
+  }
+  th {
+    background: var(--surface); color: var(--ink-300);
+    font-weight: 700; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tip {
+    background: rgba(251, 191, 36, 0.08);
+    border-left: 3px solid var(--amber);
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    margin: 12px 0; font-size: 13px; color: var(--ink-300);
+  }
+  .warn {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid var(--red);
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    margin: 12px 0; font-size: 13px; color: var(--ink-300);
+  }
+  .ok {
+    background: rgba(0, 199, 60, 0.08);
+    border-left: 3px solid var(--naver);
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    margin: 12px 0; font-size: 13px; color: var(--ink-300);
+  }
+  .info {
+    background: rgba(96, 165, 250, 0.08);
+    border-left: 3px solid var(--blue);
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    margin: 12px 0; font-size: 13px; color: var(--ink-300);
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 24px 0 32px;
+  }
+  .toc-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--ink-500); margin-bottom: 8px; font-weight: 700;
+  }
+  .toc ul { margin: 0; list-style: none; padding: 0; columns: 2; column-gap: 24px; }
+  .toc li { font-size: 13px; margin-bottom: 4px; }
+  .toc a { color: var(--ink-300); text-decoration: none; }
+  .toc a:hover { color: var(--naver); }
+
+  .badge {
+    display: inline-block; padding: 1px 6px;
+    font-size: 10px; font-weight: 700;
+    border-radius: 3px; border: 1px solid; margin-right: 4px;
+  }
+  .badge.done { background: rgba(0,199,60,0.15); color: var(--naver); border-color: var(--naver); }
+  .badge.todo { background: rgba(239,68,68,0.15); color: var(--red); border-color: var(--red); }
+  .badge.partial { background: rgba(251,191,36,0.15); color: var(--amber); border-color: var(--amber); }
+  .badge.gtm { background: rgba(167,139,250,0.15); color: var(--violet); border-color: var(--violet); }
+
+  .step-grid {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 12px 16px;
+    margin: 12px 0;
+  }
+  .step-num {
+    width: 32px; height: 32px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--naver);
+    font-size: 13px;
+  }
+  .step-body { padding-top: 4px; }
+  .step-body h4 { margin-top: 0; margin-bottom: 4px; color: var(--ink-100); text-transform: none; letter-spacing: 0; font-size: 14px; }
+  .step-body p { font-size: 13px; margin-bottom: 4px; }
+
+  @media print {
+    body { background: white; color: #111; padding: 20mm 16mm; }
+    h2 { color: #00a830; border-color: #00a830; page-break-after: avoid; }
+    table, pre, .tip, .warn, .ok, .info { background: #f9fafb; border-color: #d1d5db; color: #374151; }
+    p, li, td, strong { color: #111; }
+    .toc { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>광고 추적 인프라 가이드</h1>
+<p class="sub">GTM · GA4 · 광고 픽셀 · 검색콘솔 · 전환 추적 — 광고 ON 모드 진입 전 셋업</p>
+<p class="meta">v1.0 · 2026.05.20 · 페이드미디어 예산 전량 오즈랩페이 집중 결정 반영</p>
+
+<div class="info">
+  ℹ️ <strong>읽는 순서</strong>: 1번(인프라 매트릭스) → 2번(GTM 컨테이너 — 이미 완료) → 3번(GA4)부터 순서대로.
+  대웅·광고대행사·내부 마케터 모두 같은 페이지를 보고 작업합니다.
+</div>
+
+<div class="toc">
+  <div class="toc-title">목차</div>
+  <ul>
+    <li><a href="#matrix">1. 추적 인프라 매트릭스</a></li>
+    <li><a href="#gtm">2. GTM 컨테이너</a></li>
+    <li><a href="#ga4">3. GA4 (Google Analytics 4)</a></li>
+    <li><a href="#gsc">4. Google Search Console</a></li>
+    <li><a href="#naver-sc">5. 네이버 서치어드바이저</a></li>
+    <li><a href="#google-ads">6. Google Ads 전환 추적</a></li>
+    <li><a href="#meta">7. Meta(페이스북) 픽셀</a></li>
+    <li><a href="#naver-ads">8. 네이버 광고 픽셀</a></li>
+    <li><a href="#kakao">9. 카카오 모먼트 픽셀</a></li>
+    <li><a href="#datalayer">10. dataLayer 표준 이벤트 명세</a></li>
+    <li><a href="#conv-value">10-B. 전환가치 동적 매핑 (핵심)</a></li>
+    <li><a href="#verify">11. 검증 체크리스트</a></li>
+    <li><a href="#launch">12. 광고 ON 직전 점검</a></li>
+  </ul>
+</div>
+
+<h2 id="matrix">1. 추적 인프라 매트릭스</h2>
+<p>광고 시작 전 갖춰야 할 추적·측정 인프라 12종.
+<span class="badge done">완료</span>는 이미 박혀있고, <span class="badge partial">부분</span>은 hook만 있고 값 미설정, <span class="badge todo">대기</span>는 작업 필요.</p>
+
+<table>
+  <thead>
+    <tr><th style="width:160px">영역</th><th style="width:80px">상태</th><th>해야 할 일</th><th style="width:120px">담당</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>GTM 컨테이너</strong></td><td><span class="badge done">완료</span></td><td><code>GTM-N3HSNZPJ</code> 박힘. /admin/* 자동 차단.</td><td>—</td></tr>
+    <tr><td><strong>GA4 측정</strong></td><td><span class="badge todo">대기</span></td><td>GA4 프로퍼티 생성 → GTM 안에 GA4 설정 태그 추가 → DebugView 검증</td><td>대웅</td></tr>
+    <tr><td><strong>Google Search Console</strong></td><td><span class="badge partial">부분</span></td><td>토큰 발급 → Vercel <code>GOOGLE_SITE_VERIFICATION</code> env → 재배포 → GSC에서 확인</td><td>대웅</td></tr>
+    <tr><td><strong>네이버 서치어드바이저</strong></td><td><span class="badge partial">부분</span></td><td>토큰 발급 → Vercel <code>NAVER_SITE_VERIFICATION</code> env → 재배포 → 네이버 SC에서 확인</td><td>대웅</td></tr>
+    <tr><td><strong>Google Ads 전환</strong></td><td><span class="badge todo">대기</span></td><td>Ads 계정 → 전환 액션 생성 → GTM 안 전환 태그 → dataLayer <code>generate_lead</code> 트리거</td><td>대웅</td></tr>
+    <tr><td><strong>Meta 픽셀</strong></td><td><span class="badge todo">대기</span></td><td>비즈매니저 → 픽셀 생성 → GTM 안 사용자 정의 HTML 태그</td><td>대웅</td></tr>
+    <tr><td><strong>네이버 광고 픽셀</strong></td><td><span class="badge todo">대기</span></td><td>검색광고 + GFA 둘 다. GTM 안 사용자 정의 HTML 태그</td><td>대웅</td></tr>
+    <tr><td><strong>카카오 모먼트 픽셀</strong></td><td><span class="badge todo">대기</span></td><td>카카오 광고 운용 시. GTM 안 사용자 정의 HTML 태그</td><td>대웅</td></tr>
+    <tr><td><strong>dataLayer 이벤트 push</strong></td><td><span class="badge todo">대기</span></td><td>폼 제출·CTA 클릭·전화 클릭 등 표준 이벤트를 dataLayer에 push (코드 작업)</td><td>Cowork</td></tr>
+    <tr><td><strong>UTM 표준 어트리뷰션</strong></td><td><span class="badge done">완료</span></td><td>자동 캐치 + 30일 first-touch 보존. 광고대행사에 <a href="/admin/help/utm" style="color:var(--naver)">UTM 표준 가이드</a> 핸드오프</td><td>—</td></tr>
+    <tr><td><strong>매체별 ad_metrics sync</strong></td><td><span class="badge partial">부분</span></td><td>골격 마련됨 (Phase 5). 광고 시작 후 시트 sync 1회 실데이터 검증</td><td>대웅+Cowork</td></tr>
+    <tr><td><strong>슬랙 알림 (신규 디비·이상 시그널)</strong></td><td><span class="badge todo">대기</span></td><td>광고 시작 = 디비 폭증. Phase 7 큐에 등록됨 (2-3일 소요)</td><td>Cowork</td></tr>
+  </tbody>
+</table>
+
+<h2 id="gtm">2. GTM 컨테이너 <span class="badge done">완료</span></h2>
+<p><strong>컨테이너 ID</strong>: <code>GTM-N3HSNZPJ</code></p>
+<p>코드 박는 위치는 이미 끝났습니다. 앞으로는 GTM 웹 UI(<a href="https://tagmanager.google.com" target="_blank" style="color:var(--naver)">tagmanager.google.com</a>)에서 태그·트리거·변수만 추가하면 즉시 사이트에 반영됩니다.</p>
+
+<h3>코드 측 셋업 (이미 완료)</h3>
+<ul>
+  <li><code>components/seo/GoogleTagManager.tsx</code> — script + noscript iframe 한 번에 처리</li>
+  <li><code>app/layout.tsx</code> — <code>&lt;body&gt;</code> 최상단 마운트</li>
+  <li><code>lib/seo.ts</code> — <code>GTM_ID</code> 상수 (env <code>NEXT_PUBLIC_GTM_ID</code>로 override 가능)</li>
+  <li><strong>어드민 자동 차단</strong>: <code>usePathname()</code>이 <code>/admin/*</code>이면 GTM 렌더 0. → 직원 내부 사용이 GA 통계 오염시키지 않음.</li>
+</ul>
+
+<div class="ok">
+  ✅ 라이브 검증 통과 — www.ozlabpay.kr 에서 <code>dataLayer</code>, <code>google_tag_manager['GTM-N3HSNZPJ']</code>, noscript iframe 모두 정상 동작 확인됨.
+</div>
+
+<h3>GTM 컨테이너 바꿔야 할 때</h3>
+<ol>
+  <li>Vercel 프로젝트 Settings → Environment Variables → <code>NEXT_PUBLIC_GTM_ID</code> 값 변경</li>
+  <li>Vercel Deployments → 최신 배포 우측 ⋯ → Redeploy</li>
+  <li>약 1분 후 사이트에서 새 컨테이너 ID 박힘 확인 (Chrome 확장 Tag Assistant)</li>
+</ol>
+
+<h2 id="ga4">3. GA4 (Google Analytics 4) <span class="badge todo">대기</span></h2>
+<p>GA4는 <strong>GTM 안에서 설정 태그 1개만 추가</strong>하면 됩니다. 코드 변경 0.</p>
+
+<div class="step-grid">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>GA4 프로퍼티 생성</h4>
+    <p><a href="https://analytics.google.com" target="_blank" style="color:var(--naver)">analytics.google.com</a> → 관리(좌하단 톱니) → 프로퍼티 만들기 → <strong>오즈랩페이</strong>. 측정 ID <code>G-XXXXXXXXXX</code> 복사.</p>
+  </div>
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>GTM 안에 GA4 설정 태그</h4>
+    <p>GTM <code>GTM-N3HSNZPJ</code> 진입 → 태그 → 새로 만들기 → 태그 유형 "Google 태그" → 태그 ID에 <code>G-XXXXXXXXXX</code> 입력 → 트리거 "Initialization - All Pages" → 저장.</p>
+  </div>
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>미리보기 모드로 검증</h4>
+    <p>GTM 우상단 "미리보기" → URL <code>https://www.ozlabpay.kr</code> 입력 → Tag Assistant 새 탭 열림 → Tags Fired 영역에 "Google 태그" 보이면 OK.</p>
+  </div>
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>GA4 DebugView 확인</h4>
+    <p>GA4 좌측 메뉴 "관리 → 데이터 표시 → DebugView" 진입. 사이트 새로고침하면 실시간 이벤트 흐름 보임. <code>page_view</code> 들어오면 끝.</p>
+  </div>
+  <div class="step-num">5</div>
+  <div class="step-body">
+    <h4>제출 + 게시</h4>
+    <p>GTM 우상단 "제출" → 버전 이름 "GA4 연결" → "게시 및 만들기". 이후로 모든 방문자가 GA4에 카운트됨.</p>
+  </div>
+</div>
+
+<div class="tip">
+  💡 <strong>전환 측정</strong>은 GA4 "관리 → 이벤트" 메뉴에서 <code>form_submit</code>, <code>generate_lead</code> 등을 <strong>전환으로 표시</strong>를 켜면 자동 집계 시작. (단, 그 이벤트가 dataLayer에 push 되고 있어야 함 → 10번 섹션)
+</div>
+
+<h2 id="gsc">4. Google Search Console <span class="badge partial">부분</span></h2>
+<p>코드에 hook은 이미 있음. 토큰 발급 → env 입력 → 재배포 3단계.</p>
+
+<div class="step-grid">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>토큰 발급</h4>
+    <p><a href="https://search.google.com/search-console" target="_blank" style="color:var(--naver)">search.google.com/search-console</a> → 속성 추가 → URL 접두사 → <code>https://www.ozlabpay.kr</code> 입력 → 인증 방법 "HTML 태그" 선택 → <code>&lt;meta name="google-site-verification" content="<strong>여기값</strong>"&gt;</code>의 <strong>여기값</strong>만 복사.</p>
+  </div>
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>Vercel env 입력</h4>
+    <p>Vercel 프로젝트 ozlab → Settings → Environment Variables → 추가:</p>
+    <pre><span class="key">GOOGLE_SITE_VERIFICATION</span> = <span class="val">방금 복사한 토큰값</span></pre>
+    <p>Production · Preview · Development 3개 모두 체크.</p>
+  </div>
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>재배포</h4>
+    <p>Vercel Deployments → 최신 배포 ⋯ → Redeploy. 약 1분 후 페이지 소스(<code>view-source:</code>)에 <code>&lt;meta name="google-site-verification"&gt;</code> 박혔는지 확인.</p>
+  </div>
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>GSC에서 확인</h4>
+    <p>GSC 인증 화면 "확인" 버튼 → 통과. 이후 sitemap 제출(<code>https://www.ozlabpay.kr/sitemap.xml</code> — 이미 존재).</p>
+  </div>
+</div>
+
+<h2 id="naver-sc">5. 네이버 서치어드바이저 <span class="badge partial">부분</span></h2>
+<p>구조는 GSC와 동일. env 이름만 다름.</p>
+<pre><span class="key">NAVER_SITE_VERIFICATION</span> = <span class="val">네이버 SC에서 발급한 토큰</span></pre>
+<p><a href="https://searchadvisor.naver.com" target="_blank" style="color:var(--naver)">searchadvisor.naver.com</a> → 사이트 등록 → HTML 태그 인증 → 토큰 발급 → Vercel env 입력 → 재배포 → 확인.</p>
+
+<h2 id="google-ads">6. Google Ads 전환 추적 <span class="badge todo">대기</span></h2>
+<p>광고비 ROAS 측정의 핵심. <strong>전환 = 상담 신청 폼 제출</strong>로 잡습니다.</p>
+
+<div class="step-grid">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>Google Ads 전환 액션 생성</h4>
+    <p>Google Ads → 도구 → 전환 → +새 전환 액션 → "웹사이트" → URL 입력 → <strong>"수동으로 전환 액션 만들기"</strong> → 카테고리 "리드", 가치 "각 전환마다 같은 값 사용" → 1건당 기여 가치 입력(예: 5만원).</p>
+    <p>전환 ID 두 개 메모: <code>conversion_id</code> (<code>AW-XXXXXXXXX</code>), <code>conversion_label</code> (영문/숫자 조합).</p>
+  </div>
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>GTM 안에 전환 태그</h4>
+    <p>GTM → 태그 → 새로 만들기 → "Google Ads 전환 추적" → 위에서 받은 <code>conversion_id</code> · <code>conversion_label</code> 입력.</p>
+  </div>
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>트리거</h4>
+    <p>맞춤 이벤트 트리거 → 이벤트 이름 <code>generate_lead</code> → 저장. (이 이벤트는 dataLayer push로 들어옵니다 — 10번 섹션)</p>
+  </div>
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>Ads-GA4 연결 (보너스)</h4>
+    <p>GA4 관리 → 제품 링크 → Google Ads 링크 → 광고 계정 선택. 이러면 <strong>광고 → GA4 전환</strong> 연결이 자동 import 되어 Ads에서 직접 잡지 않아도 됩니다.</p>
+  </div>
+</div>
+
+<h2 id="meta">7. Meta(페이스북·인스타그램) 픽셀 <span class="badge todo">대기</span></h2>
+<p>메타 광고 운용 시 필수. GTM 안에 사용자 정의 HTML 태그로 박습니다.</p>
+
+<div class="step-grid">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>비즈매니저에서 픽셀 생성</h4>
+    <p><a href="https://business.facebook.com/events_manager" target="_blank" style="color:var(--naver)">business.facebook.com/events_manager</a> → 데이터 소스 → +추가 → "웹" → 픽셀 이름 "오즈랩페이" → 픽셀 ID 메모.</p>
+  </div>
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>GTM 사용자 정의 HTML 태그 (기본 PageView)</h4>
+    <pre>&lt;script&gt;
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '<span class="val">픽셀ID</span>');
+fbq('track', 'PageView');
+&lt;/script&gt;</pre>
+    <p>트리거: All Pages.</p>
+  </div>
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>Lead 이벤트 추가 태그</h4>
+    <pre>&lt;script&gt;fbq('track', 'Lead');&lt;/script&gt;</pre>
+    <p>트리거: 맞춤 이벤트 <code>generate_lead</code></p>
+  </div>
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>검증</h4>
+    <p>Chrome 확장 "Meta Pixel Helper" 설치 → 사이트 방문 → 픽셀 ID + PageView 잡혀야 OK. 폼 제출하면 Lead 이벤트도 잡힘.</p>
+  </div>
+</div>
+
+<div class="warn">
+  ⚠️ <strong>Conversions API(CAPI)</strong>는 iOS 14+ 트래킹 제한 대응으로 권장되지만 서버 측 구현 필요. 1차 런칭은 픽셀만으로 시작, 트래픽 안정화 후 CAPI 추가 검토.
+</div>
+
+<h2 id="naver-ads">8. 네이버 광고 픽셀 <span class="badge todo">대기</span></h2>
+
+<h3>8-1. 네이버 검색광고 전환</h3>
+<p>네이버 검색광고 → 도구 → 프리미엄 로그 분석 → 전환 추적 → 전환 스크립트 발급.</p>
+<p>GTM 사용자 정의 HTML 태그로 박고, 트리거 <code>generate_lead</code>.</p>
+
+<h3>8-2. 네이버 GFA (디스플레이 / 플레이스 광고)</h3>
+<p>네이버 GFA → 광고관리 → 전환 추적 → 공통 스크립트 + 전환 스크립트.</p>
+<ul>
+  <li><strong>공통 스크립트</strong>: GTM 사용자 정의 HTML → All Pages 트리거 → 모든 페이지에서 픽셀 로드</li>
+  <li><strong>전환 스크립트</strong>: GTM 사용자 정의 HTML → 맞춤 이벤트 <code>generate_lead</code> 트리거</li>
+</ul>
+
+<div class="tip">
+  💡 네이버 광고 픽셀은 <strong>네이버 광고 시스템 안에서만</strong> 발급 가능. 광고대행사가 운영한다면 대행사에 "GTM에 박을 스크립트 텍스트 보내달라"고 요청.
+</div>
+
+<h2 id="kakao">9. 카카오 모먼트 픽셀 <span class="badge todo">대기</span></h2>
+<p>카카오 비즈니스 → 카카오 모먼트 → 픽셀 & SDK → 픽셀 추적 코드 발급. 메타와 동일한 패턴(공통 + 전환).</p>
+<p>카카오 광고를 안 쓸 거면 이 섹션 스킵해도 됨.</p>
+
+<h2 id="datalayer">10. dataLayer 표준 이벤트 명세 <span class="badge todo">코드작업 대기</span></h2>
+<p>위 6·7·8·9번에서 트리거로 쓰는 이벤트 이름들은 <strong>아직 사이트에서 push되지 않습니다</strong>. 다음 단계 코드 작업(=옵션 A)에서 박을 예정.</p>
+<p>아래는 박을 표준 이벤트 명세 (GTM 트리거 만들 때 동일한 이름 쓰면 됨):</p>
+
+<table>
+  <thead>
+    <tr><th>이벤트 이름</th><th>언제 발생</th><th>데이터 payload</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>generate_lead</code> <span class="badge gtm">GA4 표준</span></td>
+      <td>상담 신청 폼 제출 성공 시</td>
+      <td><code>cta_id</code>, <code>cta_label</code>, <code>utm_source/medium/campaign</code>, <code>value</code> (1건당 기여 가치)</td>
+    </tr>
+    <tr>
+      <td><code>form_start</code></td>
+      <td>폼 첫 필드 포커스 시</td>
+      <td><code>cta_id</code>, <code>form_location</code> (hero/floating/modal 등)</td>
+    </tr>
+    <tr>
+      <td><code>cta_click</code></td>
+      <td>CTA 버튼 클릭 (폼 안 띄우는 단순 anchor 포함)</td>
+      <td><code>cta_id</code>, <code>cta_label</code>, <code>page_path</code></td>
+    </tr>
+    <tr>
+      <td><code>phone_click</code></td>
+      <td>전화번호 <code>tel:</code> 링크 클릭</td>
+      <td><code>page_path</code>, <code>phone_number</code></td>
+    </tr>
+    <tr>
+      <td><code>kakao_chat_click</code></td>
+      <td>카카오톡 채널 상담 버튼 클릭</td>
+      <td><code>page_path</code></td>
+    </tr>
+    <tr>
+      <td><code>scroll_depth</code></td>
+      <td>페이지 25/50/75/100% 스크롤 도달</td>
+      <td><code>depth_pct</code>, <code>page_path</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="info">
+  ℹ️ <strong>왜 <code>generate_lead</code>를 쓰나</strong>: GA4 추천 이벤트(<a href="https://support.google.com/analytics/answer/9267735" target="_blank" style="color:var(--naver)">공식 doc</a>) 중 하나라 GA4가 자동으로 전환 의도로 인식. 메타 픽셀의 <code>Lead</code>, Google Ads 의 "리드" 카테고리와도 1:1 매핑.
+</div>
+
+<h2 id="conv-value">10-B. 전환가치 동적 매핑 (핵심) <span class="badge todo">코드작업 대기</span></h2>
+
+<p>일반 가이드의 "1건당 5만원 고정값"은 ROAS를 왜곡합니다. 오즈랩페이는 <strong>건마다 매출·사은품·net 마진이 다름</strong>. 진짜 net 마진(매출 - 사은품 지출)이 GA·광고로 흘러야 정확한 매체별 ROAS가 보입니다.</p>
+
+<div class="info">
+  ℹ️ <strong>net 마진 정의</strong> (이번 프로젝트 기준):
+  <code>net_value = revenue_records.amount − COALESCE(gift_cost, 0)</code><br>
+  → 실제 사업 기여 가치. 광고 매체에 이 값이 들어가야 효율 정확함.
+</div>
+
+<h3>10-B-1. 시점이 두 개라는 사실 인지</h3>
+<table>
+  <thead>
+    <tr><th>시점</th><th>위치</th><th>가능한 값</th><th>액션</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>① 상담 신청 시점</strong></td>
+      <td>방문자 브라우저</td>
+      <td>매출 모름 (아직 안 났으니)</td>
+      <td>dataLayer push <code>generate_lead</code> with <strong>추정 평균 net 마진</strong></td>
+    </tr>
+    <tr>
+      <td><strong>② 매출 입력 시점</strong></td>
+      <td>어드민 (방문자 세션 종료됨)</td>
+      <td>실제 net 마진 확정</td>
+      <td>서버에서 GA4 Measurement Protocol 호출 — <strong>실제 net 값</strong>으로 보정</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>10-B-2. ① 폼 제출 시점 — 추정값 push</h3>
+<pre>window.dataLayer.push({
+  event: <span class="val">'generate_lead'</span>,
+  <span class="key">lead_id</span>: <span class="val">'consult_abc123'</span>,    <span class="com">// consultations.id (서버 응답)</span>
+  <span class="key">cta_id</span>: <span class="val">'hero_apply'</span>,
+  <span class="key">value</span>: <span class="val">30000</span>,                    <span class="com">// 추정 평균 net 마진 (운영하면서 갱신)</span>
+  <span class="key">currency</span>: <span class="val">'KRW'</span>,
+  <span class="key">utm_source</span>: <span class="val">'naver'</span>,
+  <span class="key">utm_medium</span>: <span class="val">'cpc'</span>,
+  <span class="key">utm_campaign</span>: <span class="val">'spring_launch'</span>,
+});</pre>
+<p><code>lead_id</code>는 나중에 매출 보정 시 두 이벤트를 연결하는 핵심 키. 반드시 consultations.id 와 같은 값.</p>
+
+<h3>10-B-3. ② 매출 입력 시점 — 서버에서 실제 net 값 보정</h3>
+<p>어드민 매출 카드에서 매출액 + 사은품 비용 저장될 때, 서버 라우트가 GA4 Measurement Protocol 로 두 번째 이벤트를 전송:</p>
+<pre>POST https://www.google-analytics.com/mp/collect
+  ?measurement_id=<span class="val">G-XXXXXXXXXX</span>
+  &api_secret=<span class="val">{API_SECRET}</span>
+
+{
+  <span class="key">"client_id"</span>: <span class="val">"{consultations.ga_client_id}"</span>,    <span class="com">// 폼 제출 시 저장해둔 값</span>
+  <span class="key">"events"</span>: [{
+    <span class="key">"name"</span>: <span class="val">"purchase"</span>,                <span class="com">// 또는 'lead_confirmed'</span>
+    <span class="key">"params"</span>: {
+      <span class="key">"lead_id"</span>: <span class="val">"consult_abc123"</span>,    <span class="com">// 1번 이벤트와 동일</span>
+      <span class="key">"value"</span>: <span class="val">47500</span>,                 <span class="com">// 실제 net = 50000 - 2500</span>
+      <span class="key">"currency"</span>: <span class="val">"KRW"</span>,
+      <span class="key">"transaction_id"</span>: <span class="val">"rev_xyz789"</span>
+    }
+  }]
+}</pre>
+
+<div class="tip">
+  💡 <code>client_id</code>는 폼 제출 시 GA4 쿠키 <code>_ga</code>에서 떼서 consultations 에 같이 저장. 이래야 매출 보정이 폼 제출과 동일 사용자로 묶임. <strong>안 묶이면 GA4 가 두 이벤트를 다른 사용자로 봄 → 어트리뷰션 깨짐.</strong>
+</div>
+
+<h3>10-B-4. Google Ads 측 보정 (Conversion Adjustments)</h3>
+<p>광고 ROAS 정확도를 GA4 너머 Google Ads에서도 보려면, Ads 의 "전환 조정" API로 net 값을 한 번 더 보정.</p>
+<ol>
+  <li>폼 제출 시 <code>gclid</code> 캐치 (이미 어트리뷰션 시스템에 있음) → consultations 저장</li>
+  <li>매출 입력 시 서버에서 Google Ads API <code>conversionAdjustments.upload</code> 호출 → 해당 <code>gclid</code>의 전환값을 net 마진으로 보정</li>
+  <li>Ads 화면에서 "전환 추적상태"가 <strong>"조정됨"</strong>으로 바뀌면 OK</li>
+</ol>
+
+<div class="warn">
+  ⚠️ Google Ads Conversion Adjustments API 는 OAuth 2.0 + 개발자 토큰 신청 필요. 1차 런칭 때는 GA4 Measurement Protocol 만 우선 구현 → Ads-GA4 import 로 ROAS 받고, 트래픽 안정화 후 Ads API 직접 보정 도입 권장.
+</div>
+
+<h3>10-B-5. 메타·네이버 광고는?</h3>
+<table>
+  <thead>
+    <tr><th>매체</th><th>실 매출 보정 방법</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Meta (페이스북)</td>
+      <td><strong>Conversions API (CAPI)</strong> — 서버에서 직접 <code>Purchase</code> 이벤트 + <code>value</code> 보냄. 픽셀의 Lead 이벤트와 함께 dedup.</td>
+    </tr>
+    <tr>
+      <td>네이버 검색광고</td>
+      <td>전환값 직접 보정 API 미지원. <strong>전환별 평균값</strong>을 운영하면서 매월 보정 (네이버 광고 시스템 → 전환 → 가치 갱신)</td>
+    </tr>
+    <tr>
+      <td>네이버 GFA</td>
+      <td>동일. 평균값 수동 보정 운영.</td>
+    </tr>
+    <tr>
+      <td>카카오 모먼트</td>
+      <td>동일. 평균값 수동 보정.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>10-B-6. 구현 체크리스트 (코드 작업 단계)</h3>
+<ol>
+  <li><code>consultations</code> 테이블에 <code>ga_client_id</code>, <code>ga_session_id</code>, <code>gclid</code>, <code>fbclid</code> 컬럼 (어트리뷰션 hook 일부 이미 있음 — 점검)</li>
+  <li><code>ApplyForm</code> 제출 시 GA4 쿠키에서 <code>_ga</code> 파싱 → 서버에 같이 보냄</li>
+  <li>폼 제출 성공 응답 후 dataLayer <code>generate_lead</code> push (lead_id + 추정 value)</li>
+  <li><code>/api/admin/revenue</code> POST 시 서버에서 <code>net_value = amount − COALESCE(gift_cost, 0)</code> 계산 → GA4 Measurement Protocol <code>purchase</code> 이벤트 전송</li>
+  <li>Vercel env 추가: <code>GA4_MEASUREMENT_ID</code>, <code>GA4_API_SECRET</code></li>
+  <li>(선택) Google Ads Conversion Adjustments API 연결 — 트래픽 안정화 후</li>
+</ol>
+
+<div class="ok">
+  ✅ 이 매핑이 끝나야 진짜 매체별 ROAS가 보입니다. "naver-cpc 평균 LTV 47,500원 / 메타 32,800원" 식으로. 매체 예산 분배 의사결정의 기반.
+</div>
+
+<h2 id="verify">11. 검증 체크리스트</h2>
+
+<h3>11-1. Chrome 확장 3종 설치</h3>
+<ul>
+  <li><strong>Tag Assistant Legacy (by Google)</strong> — GTM·GA4·Ads 태그 발사 확인</li>
+  <li><strong>Meta Pixel Helper</strong> — 메타 픽셀 발사 + payload 확인</li>
+  <li><strong>GA Debugger</strong> — GA4 hit 콘솔 로그 출력</li>
+</ul>
+
+<h3>11-2. GTM Preview 모드</h3>
+<p>GTM 우상단 "미리보기" → 사이트 새 탭 → 좌측 Tag Assistant 패널에서:</p>
+<ul>
+  <li><strong>Tags Fired</strong>: 발사된 태그 목록</li>
+  <li><strong>Tags Not Fired</strong>: 트리거 조건 미충족 (의도된 거면 OK, 아니면 트리거 점검)</li>
+  <li><strong>Variables</strong>: 각 이벤트 시점의 dataLayer · GTM 변수 값</li>
+  <li><strong>Data Layer</strong>: 시간순 push 기록 (이벤트 이름·payload 그대로 보임)</li>
+</ul>
+
+<h3>11-3. GA4 DebugView</h3>
+<p>GA4 → 관리 → DebugView. 실시간 이벤트 흐름 + 매개변수 확인. <code>generate_lead</code>가 보여야 광고 ROI 측정 가능.</p>
+
+<h3>11-4. Ads 전환 진단</h3>
+<p>Google Ads → 도구 → 전환 → 상태 컬럼. 폼 1건 제출 후 ~24시간 내 "기록 중"으로 바뀌면 OK.</p>
+
+<h2 id="launch">12. 광고 ON 직전 점검 리스트</h2>
+<p>실제 광고비 태우기 직전, 아래 12개 모두 ✅ 인지 점검:</p>
+
+<ol>
+  <li>GTM <code>GTM-N3HSNZPJ</code> 컨테이너 사이트 박힘 확인 (Tag Assistant)</li>
+  <li>GA4 측정 ID 연결 + DebugView에서 <code>page_view</code> 흐름 확인</li>
+  <li>GA4 "이벤트" 메뉴에서 <code>generate_lead</code> 를 <strong>전환으로 표시</strong> ON</li>
+  <li>Google Ads 계정 ↔ GA4 링크 (전환 import용)</li>
+  <li>Google Ads 전환 액션 1건 이상 활성 + GTM 전환 태그 트리거 <code>generate_lead</code></li>
+  <li>Meta 픽셀 PageView + Lead 둘 다 GTM Preview에서 발사 확인</li>
+  <li>네이버 광고 픽셀 (검색 + GFA) 발사 확인</li>
+  <li>GSC + 네이버 SC 인증 완료 + sitemap 제출</li>
+  <li>UTM 표준 가이드 광고대행사 핸드오프 완료 (<a href="/admin/help/utm" style="color:var(--naver)">/admin/help/utm</a>)</li>
+  <li>dataLayer <code>generate_lead</code> push 실데이터 1건 시뮬레이션 (테스트 신청 폼 1회 제출)</li>
+  <li><strong>전환가치 동적 매핑</strong>: 매출 입력 시 서버에서 net 마진(매출−사은품)을 GA4 Measurement Protocol로 보정 (10-B 섹션)</li>
+  <li>슬랙 알림 시스템 ON — 신규 디비 알림 + 이상 시그널(CPA 2배수 등)</li>
+  <li>ad_metrics 시트 sync 1회 실제 데이터로 검증 + 어드민 대시보드 매체별 ROAS 표시 확인</li>
+</ol>
+
+<div class="ok">
+  ✅ 12개 모두 OK = 광고 ON 가능. ROI 측정·이상 감지·매체별 분석 인프라 완비.
+</div>
+
+<div class="warn">
+  ⚠️ 1번부터 6번까지(측정·전환)는 광고 시작 전 무조건 끝나야 합니다. 7~9번(GSC/SC/UTM)은 광고와 무관하게 늘 OK여야 합니다. 10~12번은 광고 시작 첫 주 안에 안정화하세요.
+</div>
+
+<h2>참고 링크</h2>
+<ul>
+  <li><a href="https://tagmanager.google.com" target="_blank" style="color:var(--naver)">GTM 대시보드</a></li>
+  <li><a href="https://analytics.google.com" target="_blank" style="color:var(--naver)">GA4 대시보드</a></li>
+  <li><a href="https://search.google.com/search-console" target="_blank" style="color:var(--naver)">Google Search Console</a></li>
+  <li><a href="https://searchadvisor.naver.com" target="_blank" style="color:var(--naver)">네이버 서치어드바이저</a></li>
+  <li><a href="https://business.facebook.com/events_manager" target="_blank" style="color:var(--naver)">Meta 이벤트 관리자</a></li>
+  <li><a href="https://support.google.com/analytics/answer/9267735" target="_blank" style="color:var(--naver)">GA4 추천 이벤트 (공식)</a></li>
+  <li><a href="/admin/help/utm" style="color:var(--naver)">UTM 표준 네이밍 가이드 (내부)</a></li>
+</ul>
+
+</div>
+</body>
+</html>

@@ -62,6 +62,7 @@ export default async function AdminShellLayout({
         { href: '/admin/settings/blacklist', label: '블랙리스트 관리', desc: '차단 연락처·IP 해제' },
         { href: '/admin/settings/ad-sync', label: '광고 sync', desc: '시트 → ad_metrics' },
         { href: '/admin/help/utm', label: 'UTM 표준 가이드', desc: '광고대행사 핸드오프용' },
+        { href: '/admin/help/tracking', label: '광고 추적 인프라', desc: 'GTM·GA4·픽셀·전환가치 세팅' },
       ]
       : []),
     ...(!isSuperAdmin(profile.role) && canManageDbPolicy
