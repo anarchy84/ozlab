@@ -11,11 +11,12 @@
 // ─────────────────────────────────────────────
 'use client'
 
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react'
 import { EditableText } from '@/components/editable/EditableText'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
+import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, pushEvent } from '@/lib/tracking/datalayer'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -64,7 +65,10 @@ export function ApplyForm({ blocks }: Props) {
   const [error, setError] = useState<string | null>(null)
   // mount 시 어트리뷰션 캐싱 — submit 시 함께 전송
   // utm 5종 + gclid/fbclid + referer/landing_page (First-touch + URL + CTA 머지)
+  // + ga_client_id / ga_session_id (GA4 cookie 에서 파싱)
   const [attribution, setAttribution] = useState<Record<string, string>>({})
+  // form_start 는 첫 필드 포커스 시 1회만 push
+  const formStartedRef = useRef(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -84,8 +88,27 @@ export function ApplyForm({ blocks }: Props) {
     if (attr.referer)           u.referer           = attr.referer
     if (attr.landing_page_path) u.landing_page_path = attr.landing_page_path
 
+    // GA4 client_id / session_id 캐치 → 서버 저장 → 매출 입력 시 GA4 Measurement
+    // Protocol 로 동일 사용자에 매칭 (이게 빠지면 어트리뷰션 깨짐)
+    const gaClient = getGaClientId()
+    const gaSession = getGaSessionId()
+    if (gaClient)  u.ga_client_id  = gaClient
+    if (gaSession) u.ga_session_id = gaSession
+
     setAttribution(u)
   }, [])
+
+  // 첫 필드 포커스 시 form_start push (1회만)
+  //   - GA4 에서 폼 도달 vs 폼 시작 vs 완료 깔때기 분석 가능
+  const handleFieldFocus = () => {
+    if (formStartedRef.current) return
+    formStartedRef.current = true
+    pushEvent('form_start', {
+      form_id: 'home_apply',
+      form_location: 'apply_section',
+      page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+    })
+  }
 
   // 단일 onChange 핸들러 — text/select/textarea 모두 처리
   const onChange = (
@@ -121,6 +144,25 @@ export function ApplyForm({ blocks }: Props) {
       // 성공 — sent 토글, form 리셋(다시 신청 시 깨끗한 상태)
       setSent(true)
       setForm(INITIAL)
+      // GTM dataLayer push — GA4 추천 이벤트 generate_lead
+      //   · lead_id : 매출 보정 시 동일 사용자 연결 키 (consultations.id)
+      //   · value   : 1차 추정 net 마진 (실제 net 은 매출 입력 시 서버 MP 로 보정 — A-3 단계)
+      //   · utm_*   : 매체별 ROAS 측정 기반
+      //   · gclid/fbclid : Google Ads · Meta 광고 클릭 매칭
+      pushEvent('generate_lead', {
+        lead_id: typeof data?.id === 'string' ? data.id : null,
+        value: LEAD_DEFAULT_VALUE,
+        currency: 'KRW',
+        form_id: 'home_apply',
+        cta_id: attribution.cta_id ?? null,
+        utm_source: attribution.utm_source ?? null,
+        utm_medium: attribution.utm_medium ?? null,
+        utm_campaign: attribution.utm_campaign ?? null,
+        utm_content: attribution.utm_content ?? null,
+        utm_term: attribution.utm_term ?? null,
+        gclid: attribution.gclid ?? null,
+        fbclid: attribution.fbclid ?? null,
+      })
     } catch {
       setError('네트워크 오류입니다. 잠시 후 다시 시도해주세요.')
     } finally {
@@ -269,7 +311,7 @@ export function ApplyForm({ blocks }: Props) {
               </button>
             </div>
           ) : (
-            <form onSubmit={submit} noValidate>
+            <form onSubmit={submit} noValidate onFocus={handleFieldFocus}>
               <h3 className="text-h2 text-ink-900">상담 신청하기</h3>
               <p className="text-sm text-ink-500 mt-1 mb-6">
                 * 표시는 필수 입력입니다.

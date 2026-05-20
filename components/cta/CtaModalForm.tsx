@@ -14,10 +14,11 @@
 //   - 제출 성공 시 ✅ 화면 → 닫기
 // ─────────────────────────────────────────────
 
-import { useEffect, useState, FormEvent, ChangeEvent } from 'react'
+import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
+import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, pushEvent } from '@/lib/tracking/datalayer'
 
 const STANDARD_IDS = new Set([
   'name', 'phone', 'store_name', 'industry', 'region', 'message',
@@ -44,6 +45,8 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [attribution, setAttribution] = useState<Record<string, string>>({})
+  // form_start 1회만 push
+  const formStartedRef = useRef(false)
 
   // 어트리뷰션 머지 (마운트 시 1회) + CTA 클릭 캡처
   useEffect(() => {
@@ -66,8 +69,26 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     if (a.fbclid) u.fbclid = a.fbclid
     if (a.referer) u.referer = a.referer
     if (a.landing_page_path) u.landing_page_path = a.landing_page_path
+    // GA4 client_id / session_id (매출 보정 시 동일 사용자 매칭용)
+    const gaClient = getGaClientId()
+    const gaSession = getGaSessionId()
+    if (gaClient)  u.ga_client_id  = gaClient
+    if (gaSession) u.ga_session_id = gaSession
     setAttribution(u)
   }, [cta.id, cta.utm_source, cta.utm_medium, cta.utm_campaign, cta.utm_content])
+
+  // 첫 필드 포커스 시 form_start push (CTA별 1회)
+  const handleFieldFocus = () => {
+    if (formStartedRef.current) return
+    formStartedRef.current = true
+    pushEvent('form_start', {
+      form_id: `cta_${cta.id}`,
+      form_location: cta.cta_type ?? 'modal_form',
+      cta_id: cta.id,
+      cta_label: cta.label,
+      page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+    })
+  }
 
   function handleChange(
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -121,6 +142,24 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
         return
       }
       setSent(true)
+      // GTM dataLayer push — GA4 추천 이벤트 generate_lead
+      //   modal/floating/sticky/toast 어디서 들어왔든 cta_id 로 출처 식별 가능
+      pushEvent('generate_lead', {
+        lead_id: typeof data?.id === 'string' ? data.id : null,
+        value: LEAD_DEFAULT_VALUE,
+        currency: 'KRW',
+        form_id: `cta_${cta.id}`,
+        cta_id: cta.id,
+        cta_label: cta.label,
+        cta_type: cta.cta_type ?? null,
+        utm_source: attribution.utm_source ?? cta.utm_source ?? null,
+        utm_medium: attribution.utm_medium ?? cta.utm_medium ?? null,
+        utm_campaign: attribution.utm_campaign ?? cta.utm_campaign ?? null,
+        utm_content: attribution.utm_content ?? cta.utm_content ?? null,
+        utm_term: attribution.utm_term ?? null,
+        gclid: attribution.gclid ?? null,
+        fbclid: attribution.fbclid ?? null,
+      })
     } catch {
       setError('네트워크 오류입니다. 잠시 후 다시 시도해주세요.')
     } finally {
@@ -176,7 +215,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
           )}
         </div>
       ) : (
-        <form onSubmit={submit} noValidate className="space-y-3">
+        <form onSubmit={submit} onFocus={handleFieldFocus} noValidate className="space-y-3">
           {dc.title && (
             <h3 className="text-lg font-bold text-white">{dc.title}</h3>
           )}

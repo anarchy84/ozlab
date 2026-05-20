@@ -16,6 +16,7 @@
 import { useState } from 'react'
 import type { CtaButton } from '@/lib/admin/types'
 import { captureCtaClick } from '@/lib/cta-attribution'
+import { pushEvent } from '@/lib/tracking/datalayer'
 import { CtaModalForm } from './CtaModalForm'
 
 interface Props {
@@ -80,6 +81,18 @@ export function DynamicCTA({
         utm_content: cta.utm_content,
       })
     }
+    // GTM dataLayer push — CTA 클릭 (DB CTA + fallback 둘 다)
+    //   placement(hero_apply 등)·label·utm 으로 매체별·소재별 클릭 분석 가능
+    pushEvent('cta_click', {
+      cta_id: cta?.id ?? null,
+      cta_placement: placement,
+      cta_label: label,
+      cta_type: cta?.cta_type ?? 'inline_anchor',
+      utm_source: cta?.utm_source ?? null,
+      utm_medium: cta?.utm_medium ?? null,
+      utm_campaign: cta?.utm_campaign ?? null,
+      page_path: typeof window !== 'undefined' ? window.location.pathname : null,
+    })
     if (isModalTrigger) {
       e.preventDefault()
       setModalOpen(true)

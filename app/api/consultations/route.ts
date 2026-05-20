@@ -53,6 +53,9 @@ interface ConsultationInput {
   // 광고 클릭 ID
   gclid?: string
   fbclid?: string
+  // GA4 식별자 — 폼 제출 ↔ 매출 입력 시 동일 사용자 매칭용 (GA4 MP 보정)
+  ga_client_id?: string
+  ga_session_id?: string
   // 유입 경로 (클라가 보낸 First-touch 우선)
   referer?: string
   landing_page_path?: string
@@ -280,6 +283,9 @@ export async function POST(req: NextRequest) {
       utm_content: clean(body.utm_content, 100),
       gclid:       clean(body.gclid, 200),
       fbclid:      clean(body.fbclid, 200),
+      // GA4 식별자 — 매출 입력 시 GA4 Measurement Protocol 로 동일 사용자 보정용
+      ga_client_id:  clean(body.ga_client_id, 100),
+      ga_session_id: clean(body.ga_session_id, 100),
     })
     .select('id, name, phone, store_name, industry, region, message, inferred_channel')
     .single()
