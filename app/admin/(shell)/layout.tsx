@@ -62,6 +62,7 @@ export default async function AdminShellLayout({
         { href: '/admin/settings/blacklist', label: '블랙리스트 관리', desc: '차단 연락처·IP 해제' },
         { href: '/admin/settings/ad-sync', label: '광고 sync', desc: '시트 → ad_metrics' },
         { href: '/admin/settings/head', label: '사이트 head 편집', desc: 'GTM·GA4·픽셀·verification·자유 HTML' },
+        { href: '/admin/settings/seo', label: '페이지 SEO·OG', desc: '페이지별 메타·OG 이미지 업로드' },
         { href: '/admin/settings/slack', label: '슬랙 알림 설정', desc: '채널·Webhook·담당자 DM' },
         { href: '/admin/settings/alert-rules', label: '이상 시그널 룰', desc: 'CPA·ROAS·일신청 임계 알림' },
         { href: '/admin/help/utm', label: 'UTM 표준 가이드', desc: '광고대행사 핸드오프용' },
