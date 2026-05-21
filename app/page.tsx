@@ -12,6 +12,7 @@
 //   - sitemap.xml / robots.txt
 // ─────────────────────────────────────────────
 
+import type { Metadata } from 'next'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { fetchCtasByPlacement } from '@/lib/cta-server'
@@ -19,8 +20,14 @@ import HomeClient from './(home)/HomeClient'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo'
 import { homeFaqsForBlocks } from '@/lib/home-faqs'
+import { mergePageMetadata } from '@/lib/admin/page-seo'
 
 export const revalidate = 0
+
+// 홈 페이지 — root layout generateMetadata 결과 + page_seo DB 머지
+export async function generateMetadata(): Promise<Metadata> {
+  return mergePageMetadata('/', {})
+}
 
 export default async function HomePage() {
   // 병렬로 콘텐츠 블록 + CTA 마스터 조회

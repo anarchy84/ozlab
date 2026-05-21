@@ -68,52 +68,51 @@ export async function listPageSeo(): Promise<PageSeo[]> {
 }
 
 /**
- * 페이지 generateMetadata 헬퍼
+ * 페이지 generateMetadata 헬퍼 — base (publicMetadata 결과) + DB page_seo 병합
  *
- * 사용 예 (페이지 page.tsx 에 추가):
+ * DB 값이 있으면 우선, 없으면 base 그대로 (코드 fallback).
+ *
+ * 사용 예 (페이지 page.tsx):
  *
  *   export async function generateMetadata(): Promise<Metadata> {
- *     return buildPageMetadata('/internet', {
- *       title: '인터넷 가입 | 오즈랩페이',
- *       description: '소상공인 전용 인터넷·전화 가입 — 최저가 보장',
- *     })
+ *     const base = publicMetadata({ title, description, path, keywords })
+ *     return mergePageMetadata(path, base)
  *   }
- *
- * DB 값 우선, 없으면 defaults, defaults 도 없으면 layout 의 기본값.
  */
-export async function buildPageMetadata(
+export async function mergePageMetadata(
   pagePath: string,
-  defaults: { title?: string; description?: string; keywords?: string } = {},
+  base: Metadata,
 ): Promise<Metadata> {
   const seo = await getPageSeo(pagePath)
-  const title = seo?.meta_title ?? defaults.title
-  const description = seo?.meta_description ?? defaults.description
-  const ogTitle = seo?.og_title ?? seo?.meta_title ?? defaults.title
-  const ogDescription = seo?.og_description ?? seo?.meta_description ?? defaults.description
-  const images = seo?.og_image_url ? [seo.og_image_url] : undefined
+  if (!seo) return base
 
-  const md: Metadata = {}
-  if (title) md.title = title
-  if (description) md.description = description
-  if (seo?.keywords || defaults.keywords) {
-    md.keywords = (seo?.keywords ?? defaults.keywords)?.split(',').map((k) => k.trim()).filter(Boolean)
+  const merged: Metadata = { ...base }
+
+  if (seo.meta_title) merged.title = seo.meta_title
+  if (seo.meta_description) merged.description = seo.meta_description
+  if (seo.keywords) {
+    merged.keywords = seo.keywords.split(',').map((k) => k.trim()).filter(Boolean)
   }
 
-  md.openGraph = {
+  const ogTitle = seo.og_title ?? seo.meta_title ?? (typeof base.title === 'string' ? base.title : undefined)
+  const ogDescription = seo.og_description ?? seo.meta_description ?? base.description ?? undefined
+  const images = seo.og_image_url ? [seo.og_image_url] : undefined
+
+  merged.openGraph = {
+    ...base.openGraph,
     title: ogTitle,
-    description: ogDescription,
-    images,
-    type: 'website',
-    locale: 'ko_KR',
+    description: ogDescription ?? undefined,
+    ...(images ? { images } : {}),
   }
-  md.twitter = {
-    card: (seo?.twitter_card as 'summary_large_image') ?? 'summary_large_image',
+  merged.twitter = {
+    ...base.twitter,
+    card: (seo.twitter_card as 'summary_large_image') ?? 'summary_large_image',
     title: ogTitle,
-    description: ogDescription,
-    images,
+    description: ogDescription ?? undefined,
+    ...(images ? { images } : {}),
   }
 
-  return md
+  return merged
 }
 
 /** Upsert (어드민에서 저장) */

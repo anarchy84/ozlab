@@ -7,16 +7,20 @@ import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
+import { mergePageMetadata } from '@/lib/admin/page-seo'
 
 export const revalidate = 0
 
-export const metadata: Metadata = publicMetadata({
-  title: '테이블오더',
-  description:
-    '키오스크, 테이블오더, QR오더를 매장 동선과 POS 연동에 맞춰 설계하고 설치 상담까지 연결합니다.',
-  path: '/business/torder',
-  keywords: ['테이블오더', '키오스크', 'QR오더', 'POS 연동', '매장 주문 시스템'],
-})
+export async function generateMetadata(): Promise<Metadata> {
+  const base = publicMetadata({
+    title: '테이블오더',
+    description:
+      '키오스크, 테이블오더, QR오더를 매장 동선과 POS 연동에 맞춰 설계하고 설치 상담까지 연결합니다.',
+    path: '/business/torder',
+    keywords: ['테이블오더', '키오스크', 'QR오더', 'POS 연동', '매장 주문 시스템'],
+  })
+  return mergePageMetadata('/business/torder', base)
+}
 
 export default async function TableOrderPage() {
   const blocksMap = await getBlocksForPage('/business/torder')

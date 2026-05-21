@@ -7,16 +7,20 @@ import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
+import { mergePageMetadata } from '@/lib/admin/page-seo'
 
 export const revalidate = 0
 
-export const metadata: Metadata = publicMetadata({
-  title: '사업자 인터넷',
-  description:
-    'SKT, KT, LG U+ 사업자 인터넷 요금과 설치 조건을 비교하고 POS, CCTV, 손님 Wi-Fi까지 안정적인 매장 네트워크를 상담받으세요.',
-  path: '/internet',
-  keywords: ['사업자 인터넷', '매장 인터넷', '고정 IP', 'POS 인터넷', 'CCTV 인터넷'],
-})
+export async function generateMetadata(): Promise<Metadata> {
+  const base = publicMetadata({
+    title: '사업자 인터넷',
+    description:
+      'SKT, KT, LG U+ 사업자 인터넷 요금과 설치 조건을 비교하고 POS, CCTV, 손님 Wi-Fi까지 안정적인 매장 네트워크를 상담받으세요.',
+    path: '/internet',
+    keywords: ['사업자 인터넷', '매장 인터넷', '고정 IP', 'POS 인터넷', 'CCTV 인터넷'],
+  })
+  return mergePageMetadata('/internet', base)
+}
 
 export default async function InternetPage() {
   const blocksMap = await getBlocksForPage('/internet')

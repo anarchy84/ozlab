@@ -7,16 +7,20 @@ import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
+import { mergePageMetadata } from '@/lib/admin/page-seo'
 
 export const revalidate = 0
 
-export const metadata: Metadata = publicMetadata({
-  title: 'CCTV',
-  description:
-    '매장 크기와 구조에 맞는 CCTV 채널 수, 카메라 종류, 원격 확인 구성을 오즈랩페이 스타일로 상담합니다.',
-  path: '/business/cctv',
-  keywords: ['매장 CCTV', '사업장 CCTV', '원격 CCTV', 'CCTV 설치', '무선 CCTV'],
-})
+export async function generateMetadata(): Promise<Metadata> {
+  const base = publicMetadata({
+    title: 'CCTV',
+    description:
+      '매장 크기와 구조에 맞는 CCTV 채널 수, 카메라 종류, 원격 확인 구성을 오즈랩페이 스타일로 상담합니다.',
+    path: '/business/cctv',
+    keywords: ['매장 CCTV', '사업장 CCTV', '원격 CCTV', 'CCTV 설치', '무선 CCTV'],
+  })
+  return mergePageMetadata('/business/cctv', base)
+}
 
 export default async function CctvPage() {
   const blocksMap = await getBlocksForPage('/business/cctv')
