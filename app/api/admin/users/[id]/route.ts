@@ -24,6 +24,9 @@ interface PatchBody {
   department?: string | null
   note?: string | null
   is_active?: boolean
+  // 슬랙 통합 (Phase 7) — 본인 또는 super_admin 이 편집
+  slack_user_id?: string | null
+  slack_dm_enabled?: boolean
 }
 
 // ----- 마지막 활성 super_admin 인지 체크 (가드용) -----
@@ -108,6 +111,21 @@ export async function PATCH(
   if (body.department !== undefined) update.department = body.department
   if (body.note !== undefined) update.note = body.note
   if (body.is_active !== undefined) update.is_active = body.is_active
+  if (body.slack_user_id !== undefined) {
+    // 슬랙 사용자 ID 형식 가벼운 검증 (U/W 로 시작 + 8~20자) — 빈문자열은 null 로
+    const sid = body.slack_user_id
+    if (sid === null || sid === '') {
+      update.slack_user_id = null
+    } else if (typeof sid === 'string' && /^[UW][A-Z0-9]{6,20}$/i.test(sid.trim())) {
+      update.slack_user_id = sid.trim()
+    } else {
+      return NextResponse.json(
+        { error: '슬랙 사용자 ID 형식: U 또는 W 로 시작하는 영문/숫자' },
+        { status: 400 },
+      )
+    }
+  }
+  if (body.slack_dm_enabled !== undefined) update.slack_dm_enabled = !!body.slack_dm_enabled
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json(

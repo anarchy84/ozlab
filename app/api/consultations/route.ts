@@ -28,6 +28,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizePhone } from '@/lib/consultation-policy'
 import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
 import { sendMetaLead } from '@/lib/tracking/meta-capi'
+import { broadcastNewLead } from '@/lib/slack'
 import { NextRequest, NextResponse } from 'next/server'
 
 // 봇 차단 — 이 라우트는 캐시 금지
@@ -94,49 +95,8 @@ function getClientIp(req: NextRequest): string | null {
   return null
 }
 
-// -------------------------------------------------------------
-// 헬퍼 : Slack 알림 (fire and forget)
-//   환경변수 SLACK_WEBHOOK_URL_CONSULTATIONS 가 설정된 경우만 동작
-// -------------------------------------------------------------
-async function notifySlack(payload: {
-  id: string
-  name: string
-  phone: string
-  store_name: string | null
-  industry: string | null
-  region: string | null
-  message: string | null
-}) {
-  const url = process.env.SLACK_WEBHOOK_URL_CONSULTATIONS
-  if (!url) return // 미설정 시 조용히 패스
-
-  // 슬랙 메시지 — 굵게 / 줄바꿈 / 이모지로 가독성
-  const text =
-    `:tada: *오즈랩페이 신규 상담 신청*\n` +
-    `• 이름 : *${payload.name}*\n` +
-    `• 연락처 : *${payload.phone}*\n` +
-    (payload.store_name ? `• 매장 : ${payload.store_name}\n` : '') +
-    (payload.industry ? `• 업종 : ${payload.industry}\n` : '') +
-    (payload.region ? `• 지역 : ${payload.region}\n` : '') +
-    (payload.message ? `• 메시지 : ${payload.message}\n` : '') +
-    `\n어드민 : <https://www.ozlabpay.kr/admin/consultations|보기>`
-
-  try {
-    // timeout 5초 — 슬랙 끝에서 늦어져도 폼은 빨리 응답
-    const ctrl = new AbortController()
-    const t = setTimeout(() => ctrl.abort(), 5000)
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-      signal: ctrl.signal,
-    })
-    clearTimeout(t)
-  } catch (err) {
-    // 슬랙 실패는 사용자 응답에 영향 X — 콘솔에만 남김
-    console.error('[slack notify failed]', err)
-  }
-}
+// Slack 알림은 lib/slack.ts 의 broadcastNewLead 로 통합 (DB-first + env fallback)
+// 자동배정 트리거가 counselor_id 박는 시점에 맞춰 INSERT 후 별도 조회로 담당자 매핑
 
 // -------------------------------------------------------------
 // POST 핸들러
@@ -294,7 +254,7 @@ export async function POST(req: NextRequest) {
       meta_fbp: clean(body.meta_fbp, 200),
       meta_fbc: clean(body.meta_fbc, 200),
     })
-    .select('id, name, phone, store_name, industry, region, message, inferred_channel')
+    .select('id, name, phone, store_name, industry, region, message, inferred_channel, counselor_id, utm_campaign')
     .single()
 
   if (error || !data) {
@@ -305,16 +265,44 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 5) 슬랙 알림 — await 안 해서 응답 지연 방지
-  notifySlack({
-    id: data.id,
-    name: data.name,
-    phone: data.phone,
-    store_name: data.store_name,
-    industry: data.industry,
-    region: data.region,
-    message: data.message,
-  })
+  // 5) 슬랙 알림 — 채널 broadcast + 담당자 DM (자동배정 트리거가 채운 counselor_id 활용)
+  //    DB slack_channels.code = 'leads_main' 으로 broadcast
+  //    counselor_id 가 있으면 admin_users.slack_user_id 조회해서 DM
+  //    fire-and-forget (await 안 함) — 폼 응답 지연 방지
+  ;(async () => {
+    try {
+      let counselorSlackUserId: string | null = null
+      let counselorName: string | null = null
+      if (data.counselor_id) {
+        const { data: counselor } = await supabase
+          .from('admin_users')
+          .select('display_name, slack_user_id, slack_dm_enabled')
+          .eq('user_id', data.counselor_id)
+          .maybeSingle()
+        if (counselor) {
+          counselorName = counselor.display_name ?? null
+          if (counselor.slack_dm_enabled && counselor.slack_user_id) {
+            counselorSlackUserId = counselor.slack_user_id
+          }
+        }
+      }
+      void broadcastNewLead({
+        id: data.id,
+        name: data.name,
+        phone: data.phone,
+        store_name: data.store_name,
+        industry: data.industry,
+        region: data.region,
+        message: data.message,
+        inferred_channel: data.inferred_channel,
+        utm_campaign: data.utm_campaign,
+        counselorSlackUserId,
+        counselorName,
+      })
+    } catch (err) {
+      console.error('[slack broadcast prep failed]', err)
+    }
+  })()
 
   // 6) Meta CAPI Lead — 서버 측 이벤트 (브라우저 픽셀 Lead 와 event_id 로 dedupe)
   //    · event_id = consultations.id (GTM 픽셀 Lead 태그 도 같은 값 박아야 dedupe 됨 — 가이드 참고)
