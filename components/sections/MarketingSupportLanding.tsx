@@ -10,6 +10,7 @@ import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { useBlocks } from '@/components/editable/BlocksProvider'
 import { pickTextOrUndef } from '@/lib/content-blocks'
+import { marketingSupportFaqsForBlocks } from '@/lib/marketing-support-faqs'
 
 const PAGE_PATH = '/marketing-support'
 const k = (s: string) => `marketing.${s}`
@@ -40,6 +41,7 @@ const proofPoints = [
 
 export function MarketingSupportLanding() {
   const blocks = useBlocks()
+  const faqs = marketingSupportFaqsForBlocks(blocks)
   return (
     <div className="bg-white text-ink-900">
       <section className="relative overflow-hidden bg-surface-dark py-section-tight text-white">
@@ -364,6 +366,55 @@ export function MarketingSupportLanding() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-ink-50 py-section">
+        <div className="container-oz">
+          <div className="mx-auto mb-10 max-w-[760px] text-center">
+            <EditableText
+              as="span"
+              blockKey={k('faq.eyebrow')}
+              fallback="FAQ"
+              value={pickTextOrUndef(blocks, k('faq.eyebrow'))}
+              pagePath={PAGE_PATH}
+              className="eyebrow"
+            />
+            <EditableText
+              as="h2"
+              blockKey={k('faq.title')}
+              fallback="지원 혜택, 자주 묻는 질문"
+              value={pickTextOrUndef(blocks, k('faq.title'))}
+              pagePath={PAGE_PATH}
+              className="mt-4 text-h1 text-ink-900 break-keep"
+            />
+          </div>
+          <div className="mx-auto max-w-[860px] divide-y divide-ink-150 rounded-xl border border-ink-150 bg-white shadow-sm">
+            {faqs.map((faq, index) => (
+              <details key={`marketing-faq-${index}`} className="group">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 p-6 text-left text-base font-bold text-ink-900 break-keep [&::-webkit-details-marker]:hidden">
+                  <EditableText
+                    as="span"
+                    blockKey={k(`faq.items.${index}.q`)}
+                    fallback={faq.q}
+                    value={pickTextOrUndef(blocks, k(`faq.items.${index}.q`))}
+                    pagePath={PAGE_PATH}
+                  />
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-600 transition-all group-open:rotate-45 group-open:bg-naver-green group-open:text-white">
+                    <Icon.Plus s={18} />
+                  </span>
+                </summary>
+                <EditableText
+                  as="p"
+                  blockKey={k(`faq.items.${index}.a`)}
+                  fallback={faq.a}
+                  value={pickTextOrUndef(blocks, k(`faq.items.${index}.a`))}
+                  pagePath={PAGE_PATH}
+                  className="px-6 pb-6 text-[15px] leading-relaxed text-ink-500 break-keep"
+                />
+              </details>
+            ))}
           </div>
         </div>
       </section>

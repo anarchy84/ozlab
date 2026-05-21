@@ -35,6 +35,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   faq: 'FAQ',
 }
 
+function publicPostPath(post: Pick<PostRow, 'category' | 'slug'>): string {
+  return post.category === 'blog' ? `/blog/${post.slug}` : `/tips/${post.slug}`
+}
+
 export default function ContentManager({
   myRole,
   myName,
@@ -193,7 +197,7 @@ export default function ContentManager({
                   <td className="px-4 py-3 text-center">
                     {p.is_published && (
                       <a
-                        href={`/blog/${p.slug}`}
+                        href={publicPostPath(p)}
                         target="_blank"
                         rel="noopener"
                         className="text-naver-neon hover:underline text-xs mr-2"

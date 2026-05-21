@@ -17,7 +17,8 @@ import { blocksMapToRecord } from '@/lib/content-blocks'
 import { fetchCtasByPlacement } from '@/lib/cta-server'
 import HomeClient from './(home)/HomeClient'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { breadcrumbJsonLd } from '@/lib/seo'
+import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo'
+import { homeFaqsForBlocks } from '@/lib/home-faqs'
 
 export const revalidate = 0
 
@@ -31,7 +32,12 @@ export default async function HomePage() {
 
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd([{ name: '홈', path: '/' }])} />
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([{ name: '홈', path: '/' }]),
+          faqJsonLd(homeFaqsForBlocks(blocks)),
+        ]}
+      />
       <HomeClient blocks={blocks} ctasByPlacement={ctasByPlacement} />
     </>
   )

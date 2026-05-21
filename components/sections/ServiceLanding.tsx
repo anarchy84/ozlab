@@ -12,7 +12,7 @@
 
 import Link from 'next/link'
 import { Icon } from '@/components/icons'
-import type { ServiceLandingData } from '@/lib/service-pages'
+import type { ServiceLandingData, ServicePageKey } from '@/lib/service-pages'
 import { EditableText } from '@/components/editable/EditableText'
 import { useBlocks } from '@/components/editable/BlocksProvider'
 import { pickTextOrUndef } from '@/lib/content-blocks'
@@ -20,7 +20,7 @@ import { pickTextOrUndef } from '@/lib/content-blocks'
 interface Props {
   data: ServiceLandingData
   /** 페이지 식별자 — blockKey prefix 결정 */
-  pageKey: 'internet' | 'cctv' | 'tableOrder'
+  pageKey: ServicePageKey
   /** 편집 후 revalidate 대상 경로 (예: '/internet') */
   pagePath: string
 }

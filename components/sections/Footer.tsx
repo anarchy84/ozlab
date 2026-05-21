@@ -23,6 +23,8 @@ interface Props {
 export function Footer({ blocks, ctas }: Props) {
   const serviceLinks = [
     { key: 'home.footer.service.v2.ozlab', label: '오즈랩페이 기능', href: '/#features' },
+    { key: 'home.footer.service.v3.naverPos', label: '네이버 POS · 카드 단말기', href: '/naver-pos' },
+    { key: 'home.footer.service.v3.applePay', label: '애플페이 결제 단말기', href: '/apple-pay-pos' },
     { key: 'home.footer.service.v2.internet', label: '사업자 인터넷', href: '/internet' },
     { key: 'home.footer.service.v2.tableorder', label: '테이블오더', href: '/business/torder' },
     { key: 'home.footer.service.v2.cctv', label: 'CCTV', href: '/business/cctv' },

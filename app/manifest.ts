@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: '오즈랩페이',
     short_name: '오즈랩페이',
     description:
-      'POS, 카드 단말기, 리뷰 자동화, 플레이스 마케팅을 한 번에 연결하는 매장 운영 솔루션입니다.',
+      '네이버 카드 단말기, 네이버 POS, 포스단말기, 애플페이 결제 단말기와 리뷰 자동화, 플레이스 마케팅을 한 번에 연결하는 매장 운영 솔루션입니다.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

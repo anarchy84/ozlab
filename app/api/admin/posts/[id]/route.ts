@@ -18,6 +18,17 @@ function adminClientOrResponse() {
   }
 }
 
+function publicPostPath(category: string | null | undefined, slug: string): string {
+  return category === 'blog' ? `/blog/${slug}` : `/tips/${slug}`
+}
+
+function revalidatePostPaths(category: string | null | undefined, slug: string) {
+  revalidatePath(publicPostPath(category, slug))
+  revalidatePath(category === 'blog' ? '/blog' : '/tips')
+  revalidatePath('/sitemap.xml')
+  revalidatePath('/llms.txt')
+}
+
 // ─── GET : 단건 조회 ────────────────────────
 export async function GET(
   _request: NextRequest,
@@ -58,16 +69,17 @@ export async function PUT(
   const { admin, response } = adminClientOrResponse()
   if (!admin) return response
 
+  const { data: existingPost } = await admin
+    .from('content_posts')
+    .select('published_at, slug, category, is_published')
+    .eq('id', params.id)
+    .single()
+
   // 처음 발행 시 published_at 보존
   let publishedAt: string | null | undefined = body.published_at
   if (body.is_published) {
     if (!publishedAt) {
-      const { data: existing } = await admin
-        .from('content_posts')
-        .select('published_at, slug')
-        .eq('id', params.id)
-        .single()
-      publishedAt = existing?.published_at ?? new Date().toISOString()
+      publishedAt = existingPost?.published_at ?? new Date().toISOString()
     }
   } else {
     publishedAt = null
@@ -122,9 +134,14 @@ export async function PUT(
 
   // 발행된 글이면 캐시 무효화 (즉시 라이브 반영)
   if (data?.is_published && data?.slug) {
-    revalidatePath(`/blog/${data.slug}`)
-    revalidatePath('/blog')
-    revalidatePath('/sitemap.xml')
+    revalidatePostPaths(data.category, data.slug)
+  }
+  if (
+    existingPost?.is_published &&
+    existingPost.slug &&
+    (existingPost.slug !== data?.slug || existingPost.category !== data?.category)
+  ) {
+    revalidatePostPaths(existingPost.category, existingPost.slug)
   }
 
   return NextResponse.json(data)
@@ -144,7 +161,7 @@ export async function DELETE(
   // 삭제 전 slug 확보 (캐시 무효화용)
   const { data: existing } = await admin
     .from('content_posts')
-    .select('slug, is_published')
+    .select('slug, category, is_published')
     .eq('id', params.id)
     .single()
 
@@ -152,9 +169,7 @@ export async function DELETE(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (existing?.is_published && existing?.slug) {
-    revalidatePath(`/blog/${existing.slug}`)
-    revalidatePath('/blog')
-    revalidatePath('/sitemap.xml')
+    revalidatePostPaths(existing.category, existing.slug)
   }
 
   return NextResponse.json({ success: true })

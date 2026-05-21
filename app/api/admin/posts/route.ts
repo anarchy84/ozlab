@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
 import { calcSeoScore, serializeScoreCache } from '@/lib/seo-score'
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 function adminClientOrResponse() {
   try {
@@ -27,6 +28,17 @@ function makeSlug(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .substring(0, 80)
+}
+
+function publicPostPath(category: string | null | undefined, slug: string): string {
+  return category === 'blog' ? `/blog/${slug}` : `/tips/${slug}`
+}
+
+function revalidatePostPaths(category: string | null | undefined, slug: string) {
+  revalidatePath(publicPostPath(category, slug))
+  revalidatePath(category === 'blog' ? '/blog' : '/tips')
+  revalidatePath('/sitemap.xml')
+  revalidatePath('/llms.txt')
 }
 
 // ─── GET : 글 목록 ──────────────────────────
@@ -121,6 +133,10 @@ export async function POST(request: NextRequest) {
       )
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (data?.is_published && data?.slug) {
+    revalidatePostPaths(data.category, data.slug)
   }
 
   return NextResponse.json(data, { status: 201 })

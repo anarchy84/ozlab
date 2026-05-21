@@ -5,7 +5,7 @@ import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { getCategoryLabel, getPostBySlug, listPublishedPosts } from '@/lib/posts'
 import { renderMarkdown } from '@/lib/markdown'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, postCanonicalPath } from '@/lib/seo'
+import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, faqFromPostJsonLd, postCanonicalPath } from '@/lib/seo'
 
 export const revalidate = 600
 
@@ -73,19 +73,22 @@ export default async function TipPostPage({ params }: Params) {
   const html = post.body_html && post.body_html.trim().length > 0
     ? post.body_html
     : renderMarkdown(post.body_md)
+  const faqSchema = faqFromPostJsonLd(post, html)
+  const jsonLd = [
+    breadcrumbJsonLd([
+      { name: '홈', path: '/' },
+      { name: '꿀팁', path: '/tips' },
+      { name: post.title, path: `/tips/${post.slug}` },
+    ]),
+    articleJsonLd(post),
+    ...(faqSchema ? [faqSchema] : []),
+  ]
 
   return (
     <PublicPageFrame>
       <div className="bg-white text-ink-900">
         <JsonLd
-          data={[
-            breadcrumbJsonLd([
-              { name: '홈', path: '/' },
-              { name: '꿀팁', path: '/tips' },
-              { name: post.title, path: `/tips/${post.slug}` },
-            ]),
-            articleJsonLd(post),
-          ]}
+          data={jsonLd}
         />
 
         <header className="bg-surface-dark py-12 text-white">

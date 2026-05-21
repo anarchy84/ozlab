@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { ServiceLanding } from '@/components/sections/ServiceLanding'
 import { BlocksProvider } from '@/components/editable/BlocksProvider'
-import { servicePages } from '@/lib/service-pages'
+import { serviceFaqsForBlocks, servicePages } from '@/lib/service-pages'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -22,6 +22,7 @@ export default async function TableOrderPage() {
   const blocksMap = await getBlocksForPage('/business/torder')
   const blocks = blocksMapToRecord(blocksMap)
   const data = servicePages.tableOrder
+  const faqs = serviceFaqsForBlocks(data, 'tableOrder', blocks)
   return (
     <PublicPageFrame>
       <JsonLd
@@ -35,8 +36,14 @@ export default async function TableOrderPage() {
             description: data.hero.description,
             path: '/business/torder',
             serviceType: 'Table Ordering System Consultation',
+            keywords: ['테이블오더', '키오스크', 'QR오더', 'POS 연동', '매장 주문 시스템'],
+            audience: '식당, 카페, 프랜차이즈, 매장 운영자',
+            offerCatalog: data.intro.cards.map((card) => ({
+              name: card.title,
+              description: card.desc,
+            })),
           }),
-          faqJsonLd(data.faqs),
+          faqJsonLd(faqs),
         ]}
       />
       <BlocksProvider blocks={blocks}>

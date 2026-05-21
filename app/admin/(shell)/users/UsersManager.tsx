@@ -242,7 +242,7 @@ function InviteModal({
       setResult({
         email: j.email ?? email,
         password: j.password ?? '(자동 생성됨)',
-        login_url: j.login_url ?? 'https://ozlabpay.kr/admin/login',
+        login_url: j.login_url ?? 'https://www.ozlabpay.kr/admin/login',
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
@@ -467,7 +467,7 @@ function EditUserModal({
       setPwResult({
         password: j.password ?? '',
         email: j.email ?? null,
-        login_url: j.login_url ?? 'https://ozlabpay.kr/admin/login',
+        login_url: j.login_url ?? 'https://www.ozlabpay.kr/admin/login',
       })
       setPwInput('')
     } catch (err) {

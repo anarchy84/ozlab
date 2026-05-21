@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { ServiceLanding } from '@/components/sections/ServiceLanding'
 import { BlocksProvider } from '@/components/editable/BlocksProvider'
-import { servicePages } from '@/lib/service-pages'
+import { serviceFaqsForBlocks, servicePages } from '@/lib/service-pages'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -22,6 +22,7 @@ export default async function CctvPage() {
   const blocksMap = await getBlocksForPage('/business/cctv')
   const blocks = blocksMapToRecord(blocksMap)
   const data = servicePages.cctv
+  const faqs = serviceFaqsForBlocks(data, 'cctv', blocks)
   return (
     <PublicPageFrame>
       <JsonLd
@@ -35,8 +36,14 @@ export default async function CctvPage() {
             description: data.hero.description,
             path: '/business/cctv',
             serviceType: 'Business CCTV Installation Consultation',
+            keywords: ['매장 CCTV', '사업장 CCTV', '원격 CCTV', 'CCTV 설치', '무선 CCTV'],
+            audience: '매장 운영자, 사무실, 학원, 음식점',
+            offerCatalog: data.intro.cards.map((card) => ({
+              name: card.title,
+              description: card.desc,
+            })),
           }),
-          faqJsonLd(data.faqs),
+          faqJsonLd(faqs),
         ]}
       />
       <BlocksProvider blocks={blocks}>

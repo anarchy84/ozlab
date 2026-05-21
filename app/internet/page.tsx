@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { ServiceLanding } from '@/components/sections/ServiceLanding'
 import { BlocksProvider } from '@/components/editable/BlocksProvider'
-import { servicePages } from '@/lib/service-pages'
+import { serviceFaqsForBlocks, servicePages } from '@/lib/service-pages'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -22,6 +22,7 @@ export default async function InternetPage() {
   const blocksMap = await getBlocksForPage('/internet')
   const blocks = blocksMapToRecord(blocksMap)
   const data = servicePages.internet
+  const faqs = serviceFaqsForBlocks(data, 'internet', blocks)
   return (
     <PublicPageFrame>
       <JsonLd
@@ -35,8 +36,14 @@ export default async function InternetPage() {
             description: data.hero.description,
             path: '/internet',
             serviceType: 'Business Internet Consultation',
+            keywords: ['사업자 인터넷', '매장 인터넷', 'POS 인터넷', 'CCTV 인터넷', '고정 IP'],
+            audience: '매장 운영자, 자영업자, 소상공인',
+            offerCatalog: data.catalog.cards.map((card) => ({
+              name: card.title,
+              description: card.desc,
+            })),
           }),
-          faqJsonLd(data.faqs),
+          faqJsonLd(faqs),
         ]}
       />
       <BlocksProvider blocks={blocks}>

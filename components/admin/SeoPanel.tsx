@@ -18,6 +18,7 @@ interface SeoPanelProps {
   metaTitle: string
   metaDescription: string
   slug: string
+  basePath?: 'blog' | 'tips'
   bodyHtml: string
   focusKeyword: string
   authorName: string
@@ -30,6 +31,7 @@ export default function SeoPanel({
   metaTitle,
   metaDescription,
   slug,
+  basePath = 'blog',
   bodyHtml,
   focusKeyword,
   authorName,
@@ -38,7 +40,7 @@ export default function SeoPanel({
 }: SeoPanelProps) {
   const displayTitle = metaTitle || title || '제목 없음'
   const displayDesc = metaDescription || '설명을 입력하세요...'
-  const displayUrl = `ozlabpay.kr/blog/${slug || '...'}`
+  const displayUrl = `www.ozlabpay.kr/${basePath}/${slug || '...'}`
 
   const plain = useMemo(
     () => bodyHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),

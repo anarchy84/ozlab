@@ -119,7 +119,7 @@ async function notifySlack(payload: {
     (payload.industry ? `• 업종 : ${payload.industry}\n` : '') +
     (payload.region ? `• 지역 : ${payload.region}\n` : '') +
     (payload.message ? `• 메시지 : ${payload.message}\n` : '') +
-    `\n어드민 : <https://ozlabpay.kr/admin/consultations|보기>`
+    `\n어드민 : <https://www.ozlabpay.kr/admin/consultations|보기>`
 
   try {
     // timeout 5초 — 슬랙 끝에서 늦어져도 폼은 빨리 응답

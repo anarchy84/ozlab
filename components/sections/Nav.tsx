@@ -26,12 +26,13 @@ export function Nav({ blocks, ctas }: Props) {
   // 오래된 GNB 편집값이 남아 있어도 새 메뉴 구성이 우선 적용되도록 신규 블록 키를 사용한다.
   const menuLinks = [
     { key: 'home.nav.v2.features', label: '기능', href: '/#features' },
+    { key: 'home.nav.v3.naverPos', label: '네이버 POS', href: '/naver-pos' },
+    { key: 'home.nav.v3.applePay', label: '애플페이', href: '/apple-pay-pos' },
     { key: 'home.nav.v2.internet', label: '사업자 인터넷', href: '/internet' },
     { key: 'home.nav.v2.tableorder', label: '테이블오더', href: '/business/torder' },
     { key: 'home.nav.v2.cctv', label: 'CCTV', href: '/business/cctv' },
     { key: 'home.nav.v2.marketing', label: '사업자 마케팅지원', href: '/marketing-support' },
     { key: 'home.nav.v2.tips', label: '꿀팁', href: '/tips' },
-    { key: 'home.nav.v2.pricing', label: '가격', href: '/#pricing' },
     { key: 'home.nav.v2.faq', label: 'FAQ', href: '/#faq' },
   ]
 
@@ -39,7 +40,7 @@ export function Nav({ blocks, ctas }: Props) {
     const active = isActiveMenu(pathname, href)
     const base = mobile
       ? 'shrink-0 whitespace-nowrap rounded-pill px-3 py-1.5 text-[13px] font-bold transition-colors'
-      : 'whitespace-nowrap rounded-pill px-3 py-1.5 text-[14px] xl:text-[15px] font-semibold transition-colors'
+      : 'whitespace-nowrap rounded-pill px-2.5 py-1.5 text-[13px] xl:text-[14px] font-semibold transition-colors'
     return active
       ? `${base} bg-naver-soft text-naver-deep shadow-sm`
       : `${base} text-ink-700 hover:bg-ink-50 hover:text-naver-green`
@@ -53,7 +54,7 @@ export function Nav({ blocks, ctas }: Props) {
         </a>
 
         {/* 메뉴 — 데스크톱에서 노출 */}
-        <div className="hidden lg:flex items-center gap-5 xl:gap-7">
+        <div className="hidden lg:flex items-center gap-1.5 xl:gap-2.5">
           {menuLinks.map((l) => {
             const current = pickLinkOrUndef(blocks, l.key)
             const href = current?.href ?? l.href

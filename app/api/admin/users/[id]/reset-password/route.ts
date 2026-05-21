@@ -60,7 +60,7 @@ export async function POST(
   }
 
   const email = data?.user?.email ?? null
-  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ozlabpay.kr'}/admin/login`
+  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.ozlabpay.kr'}/admin/login`
 
   return NextResponse.json({
     success: true,

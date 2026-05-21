@@ -64,6 +64,7 @@ export default function ContentEditor({
   const [loadingData, setLoadingData] = useState(isEdit)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [coverPickerOpen, setCoverPickerOpen] = useState(false)
+  const publicBasePath = form.category === 'blog' ? 'blog' : 'tips'
 
   useEffect(() => {
     if (isEdit && postId) {
@@ -197,7 +198,9 @@ export default function ContentEditor({
 
           {/* slug */}
           <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-            <span className="text-xs text-ink-500 break-all">ozlabpay.kr/blog/</span>
+            <span className="text-xs text-ink-500 break-all">
+              www.ozlabpay.kr/{publicBasePath}/
+            </span>
             <input
               type="text"
               value={form.slug}
@@ -320,12 +323,13 @@ export default function ContentEditor({
           <h2 className="text-sm font-bold text-ink-100 mb-4">
             🎯 SEO 어시스턴트
           </h2>
-          <SeoPanel
-            title={form.title}
-            metaTitle={form.meta_title}
-            metaDescription={form.meta_description}
-            slug={form.slug}
-            bodyHtml={form.body_html}
+            <SeoPanel
+              title={form.title}
+              metaTitle={form.meta_title}
+              metaDescription={form.meta_description}
+              slug={form.slug}
+              basePath={publicBasePath}
+              bodyHtml={form.body_html}
             focusKeyword={form.focus_keyword}
             authorName={form.author_name}
             updatedAt={updatedAt}

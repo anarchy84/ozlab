@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ozlabpay.kr'}/admin/login`
+  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.ozlabpay.kr'}/admin/login`
 
   return NextResponse.json({
     success: true,

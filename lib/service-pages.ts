@@ -1,3 +1,5 @@
+import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
+
 export type ServiceCard = {
   title: string
   desc: string
@@ -52,6 +54,219 @@ export type ServiceLandingData = {
 }
 
 export const servicePages = {
+  naverPos: {
+    eyebrow: '네이버 POS · 카드 단말기',
+    hero: {
+      line1: '네이버 카드 단말기와',
+      highlight: '네이버 POS',
+      line3: '한 번에 연결',
+      description:
+        '네이버 카드 결제기, 네이버포스기, 포스단말기, 결제포스기까지 매장 환경에 맞게 상담합니다. 결제부터 리뷰 자동화, 플레이스 마케팅까지 같이 설계해요.',
+    },
+    primaryCta: '네이버 POS 상담',
+    secondaryCta: '애플페이도 확인',
+    secondaryHref: '/apple-pay-pos',
+    stats: [
+      { value: '0원', label: '단말기 프로모션 상담' },
+      { value: 'N pay', label: '네이버페이 연동' },
+      { value: '3~5일', label: '평균 설치 일정' },
+    ],
+    intro: {
+      eyebrow: 'Why Naver POS',
+      title: '결제만 되는 포스기가 아니라,\n검색과 리뷰까지 이어져야 합니다.',
+      description:
+        '요즘 매장은 결제 순간이 마케팅 시작점입니다. 네이버 카드 단말기와 POS 연동을 통해 결제, 리뷰, 플레이스 노출 흐름을 한 번에 정리합니다.',
+      cards: [
+        {
+          title: '네이버페이 연동 결제',
+          desc: '카드, 간편결제, 네이버페이 결제를 매장 운영 방식에 맞춰 연결합니다. 기존 POS와 병행 가능한 구성도 함께 확인합니다.',
+        },
+        {
+          title: '포스단말기 교체 상담',
+          desc: '지금 쓰는 포스기, 카드 결제기, 영수증 프린터, 인터넷 환경을 확인하고 교체가 필요한 장비만 정리합니다.',
+        },
+        {
+          title: '리뷰 자동화 동선',
+          desc: '결제 후 영수증 리뷰 요청 흐름이 자연스럽게 이어지도록 네이버 플레이스와 결제 동선을 같이 봅니다.',
+        },
+      ],
+    },
+    catalog: {
+      eyebrow: 'Core Keywords',
+      title: '찾고 계신 단말기 이름은 달라도,\n확인해야 할 기준은 같습니다.',
+      description:
+        '네이버 카드 단말기, 네이버 카드 결제기, 네이버포스, 네이버 POS 모두 매장 결제와 플레이스 운영을 함께 보는 것이 핵심입니다.',
+      cards: [
+        {
+          meta: 'Naver Pay',
+          title: '네이버 카드 단말기',
+          desc: '네이버페이 결제와 카드 결제를 함께 고려하는 매장을 위한 단말기 상담입니다.',
+          bullets: ['네이버페이 연동 확인', '카드 결제기 교체 상담', '영수증 리뷰 흐름 점검'],
+        },
+        {
+          meta: 'POS',
+          title: '네이버포스기 · 네이버 POS',
+          desc: '기존 POS와 연동할지, 새 포스단말기로 교체할지 매장 상황에 맞춰 비교합니다.',
+          bullets: ['기존 POS 호환성', '결제포스 구성', '매장 인터넷 점검'],
+        },
+        {
+          meta: 'Payment',
+          title: '결제포스기 구성',
+          desc: '카운터 결제, 테이블 결제, 배달·포장 주문까지 결제 동선에 맞는 구성을 잡습니다.',
+          bullets: ['카운터형 결제', '간편결제 대응', '프린터·서명패드 확인'],
+        },
+      ],
+    },
+    proof: {
+      eyebrow: 'Effect',
+      title: '단말기 교체가\n마케팅 흐름까지 바꿉니다.',
+      description: '* 매장 업종, 기존 장비, 플레이스 상태에 따라 효과는 달라질 수 있습니다.',
+      cards: [
+        { value: '결제', label: '카드·간편결제 통합' },
+        { value: '리뷰', label: '영수증 리뷰 동선' },
+        { value: '노출', label: '플레이스 최적화 기반' },
+        { value: '상담', label: '장비·인터넷 동시 점검' },
+      ],
+    },
+    guide: {
+      eyebrow: 'Setup',
+      title: '설치 전 체크할 항목을\n먼저 정리합니다.',
+      cards: [
+        { meta: '01', title: '기존 장비 확인', desc: '현재 쓰는 포스기, 카드 단말기, 프린터, 인터넷 회선을 확인합니다.' },
+        { meta: '02', title: '연동 가능 여부 점검', desc: '네이버페이, 기존 POS, 플레이스 운영 상태를 함께 봅니다.' },
+        { meta: '03', title: '혜택 적용 확인', desc: '단말기 0원, 설치비 지원, 마케팅 지원 가능 여부를 정리합니다.' },
+        { meta: '04', title: '설치 일정 조율', desc: '영업에 지장 없는 시간으로 기사 방문과 세팅 일정을 맞춥니다.' },
+      ],
+    },
+    process: [
+      { title: '키워드별 상담 대응', desc: '네이버 카드 단말기, 네이버포스기, 포스단말기처럼 검색어가 달라도 같은 상담 흐름으로 정리합니다.' },
+      { title: '플레이스 상태 점검', desc: '단말기만 놓고 끝내지 않고 플레이스 정보, 리뷰 동선, 광고 필요 여부를 같이 확인합니다.' },
+      { title: '운영비 비교', desc: '기존 장비 유지, 교체, 신규 도입 중 어떤 방식이 유리한지 월 비용과 혜택을 나눠 봅니다.' },
+    ],
+    faqs: [
+      {
+        q: '네이버 카드 단말기와 일반 카드 단말기는 무엇이 다른가요?',
+        a: '일반 카드 결제 기능만 보는 것이 아니라 네이버페이 결제, 영수증 리뷰, 플레이스 운영까지 함께 연결되는지가 핵심입니다. 매장 상황에 따라 기존 단말기 유지와 교체를 비교해드립니다.',
+      },
+      {
+        q: '네이버포스기나 네이버 POS를 새로 설치해야 하나요?',
+        a: '반드시 새로 설치해야 하는 것은 아닙니다. 기존 POS와 병행 가능한 경우도 있고, 결제포스기 교체가 유리한 경우도 있어 현재 장비를 먼저 확인합니다.',
+      },
+      {
+        q: '포스단말기 교체 비용은 얼마인가요?',
+        a: '프로모션, 약정, 기존 장비 상태에 따라 달라집니다. 일부 매장은 단말기 0원 또는 설치비 지원 조건을 적용받을 수 있어 상담에서 정확히 안내합니다.',
+      },
+      {
+        q: '네이버 카드 결제기를 쓰면 리뷰가 자동으로 쌓이나요?',
+        a: '결제 후 네이버 영수증 리뷰 요청 흐름을 만들 수 있습니다. 다만 플레이스 상태와 고객 결제 방식에 따라 결과가 달라지므로 세팅을 같이 점검하는 것이 좋습니다.',
+      },
+    ],
+    consultChips: ['네이버 카드 단말기', '네이버포스', '포스단말기', '결제포스기'],
+  },
+  applePayPos: {
+    eyebrow: '애플페이 POS · 결제 단말기',
+    hero: {
+      line1: '애플페이 결제까지',
+      highlight: '포스기·단말기',
+      line3: '호환 점검',
+      description:
+        '애플페이포스기, 애플페이결제단말기를 찾는 매장을 위해 현재 POS와 카드 단말기의 NFC 결제 지원 여부부터 교체 필요성까지 확인합니다.',
+    },
+    primaryCta: '애플페이 상담',
+    secondaryCta: '네이버 POS 보기',
+    secondaryHref: '/naver-pos',
+    stats: [
+      { value: 'NFC', label: '비접촉 결제 확인' },
+      { value: 'POS', label: '기존 연동 점검' },
+      { value: '간편결제', label: '네이버·애플 동시 고려' },
+    ],
+    intro: {
+      eyebrow: 'Apple Pay Ready',
+      title: '애플페이는 단말기만 보고\n결정하면 안 됩니다.',
+      description:
+        'NFC 지원 단말기, 카드사 승인, POS 연동, 영수증 출력까지 실제 결제 흐름을 기준으로 확인해야 합니다.',
+      cards: [
+        {
+          title: 'NFC 단말기 확인',
+          desc: '애플페이는 비접촉 결제를 지원하는 단말기가 필요합니다. 현재 장비가 가능한지 먼저 확인합니다.',
+        },
+        {
+          title: 'POS 연동 점검',
+          desc: '결제 승인만 되는 것과 POS 매출·정산까지 맞는 것은 다릅니다. 매장 POS와 정산 흐름을 같이 확인합니다.',
+        },
+        {
+          title: '간편결제 동시 대응',
+          desc: '애플페이뿐 아니라 네이버페이, 삼성페이 등 고객이 자주 쓰는 결제 수단을 함께 고려합니다.',
+        },
+      ],
+    },
+    catalog: {
+      eyebrow: 'Checks',
+      title: '애플페이 결제 단말기 도입 전\n세 가지를 확인하세요.',
+      cards: [
+        {
+          meta: '01',
+          title: '현재 단말기 호환',
+          desc: '기존 카드 단말기가 NFC 결제를 지원하는지, 교체가 필요한지 확인합니다.',
+          bullets: ['NFC 지원 여부', '카드사 승인 흐름', '서명·영수증 출력'],
+        },
+        {
+          meta: '02',
+          title: 'POS 매출 반영',
+          desc: '애플페이 결제가 POS 매출, 정산, 주문 내역에 정상 반영되는 구성을 확인합니다.',
+          bullets: ['매출 누락 방지', '정산 확인', '주문 동선 유지'],
+        },
+        {
+          meta: '03',
+          title: '교체 혜택 비교',
+          desc: '네이버 카드 단말기와 함께 교체할 때 적용 가능한 설치비, 단말기 지원 조건을 비교합니다.',
+          bullets: ['단말기 지원', '설치 일정', '플레이스 마케팅 연계'],
+        },
+      ],
+    },
+    proof: {
+      eyebrow: 'Use Case',
+      title: '이런 매장이라면\n애플페이 대응을 확인하세요.',
+      cards: [
+        { value: '카페', label: '젊은 고객 간편결제 비중 높음' },
+        { value: '식당', label: '카운터 결제 회전율 중요' },
+        { value: '샵', label: '고객 경험과 브랜드 이미지 중요' },
+      ],
+    },
+    guide: {
+      eyebrow: 'Setup',
+      title: '호환 여부부터\n교체 필요성까지 봅니다.',
+      cards: [
+        { meta: '01', title: '단말기 모델 확인', desc: '현재 카드 단말기 모델과 NFC 지원 여부를 확인합니다.' },
+        { meta: '02', title: 'POS·정산 흐름 확인', desc: '결제 승인, 매출 반영, 영수증 출력까지 실제 운영 흐름을 점검합니다.' },
+        { meta: '03', title: '교체 조건 비교', desc: '애플페이 결제 단말기 교체가 필요한 경우 비용과 혜택을 정리합니다.' },
+      ],
+    },
+    process: [
+      { title: '기존 장비 유지 가능성', desc: '가능하면 현재 장비를 활용하고, 필요한 경우에만 교체 방향을 안내합니다.' },
+      { title: '네이버페이 동시 고려', desc: '애플페이만이 아니라 네이버페이와 카드 결제 동선을 함께 설계합니다.' },
+      { title: '설치 후 결제 테스트', desc: '현장에서 실제 결제, 취소, 영수증 출력까지 확인합니다.' },
+    ],
+    faqs: [
+      {
+        q: '애플페이포스기는 기존 포스기와 다른가요?',
+        a: '애플페이 결제 자체는 NFC 지원 카드 단말기가 핵심입니다. 다만 POS 매출 반영과 정산 흐름까지 맞아야 하므로 기존 포스기와 단말기 호환성을 함께 확인해야 합니다.',
+      },
+      {
+        q: '애플페이결제단말기만 바꾸면 바로 사용할 수 있나요?',
+        a: '단말기 모델, 카드사 설정, POS 연동 상태에 따라 다릅니다. 상담 시 현재 단말기 모델을 알려주시면 교체 필요 여부를 먼저 확인합니다.',
+      },
+      {
+        q: '네이버페이와 애플페이를 같이 받을 수 있나요?',
+        a: '가능한 구성이 많습니다. 매장 결제 동선에 따라 네이버페이, 애플페이, 삼성페이, 카드 결제를 함께 고려해 안내합니다.',
+      },
+      {
+        q: '애플페이 단말기 교체 비용도 지원되나요?',
+        a: '프로모션과 계약 조건에 따라 지원 여부가 달라집니다. 네이버 카드 단말기 교체 상담과 함께 확인하면 혜택을 비교하기 쉽습니다.',
+      },
+    ],
+    consultChips: ['애플페이포스기', '애플페이결제단말기', 'NFC 단말기', '간편결제'],
+  },
   internet: {
     eyebrow: '사업자 인터넷',
     hero: {
@@ -383,3 +598,16 @@ export const servicePages = {
     consultChips: ['실내 CCTV', '실외 CCTV', '무선 카메라', '기존 교체'],
   },
 } satisfies Record<string, ServiceLandingData>
+
+export type ServicePageKey = keyof typeof servicePages
+
+export function serviceFaqsForBlocks(
+  data: ServiceLandingData,
+  pageKey: ServicePageKey,
+  blocks: Record<string, ContentBlock>
+) {
+  return data.faqs.map((faq, index) => ({
+    q: pickTextOrUndef(blocks, `service.${pageKey}.faqs.items.${index}.q`) ?? faq.q,
+    a: pickTextOrUndef(blocks, `service.${pageKey}.faqs.items.${index}.a`) ?? faq.a,
+  }))
+}
