@@ -7,7 +7,7 @@
 // PUT  : 입력값 일괄 UPSERT
 //        body: { gtm_id, ga4_measurement_id, meta_pixel_id, google_site_verification,
 //                naver_site_verification, custom_head_html }
-//        각 필드 string|null. 빈 문자열은 null 로 정규화.
+//        각 필드 string|null. 비어 있는 필드는 앱에서는 null 취급, DB 에는 '' 저장.
 //
 // 적용 흐름:
 //   - PUT 직후 SSR layout.tsx 가 다음 요청부터 신규 값 사용 (force-dynamic)

@@ -73,7 +73,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
 /**
  * 특정 키 UPSERT. updated_by 는 호출자가 user_id 전달.
- *   - 빈 문자열은 null 로 저장 (필드 비우기)
+ *   - 빈 문자열은 DB NOT NULL 제약에 맞춰 '' 로 저장 (앱에서는 falsy 로 비어 있음 처리)
  *   - super_admin 권한 체크는 호출자(API 라우트) 책임
  */
 export async function upsertSiteSetting(
@@ -83,13 +83,13 @@ export async function upsertSiteSetting(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const admin = createAdminClient()
-    const stored = value && value.trim().length > 0 ? value.trim() : null
+    const stored = value && value.trim().length > 0 ? value.trim() : ''
     const { error } = await admin
       .from('site_settings')
       .upsert(
         {
           key,
-          value: stored as unknown as object, // jsonb — supabase-js 가 자동 직렬화 (null OK)
+          value: stored as unknown as object, // jsonb — 빈 값도 NOT NULL 제약 때문에 '' 로 저장
           updated_by: updatedBy,
         },
         { onConflict: 'key' },

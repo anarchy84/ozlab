@@ -113,7 +113,7 @@ export default function HeadSettingsForm({ initial }: Props) {
     }
     setSaving(true)
     try {
-      // 빈 문자열은 null 로 보냄
+      // 화면의 빈 문자열은 API 에 null 로 보내고, 서버가 DB NOT NULL 제약에 맞게 저장한다.
       const body: Partial<Record<SiteSettingKey, string | null>> = {}
       for (const f of FIELDS) {
         const v = values[f.key]
