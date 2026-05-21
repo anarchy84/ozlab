@@ -41,11 +41,17 @@ const EMPTY: SiteSettings = {
   custom_head_html: null,
 }
 
+const VERIFICATION_META_NAMES: Partial<Record<SiteSettingKey, string>> = {
+  google_site_verification: 'google-site-verification',
+  naver_site_verification: 'naver-site-verification',
+}
+
 /**
  * 모든 site_settings 키 한 번에 로드 (layout.tsx SSR 시 호출).
  *   - DB 오류 시 빈 객체 리턴 (사이트 다운 안 시킴)
  *   - value 가 jsonb 'null' 이면 string|null 의 null 로 매핑
- *   - value 가 jsonb string 이면 그대로 string 로 매핑
+ *   - value 가 jsonb string 이면 string 로 매핑
+ *   - verification 값은 토큰/전체 meta 태그 모두 content 토큰으로 정규화
  */
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
@@ -61,9 +67,12 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       const k = row.key as SiteSettingKey
       if (!(SITE_SETTING_KEYS as readonly string[]).includes(k)) continue
       const v = row.value
-      if (typeof v === 'string') out[k] = v
+      if (typeof v === 'string') out[k] = normalizeSiteSettingValue(k, v)
       else if (v === null) out[k] = null
-      else out[k] = typeof v === 'object' ? JSON.stringify(v) : String(v)
+      else {
+        const raw = typeof v === 'object' ? JSON.stringify(v) : String(v)
+        out[k] = normalizeSiteSettingValue(k, raw)
+      }
     }
     return out
   } catch {
@@ -83,7 +92,7 @@ export async function upsertSiteSetting(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const admin = createAdminClient()
-    const stored = value && value.trim().length > 0 ? value.trim() : ''
+    const stored = normalizeSiteSettingValue(key, value)
     const { error } = await admin
       .from('site_settings')
       .upsert(
@@ -99,6 +108,48 @@ export async function upsertSiteSetting(
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'unknown' }
   }
+}
+
+export function normalizeSiteSettingValue(
+  key: SiteSettingKey,
+  value: string | null | undefined,
+): string {
+  const trimmed = value?.trim() ?? ''
+  if (!trimmed) return ''
+
+  const expectedMetaName = VERIFICATION_META_NAMES[key]
+  if (!expectedMetaName) return trimmed
+
+  return extractVerificationToken(trimmed, expectedMetaName) ?? trimmed
+}
+
+function extractVerificationToken(value: string, expectedMetaName: string): string | null {
+  if (!value.toLowerCase().includes('<meta')) return null
+
+  const metaTag = value.match(/<meta\b[^>]*>/i)?.[0]
+  if (!metaTag) return null
+
+  const attrs = parseHtmlAttributes(metaTag)
+  const name = attrs.name?.trim().toLowerCase()
+  const content = attrs.content?.trim()
+
+  if (!content) return null
+  if (name && name !== expectedMetaName) return null
+
+  return content
+}
+
+function parseHtmlAttributes(tag: string): Record<string, string> {
+  const attrs: Record<string, string> = {}
+  const pattern = /([A-Za-z_:][A-Za-z0-9_:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g
+  let match: RegExpExecArray | null
+
+  while ((match = pattern.exec(tag)) !== null) {
+    const key = match[1].toLowerCase()
+    attrs[key] = match[2] ?? match[3] ?? match[4] ?? ''
+  }
+
+  return attrs
 }
 
 /**

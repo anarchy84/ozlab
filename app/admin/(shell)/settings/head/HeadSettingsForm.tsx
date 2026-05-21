@@ -52,15 +52,15 @@ const FIELDS: Array<{
   },
   {
     key: 'google_site_verification',
-    label: 'Google Search Console 토큰',
-    placeholder: 'verification 토큰',
-    help: 'GSC 속성 추가 > HTML 태그 > content="여기값" 만 복사. <meta name="google-site-verification">로 자동 박힘.',
+    label: 'Google Search Console 인증 태그',
+    placeholder: '<meta name="google-site-verification" content="..." />',
+    help: 'GSC 속성 추가 > HTML 태그 전체를 그대로 붙여넣어도 됩니다. content 값만 넣어도 동일하게 동작합니다.',
   },
   {
     key: 'naver_site_verification',
-    label: '네이버 서치어드바이저 토큰',
-    placeholder: 'verification 토큰',
-    help: '네이버 SC 사이트 등록 > HTML 태그 인증 > content 값. <meta name="naver-site-verification">으로 자동 박힘.',
+    label: '네이버 서치어드바이저 인증 태그',
+    placeholder: '<meta name="naver-site-verification" content="..." />',
+    help: '네이버 SC 사이트 등록 > HTML 태그 인증 값을 그대로 붙여넣어도 됩니다. content 값만 넣어도 동일하게 동작합니다.',
   },
   {
     key: 'custom_head_html',
