@@ -519,7 +519,7 @@ function DashboardPeriodFilter({ period }: { period: DashboardPeriod }) {
   ]
 
   return (
-    <section className="rounded-2xl border border-ink-700 bg-surface-darkSoft/95 p-4 sm:p-5">
+    <section className="rounded-2xl border border-ink-200 bg-white p-4 shadow-sm dark:border-ink-700 dark:bg-surface-darkSoft/95 sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-base font-bold text-ink-100">조회 기간</h2>
@@ -531,7 +531,7 @@ function DashboardPeriodFilter({ period }: { period: DashboardPeriod }) {
               <Link
                 key={range.label}
                 href={range.href}
-                className="rounded-full border border-ink-700 bg-ink-900 px-3 py-1.5 text-xs font-semibold text-ink-300 hover:border-brand-blue/60 hover:text-brand-blue"
+                className="rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-sm hover:border-brand-blue/60 hover:text-brand-blue dark:border-ink-700 dark:bg-ink-900 dark:text-ink-300"
               >
                 {range.label}
               </Link>
@@ -545,7 +545,7 @@ function DashboardPeriodFilter({ period }: { period: DashboardPeriod }) {
               type="date"
               name="from"
               defaultValue={period.from}
-              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-sm text-ink-100 outline-none focus:border-brand-blue"
+              className="w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-brand-blue dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100"
             />
           </FieldControl>
           <FieldControl label="종료일">
@@ -553,21 +553,21 @@ function DashboardPeriodFilter({ period }: { period: DashboardPeriod }) {
               type="date"
               name="to"
               defaultValue={period.to}
-              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-sm text-ink-100 outline-none focus:border-brand-blue"
+              className="w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-brand-blue dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100"
             />
           </FieldControl>
           <FieldControl label="정렬">
             <select
               name="sort"
               defaultValue={period.sort}
-              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-sm text-ink-100 outline-none focus:border-brand-blue"
+              className="w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 outline-none focus:border-brand-blue dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100"
             >
               <option value="revenue">매출액순</option>
               <option value="count">건수순</option>
               <option value="name">이름순</option>
             </select>
           </FieldControl>
-          <label className="flex h-10 items-center gap-2 rounded-lg border border-ink-700 bg-ink-900 px-3 text-sm text-ink-300">
+          <label className="flex h-10 items-center gap-2 rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-600 shadow-sm dark:border-ink-700 dark:bg-ink-900 dark:text-ink-300">
             <input
               type="checkbox"
               name="compare"
@@ -683,13 +683,13 @@ function RoleRevenueOverview({
       ]
 
   return (
-    <section className="rounded-2xl border border-ink-700 bg-surface-darkSoft/95 p-4 sm:p-5 shadow-sm">
+    <section className="rounded-2xl border border-ink-200 bg-white p-4 shadow-sm dark:border-ink-700 dark:bg-surface-darkSoft/95 sm:p-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-base font-bold text-ink-100">{title}</h2>
           <p className="mt-1 text-sm text-ink-400 break-keep">{description}</p>
         </div>
-        <span className="w-fit rounded-full border border-brand-blue/40 bg-brand-blue/10 px-3 py-1 text-xs font-semibold text-brand-blue">
+        <span className="w-fit rounded-full border border-brand-blue/30 bg-brand-soft px-3 py-1 text-xs font-semibold text-brand-deep dark:border-brand-blue/40 dark:bg-brand-blue/10 dark:text-brand-blue">
           {formatYmdLabel(period.from)} ~ {formatYmdLabel(period.to)}
         </span>
       </div>
@@ -701,7 +701,7 @@ function RoleRevenueOverview({
           ))}
         </div>
 
-        <div className="rounded-xl border border-ink-700 bg-ink-900/55 p-4">
+        <div className="rounded-xl border border-ink-200 bg-ink-50 p-4 dark:border-ink-700 dark:bg-ink-900/55">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-ink-100">{unpaidTitle}</p>
@@ -709,11 +709,11 @@ function RoleRevenueOverview({
                 고객명, 담당자, 미수 상태, 금액, 예정일 표시 영역
               </p>
             </div>
-            <span className="rounded-full bg-ink-800 px-2.5 py-1 text-[11px] font-semibold text-ink-400">
+            <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-ink-500 shadow-sm dark:bg-ink-800 dark:text-ink-400">
               0건
             </span>
           </div>
-          <div className="mt-4 rounded-lg border border-dashed border-ink-700 bg-surface-dark/60 px-4 py-5 text-center">
+          <div className="mt-4 rounded-lg border border-dashed border-ink-300 bg-white px-4 py-5 text-center dark:border-ink-700 dark:bg-surface-dark/60">
             <p className="text-sm font-semibold text-ink-300">미수금 데이터 연결 대기</p>
             <p className="mt-1 text-xs text-ink-500 break-keep">
               클로드 작업 시 실제 미수금 목록 API 또는 뷰를 연결하면 이 영역에 리스트가 표시됩니다.
@@ -739,13 +739,13 @@ function RevenueSummaryCard({
   tone: 'blue' | 'violet' | 'amber'
 }) {
   const toneClass = {
-    blue: 'from-brand-blue/20 to-brand-blue/5 text-brand-blue border-brand-blue/30',
-    violet: 'from-indigo-400/20 to-indigo-400/5 text-indigo-300 border-indigo-400/30',
-    amber: 'from-amber-400/20 to-amber-400/5 text-amber-300 border-amber-400/30',
+    blue: 'border-brand-blue/25 bg-brand-soft text-brand-deep dark:border-brand-blue/30 dark:bg-ink-900 dark:bg-gradient-to-br dark:from-brand-blue/20 dark:to-brand-blue/5 dark:text-brand-blue',
+    violet: 'border-brand-violet/25 bg-[#F4F0FF] text-brand-violet dark:border-indigo-400/30 dark:bg-ink-900 dark:bg-gradient-to-br dark:from-indigo-400/20 dark:to-indigo-400/5 dark:text-indigo-300',
+    amber: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/30 dark:bg-ink-900 dark:bg-gradient-to-br dark:from-amber-400/20 dark:to-amber-400/5 dark:text-amber-300',
   }[tone]
 
   return (
-    <article className={`rounded-xl border bg-gradient-to-br p-4 ${toneClass}`}>
+    <article className={`rounded-xl border p-4 ${toneClass}`}>
       <p className="text-xs font-semibold text-ink-400">{label}</p>
       <p className="mt-2 text-xl font-extrabold text-ink-100 sm:text-2xl">{value}</p>
       {comparison && (
@@ -789,25 +789,25 @@ function PerformanceLineChart({
   const gradientId = title === '상품별 실적' ? 'productPerformanceGlow' : 'counselorPerformanceGlow'
 
   return (
-    <section className="rounded-2xl border border-ink-700 bg-surface-darkSoft/95 p-4 sm:p-5">
+    <section className="rounded-2xl border border-ink-200 bg-white p-4 shadow-sm dark:border-ink-700 dark:bg-surface-darkSoft/95 sm:p-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-base font-bold text-ink-100">{title}</h2>
           <p className="mt-1 text-sm text-ink-400">{subtitle}</p>
         </div>
-        <span className="w-fit rounded-full bg-ink-900 px-3 py-1 text-xs font-semibold text-ink-400">
+        <span className="w-fit rounded-full bg-ink-50 px-3 py-1 text-xs font-semibold text-ink-500 dark:bg-ink-900 dark:text-ink-400">
           선그래프
         </span>
       </div>
 
       {series.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-ink-700 bg-surface-dark/60 px-4 py-12 text-center">
+        <div className="mt-4 rounded-xl border border-dashed border-ink-300 bg-ink-50 px-4 py-12 text-center dark:border-ink-700 dark:bg-surface-dark/60">
           <p className="text-sm font-semibold text-ink-300">{emptyText}</p>
           <p className="mt-1 text-xs text-ink-500">기간을 넓히거나 매출 등록 여부를 확인하세요.</p>
         </div>
       ) : (
         <>
-          <div className="mt-4 overflow-hidden rounded-xl border border-ink-700 bg-ink-950/40">
+          <div className="mt-4 overflow-hidden rounded-xl border border-ink-200 bg-white dark:border-ink-700 dark:bg-ink-950/40">
             <svg
               viewBox={`0 0 ${width} ${height}`}
               className="h-[260px] w-full"
@@ -903,7 +903,7 @@ function PerformanceLineChart({
             {series.map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between gap-3 rounded-lg bg-ink-900/70 px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-lg bg-ink-50 px-3 py-2 dark:bg-ink-900/70"
               >
                 <div className="flex min-w-0 items-center gap-2">
                   <span

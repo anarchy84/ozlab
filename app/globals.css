@@ -404,17 +404,34 @@ html.light [data-admin-shell] {
   font: inherit;
 }
 html.light [data-admin-shell].bg-surface-dark,
-html.light [data-admin-shell] .bg-surface-dark {
+html.light [data-admin-shell] .bg-surface-dark,
+html.light [data-admin-shell] [class~="bg-surface-dark/80"],
+html.light [data-admin-shell] [class~="bg-surface-dark/60"],
+html.light [data-admin-shell] [class~="bg-surface-dark/40"] {
   background-color: #f3f4f6 !important;
 }
 html.light [data-admin-shell].bg-surface-darkSoft,
 html.light [data-admin-shell].bg-ink-900,
 html.light [data-admin-shell] .bg-surface-darkSoft,
+html.light [data-admin-shell] [class~="bg-surface-darkSoft/95"],
+html.light [data-admin-shell] [class~="bg-surface-darkSoft/80"],
+html.light [data-admin-shell] [class~="bg-surface-darkSoft/60"],
+html.light [data-admin-shell] [class~="bg-surface-darkSoft/50"],
+html.light [data-admin-shell] [class~="bg-surface-darkSoft/40"],
 html.light [data-admin-shell] .bg-ink-900,
+html.light [data-admin-shell] .bg-ink-950,
+html.light [data-admin-shell] [class~="bg-ink-950/80"],
+html.light [data-admin-shell] [class~="bg-ink-950/60"],
+html.light [data-admin-shell] [class~="bg-ink-950/50"],
+html.light [data-admin-shell] [class~="bg-ink-950/40"],
+html.light [data-admin-shell] [class~="bg-ink-950/30"],
 html.light [data-admin-shell] [class~="bg-ink-900/80"],
+html.light [data-admin-shell] [class~="bg-ink-900/70"],
 html.light [data-admin-shell] [class~="bg-ink-900/60"],
+html.light [data-admin-shell] [class~="bg-ink-900/55"],
 html.light [data-admin-shell] [class~="bg-ink-900/50"],
-html.light [data-admin-shell] [class~="bg-ink-900/40"] {
+html.light [data-admin-shell] [class~="bg-ink-900/40"],
+html.light [data-admin-shell] [class~="bg-ink-900/30"] {
   background-color: #ffffff !important;
 }
 html.light [data-admin-shell].bg-ink-800,
