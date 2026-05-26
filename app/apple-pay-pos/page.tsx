@@ -5,7 +5,9 @@ import { ServiceLanding } from '@/components/sections/ServiceLanding'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import { serviceFaqsForBlocks, servicePages } from '@/lib/service-pages'
+import { landingFaqsForSlots } from '@/lib/landing-sections'
 import { breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
 
 export const revalidate = 0
@@ -26,10 +28,16 @@ export const metadata: Metadata = publicMetadata({
 })
 
 export default async function ApplePayPosPage() {
-  const blocksMap = await getBlocksForPage('/apple-pay-pos')
+  const [blocksMap, landingSlots] = await Promise.all([
+    getBlocksForPage('/apple-pay-pos'),
+    getLandingSlotsForPage('/apple-pay-pos'),
+  ])
   const blocks = blocksMapToRecord(blocksMap)
   const data = servicePages.applePayPos
-  const faqs = serviceFaqsForBlocks(data, 'applePayPos', blocks)
+  const faqs = [
+    ...serviceFaqsForBlocks(data, 'applePayPos', blocks),
+    ...landingFaqsForSlots(landingSlots),
+  ]
 
   return (
     <PublicPageFrame>
@@ -62,7 +70,12 @@ export default async function ApplePayPosPage() {
         ]}
       />
       <BlocksProvider blocks={blocks}>
-        <ServiceLanding data={data} pageKey="applePayPos" pagePath="/apple-pay-pos" />
+        <ServiceLanding
+          data={data}
+          pageKey="applePayPos"
+          pagePath="/apple-pay-pos"
+          landingSlots={landingSlots}
+        />
       </BlocksProvider>
     </PublicPageFrame>
   )

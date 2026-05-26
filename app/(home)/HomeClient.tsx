@@ -16,6 +16,7 @@
 
 import type { ContentBlock } from '@/lib/content-blocks'
 import type { CtaButton, CtaPlacement } from '@/lib/admin/types'
+import type { LandingSlotsByKey } from '@/lib/landing-sections'
 
 import { PromoStrip } from '@/components/sections/PromoStrip'
 import { Nav } from '@/components/sections/Nav'
@@ -34,13 +35,15 @@ import { ApplyForm } from '@/components/sections/ApplyForm'
 import { Footer } from '@/components/sections/Footer'
 import { FloatingCTA } from '@/components/sections/FloatingCTA'
 import { CtaTriggerHost } from '@/components/cta/CtaTriggerHost'
+import { LandingSlot } from '@/components/landing/LandingSlot'
 
 interface Props {
   blocks: Record<string, ContentBlock>
   ctasByPlacement: Partial<Record<CtaPlacement, CtaButton[]>>
+  landingSlots: LandingSlotsByKey
 }
 
-export default function HomeClient({ blocks, ctasByPlacement }: Props) {
+export default function HomeClient({ blocks, ctasByPlacement, landingSlots }: Props) {
   // 자동 트리거 CTA (modal_form/floating_button/sticky_bar/toast) 모두 평탄화
   const allCtas = Object.values(ctasByPlacement).flat().filter(Boolean) as CtaButton[]
   return (
@@ -48,6 +51,12 @@ export default function HomeClient({ blocks, ctasByPlacement }: Props) {
       <PromoStrip blocks={blocks} />
       <Nav blocks={blocks} ctas={ctasByPlacement.nav} />
       <Hero blocks={blocks} ctas={ctasByPlacement.hero} />
+      <LandingSlot
+        pagePath="/"
+        slotKey="home.after_hero"
+        label="홈 히어로 아래"
+        items={landingSlots['home.after_hero']}
+      />
       <Painpoints blocks={blocks} />
       <Showcase blocks={blocks} ctas={ctasByPlacement.showcase} />
       <Features blocks={blocks} />
@@ -58,6 +67,12 @@ export default function HomeClient({ blocks, ctasByPlacement }: Props) {
       <Promotion blocks={blocks} ctas={ctasByPlacement.promotion} />
       <Testimonials blocks={blocks} />
       <FAQ blocks={blocks} />
+      <LandingSlot
+        pagePath="/"
+        slotKey="home.before_apply"
+        label="홈 상담폼 위"
+        items={landingSlots['home.before_apply']}
+      />
       <ApplyForm blocks={blocks} />
       <Footer blocks={blocks} ctas={ctasByPlacement.footer} />
       <FloatingCTA blocks={blocks} ctas={ctasByPlacement.floating} />

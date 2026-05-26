@@ -5,7 +5,9 @@ import { ServiceLanding } from '@/components/sections/ServiceLanding'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import { serviceFaqsForBlocks, servicePages } from '@/lib/service-pages'
+import { landingFaqsForSlots } from '@/lib/landing-sections'
 import { breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
 
 export const revalidate = 0
@@ -30,10 +32,16 @@ export const metadata: Metadata = publicMetadata({
 })
 
 export default async function NaverPosPage() {
-  const blocksMap = await getBlocksForPage('/naver-pos')
+  const [blocksMap, landingSlots] = await Promise.all([
+    getBlocksForPage('/naver-pos'),
+    getLandingSlotsForPage('/naver-pos'),
+  ])
   const blocks = blocksMapToRecord(blocksMap)
   const data = servicePages.naverPos
-  const faqs = serviceFaqsForBlocks(data, 'naverPos', blocks)
+  const faqs = [
+    ...serviceFaqsForBlocks(data, 'naverPos', blocks),
+    ...landingFaqsForSlots(landingSlots),
+  ]
 
   return (
     <PublicPageFrame>
@@ -67,7 +75,12 @@ export default async function NaverPosPage() {
         ]}
       />
       <BlocksProvider blocks={blocks}>
-        <ServiceLanding data={data} pageKey="naverPos" pagePath="/naver-pos" />
+        <ServiceLanding
+          data={data}
+          pageKey="naverPos"
+          pagePath="/naver-pos"
+          landingSlots={landingSlots}
+        />
       </BlocksProvider>
     </PublicPageFrame>
   )

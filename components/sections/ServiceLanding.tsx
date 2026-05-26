@@ -16,6 +16,8 @@ import type { ServiceLandingData, ServicePageKey } from '@/lib/service-pages'
 import { EditableText } from '@/components/editable/EditableText'
 import { useBlocks } from '@/components/editable/BlocksProvider'
 import { pickTextOrUndef } from '@/lib/content-blocks'
+import { LandingSlot } from '@/components/landing/LandingSlot'
+import type { LandingSlotsByKey } from '@/lib/landing-sections'
 
 interface Props {
   data: ServiceLandingData
@@ -23,6 +25,8 @@ interface Props {
   pageKey: ServicePageKey
   /** 편집 후 revalidate 대상 경로 (예: '/internet') */
   pagePath: string
+  /** 마케터용 동적 섹션 슬롯 */
+  landingSlots?: LandingSlotsByKey
 }
 
 // ─── 섹션 헤더 (eyebrow / title / description) ──
@@ -148,7 +152,7 @@ function ServiceCard({
   )
 }
 
-export function ServiceLanding({ data, pageKey, pagePath }: Props) {
+export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: Props) {
   const blocks = useBlocks()
   const introGrid =
     data.intro.cards.length >= 4 ? 'md:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-3'
@@ -299,6 +303,13 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
           </div>
         </div>
       </section>
+
+      <LandingSlot
+        pagePath={pagePath}
+        slotKey="page.after_hero"
+        label="히어로 아래"
+        items={landingSlots['page.after_hero']}
+      />
 
       {/* INTRO */}
       <section className="py-section">
@@ -530,6 +541,13 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
           </div>
         </div>
       </section>
+
+      <LandingSlot
+        pagePath={pagePath}
+        slotKey="page.before_consult"
+        label="상담 CTA 위"
+        items={landingSlots['page.before_consult']}
+      />
 
       {/* CONSULT */}
       <section id="consult" className="bg-surface-dark py-section text-white">

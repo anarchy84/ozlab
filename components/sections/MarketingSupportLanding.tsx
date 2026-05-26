@@ -11,6 +11,8 @@ import { EditableText } from '@/components/editable/EditableText'
 import { useBlocks } from '@/components/editable/BlocksProvider'
 import { pickTextOrUndef } from '@/lib/content-blocks'
 import { marketingSupportFaqsForBlocks } from '@/lib/marketing-support-faqs'
+import { LandingSlot } from '@/components/landing/LandingSlot'
+import type { LandingSlotsByKey } from '@/lib/landing-sections'
 
 const PAGE_PATH = '/marketing-support'
 const k = (s: string) => `marketing.${s}`
@@ -39,7 +41,7 @@ const proofPoints = [
   { label: '지원 기간', value: '5월 한 달' },
 ]
 
-export function MarketingSupportLanding() {
+export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: LandingSlotsByKey }) {
   const blocks = useBlocks()
   const faqs = marketingSupportFaqsForBlocks(blocks)
   return (
@@ -184,6 +186,13 @@ export function MarketingSupportLanding() {
           </div>
         </div>
       </section>
+
+      <LandingSlot
+        pagePath={PAGE_PATH}
+        slotKey="marketing.after_hero"
+        label="히어로 아래"
+        items={landingSlots['marketing.after_hero']}
+      />
 
       <section id="event-benefits" className="py-section">
         <div className="container-oz">
@@ -369,6 +378,13 @@ export function MarketingSupportLanding() {
           </div>
         </div>
       </section>
+
+      <LandingSlot
+        pagePath={PAGE_PATH}
+        slotKey="marketing.before_faq"
+        label="FAQ 위"
+        items={landingSlots['marketing.before_faq']}
+      />
 
       <section className="bg-ink-50 py-section">
         <div className="container-oz">

@@ -4,7 +4,9 @@ import { ServiceLanding } from '@/components/sections/ServiceLanding'
 import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { serviceFaqsForBlocks, servicePages } from '@/lib/service-pages'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
+import { landingFaqsForSlots } from '@/lib/landing-sections'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
 import { mergePageMetadata } from '@/lib/admin/page-seo'
@@ -23,10 +25,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function InternetPage() {
-  const blocksMap = await getBlocksForPage('/internet')
+  const [blocksMap, landingSlots] = await Promise.all([
+    getBlocksForPage('/internet'),
+    getLandingSlotsForPage('/internet'),
+  ])
   const blocks = blocksMapToRecord(blocksMap)
   const data = servicePages.internet
-  const faqs = serviceFaqsForBlocks(data, 'internet', blocks)
+  const faqs = [
+    ...serviceFaqsForBlocks(data, 'internet', blocks),
+    ...landingFaqsForSlots(landingSlots),
+  ]
   return (
     <PublicPageFrame>
       <JsonLd
@@ -55,6 +63,7 @@ export default async function InternetPage() {
           data={data}
           pageKey="internet"
           pagePath="/internet"
+          landingSlots={landingSlots}
         />
       </BlocksProvider>
     </PublicPageFrame>

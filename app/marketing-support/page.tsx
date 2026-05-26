@@ -3,6 +3,8 @@ import { MarketingSupportLanding } from '@/components/sections/MarketingSupportL
 import { PublicPageFrame } from '@/components/sections/PublicPageFrame'
 import { BlocksProvider } from '@/components/editable/BlocksProvider'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
+import { landingFaqsForSlots } from '@/lib/landing-sections'
+import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { marketingSupportFaqsForBlocks } from '@/lib/marketing-support-faqs'
@@ -23,9 +25,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MarketingSupportPage() {
-  const blocksMap = await getBlocksForPage('/marketing-support')
+  const [blocksMap, landingSlots] = await Promise.all([
+    getBlocksForPage('/marketing-support'),
+    getLandingSlotsForPage('/marketing-support'),
+  ])
   const blocks = blocksMapToRecord(blocksMap)
-  const faqs = marketingSupportFaqsForBlocks(blocks)
+  const faqs = [
+    ...marketingSupportFaqsForBlocks(blocks),
+    ...landingFaqsForSlots(landingSlots),
+  ]
   return (
     <PublicPageFrame>
       <JsonLd
@@ -63,7 +71,7 @@ export default async function MarketingSupportPage() {
         ]}
       />
       <BlocksProvider blocks={blocks}>
-        <MarketingSupportLanding />
+        <MarketingSupportLanding landingSlots={landingSlots} />
       </BlocksProvider>
     </PublicPageFrame>
   )

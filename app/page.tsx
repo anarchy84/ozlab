@@ -16,6 +16,8 @@ import type { Metadata } from 'next'
 import { getBlocksForPage } from '@/lib/content-blocks-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { fetchCtasByPlacement } from '@/lib/cta-server'
+import { landingFaqsForSlots } from '@/lib/landing-sections'
+import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import HomeClient from './(home)/HomeClient'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo'
@@ -30,10 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  // 병렬로 콘텐츠 블록 + CTA 마스터 조회
-  const [blocksMap, ctasByPlacement] = await Promise.all([
+  // 병렬로 콘텐츠 블록 + CTA 마스터 + 랜딩 슬롯 조회
+  const [blocksMap, ctasByPlacement, landingSlots] = await Promise.all([
     getBlocksForPage('/'),
     fetchCtasByPlacement(),
+    getLandingSlotsForPage('/'),
   ])
   const blocks = blocksMapToRecord(blocksMap)
 
@@ -42,10 +45,14 @@ export default async function HomePage() {
       <JsonLd
         data={[
           breadcrumbJsonLd([{ name: '홈', path: '/' }]),
-          faqJsonLd(homeFaqsForBlocks(blocks)),
+          faqJsonLd([...homeFaqsForBlocks(blocks), ...landingFaqsForSlots(landingSlots)]),
         ]}
       />
-      <HomeClient blocks={blocks} ctasByPlacement={ctasByPlacement} />
+      <HomeClient
+        blocks={blocks}
+        ctasByPlacement={ctasByPlacement}
+        landingSlots={landingSlots}
+      />
     </>
   )
 }
