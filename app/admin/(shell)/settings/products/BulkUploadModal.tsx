@@ -22,9 +22,16 @@ const HEADERS = [
   'label',
   'category',
   'vendor',
+  'device_type',
   'customer_price',
   'default_commission',
   'device_cost',
+  'cost_5plus',
+  'cost_10plus',
+  'cost_20plus',
+  'cost_30plus',
+  'cost_50plus',
+  'cost_100plus',
   'default_amount',
   'default_period',
   'is_subscription',
@@ -226,19 +233,26 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
               </div>
 
               <div className="flex gap-3 flex-wrap">
+                <a
+                  href="/templates/products_template_ko_v0.3.xlsx"
+                  download="우리편_상품_등록양식_v0.3.xlsx"
+                  className="px-3 py-2 text-sm bg-brand-blue text-white rounded font-bold hover:bg-brand-dark"
+                >
+                  📘 엑셀 양식 받기 (안내+예시 포함)
+                </a>
                 <button
                   type="button"
                   onClick={downloadTemplateKo}
                   className="px-3 py-2 text-sm bg-brand-blue/20 border border-brand-blue text-brand-neon rounded font-medium hover:bg-brand-blue/30"
                 >
-                  📄 한글 양식 받기 (담당자용)
+                  📄 한글 CSV (간단)
                 </button>
                 <button
                   type="button"
                   onClick={downloadTemplateEn}
                   className="px-3 py-2 text-sm border border-ink-700 text-ink-400 rounded hover:bg-ink-800"
                 >
-                  영문 양식 (선택)
+                  영문 CSV (선택)
                 </button>
                 <label className="px-3 py-2 text-sm bg-brand-blue text-white rounded font-medium cursor-pointer hover:bg-brand-dark ml-auto">
                   📁 CSV 파일 선택

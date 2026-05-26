@@ -63,6 +63,38 @@ interface InputRow {
   '월결제'?: string
   '메모'?: string
   '비고'?: string
+  '특이사항'?: string
+  // 단말기 + 원가 7단계
+  '단말기 종류'?: string
+  '단말기종류'?: string
+  '원가 1대'?: string | number
+  '원가(1대)'?: string | number
+  '원가 (1대)'?: string | number
+  '원가 5대+'?: string | number
+  '원가(5대+)'?: string | number
+  '원가 (5대+)'?: string | number
+  '원가 10대+'?: string | number
+  '원가(10대+)'?: string | number
+  '원가 (10대+)'?: string | number
+  '원가 20대+'?: string | number
+  '원가(20대+)'?: string | number
+  '원가 (20대+)'?: string | number
+  '원가 30대+'?: string | number
+  '원가(30대+)'?: string | number
+  '원가 (30대+)'?: string | number
+  '원가 50대+'?: string | number
+  '원가(50대+)'?: string | number
+  '원가 (50대+)'?: string | number
+  '원가 100대+'?: string | number
+  '원가(100대+)'?: string | number
+  '원가 (100대+)'?: string | number
+  cost_5plus?: string | number | null
+  cost_10plus?: string | number | null
+  cost_20plus?: string | number | null
+  cost_30plus?: string | number | null
+  cost_50plus?: string | number | null
+  cost_100plus?: string | number | null
+  device_type?: string | null
 }
 
 // 한글 분류값 → 영문 category code 매핑
@@ -253,13 +285,20 @@ export async function POST(req: NextRequest) {
     const action: 'insert' | 'update' = existingCodes.has(code) ? 'update' : 'insert'
 
     const vendorVal       = cleanStr(pick(r, 'vendor', '공급 회사', '공급회사', '본사', '회사'), 40) || null
+    const deviceTypeVal   = cleanStr(pick(r, 'device_type', '단말기 종류', '단말기종류'), 40) || null
     const customerPriceVal = toNumber(pick(r, 'customer_price', '고객 가격', '고객가격', '가격'))
     const commissionVal    = toNumber(pick(r, 'default_commission', '우리 수당', '우리수당', '수당'))
-    const deviceCostVal    = toNumber(pick(r, 'device_cost', '기기 값', '기기값', '기기 매입가'))
-    const noteVal          = cleanStr(pick(r, 'note', '메모', '비고'), 500) || null
+    // 원가 1대 (= device_cost, 의미 재정의)
+    const deviceCostVal    = toNumber(pick(r, 'device_cost', '원가 1대', '원가(1대)', '원가 (1대)', '기기 값', '기기값', '기기 매입가'))
+    const cost5            = toNumber(pick(r, 'cost_5plus',   '원가 5대+',  '원가(5대+)',  '원가 (5대+)'))
+    const cost10           = toNumber(pick(r, 'cost_10plus',  '원가 10대+', '원가(10대+)', '원가 (10대+)'))
+    const cost20           = toNumber(pick(r, 'cost_20plus',  '원가 20대+', '원가(20대+)', '원가 (20대+)'))
+    const cost30           = toNumber(pick(r, 'cost_30plus',  '원가 30대+', '원가(30대+)', '원가 (30대+)'))
+    const cost50           = toNumber(pick(r, 'cost_50plus',  '원가 50대+', '원가(50대+)', '원가 (50대+)'))
+    const cost100          = toNumber(pick(r, 'cost_100plus', '원가 100대+', '원가(100대+)', '원가 (100대+)'))
+    const noteVal          = cleanStr(pick(r, 'note', '메모', '비고', '특이사항'), 500) || null
     const isSubVal         = toBool(pick(r, 'is_subscription', '월 정기 결제', '월정기결제', '월결제'))
     const defaultMonthly   = toNumber(pick(r, 'default_monthly'))
-    // 월 정기 결제이면 customer_price 를 default_monthly 로도 자동 세팅
     const finalMonthly     = defaultMonthly ?? (isSubVal ? customerPriceVal : null)
 
     const payload: Record<string, unknown> = {
@@ -267,10 +306,17 @@ export async function POST(req: NextRequest) {
       label,
       category,
       vendor: vendorVal,
+      device_type: deviceTypeVal,
       default_amount: toNumber(r.default_amount),
       default_commission: commissionVal,
       customer_price: customerPriceVal,
       device_cost: deviceCostVal,
+      cost_5plus:   cost5,
+      cost_10plus:  cost10,
+      cost_20plus:  cost20,
+      cost_30plus:  cost30,
+      cost_50plus:  cost50,
+      cost_100plus: cost100,
       default_period: period || null,
       is_subscription: isSubVal,
       default_monthly: finalMonthly,

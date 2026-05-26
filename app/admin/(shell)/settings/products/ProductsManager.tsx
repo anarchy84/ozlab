@@ -25,10 +25,17 @@ interface Product {
   label: string
   category: string
   vendor: string | null
+  device_type: string | null
   default_amount: number | null
   default_commission: number | null
   customer_price: number | null
   device_cost: number | null
+  cost_5plus: number | null
+  cost_10plus: number | null
+  cost_20plus: number | null
+  cost_30plus: number | null
+  cost_50plus: number | null
+  cost_100plus: number | null
   default_period: string | null
   is_subscription: boolean
   default_monthly: number | null
@@ -481,10 +488,17 @@ function ProductEditor({
     label: product?.label ?? '',
     category: product?.category ?? defaultCategoryCode,
     vendor: product?.vendor ?? '',
+    device_type: product?.device_type ?? '',
     default_amount: product?.default_amount?.toString() ?? '',
     default_commission: product?.default_commission?.toString() ?? '',
     customer_price: product?.customer_price?.toString() ?? '',
     device_cost: product?.device_cost?.toString() ?? '',
+    cost_5plus: product?.cost_5plus?.toString() ?? '',
+    cost_10plus: product?.cost_10plus?.toString() ?? '',
+    cost_20plus: product?.cost_20plus?.toString() ?? '',
+    cost_30plus: product?.cost_30plus?.toString() ?? '',
+    cost_50plus: product?.cost_50plus?.toString() ?? '',
+    cost_100plus: product?.cost_100plus?.toString() ?? '',
     default_period: product?.default_period ?? '없음',
     is_subscription: product?.is_subscription ?? false,
     default_monthly: product?.default_monthly?.toString() ?? '',
@@ -509,10 +523,17 @@ function ProductEditor({
       label: form.label.trim(),
       category: form.category,
       vendor: form.vendor.trim() || null,
+      device_type: form.device_type.trim() || null,
       default_amount: form.default_amount ? Number(form.default_amount) : null,
       default_commission: form.default_commission ? Number(form.default_commission) : null,
       customer_price: form.customer_price ? Number(form.customer_price) : null,
       device_cost: form.device_cost ? Number(form.device_cost) : null,
+      cost_5plus: form.cost_5plus ? Number(form.cost_5plus) : null,
+      cost_10plus: form.cost_10plus ? Number(form.cost_10plus) : null,
+      cost_20plus: form.cost_20plus ? Number(form.cost_20plus) : null,
+      cost_30plus: form.cost_30plus ? Number(form.cost_30plus) : null,
+      cost_50plus: form.cost_50plus ? Number(form.cost_50plus) : null,
+      cost_100plus: form.cost_100plus ? Number(form.cost_100plus) : null,
       default_period: form.default_period === '없음' ? null : form.default_period,
       is_subscription: form.is_subscription,
       default_monthly: form.default_monthly ? Number(form.default_monthly) : null,
@@ -609,12 +630,11 @@ function ProductEditor({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="기기 매입가 (원) — 있는 경우만">
+          <Field label="단말기 종류 (단말기 상품만)">
             <input
-              type="number"
-              value={form.device_cost}
-              onChange={(e) => setForm({ ...form, device_cost: e.target.value })}
-              placeholder="500000 (단말기·키오스크 등)"
+              value={form.device_type}
+              onChange={(e) => setForm({ ...form, device_type: e.target.value })}
+              placeholder="범용 / 특수 (그 외는 비움)"
               className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
             />
           </Field>
@@ -632,6 +652,72 @@ function ProductEditor({
             </select>
           </Field>
         </div>
+
+        {/* 원가 7단계 (단말기·키오스크 등 기기 상품만) */}
+        <details className="rounded border border-ink-700 bg-ink-900/40 open:bg-ink-900/60">
+          <summary className="cursor-pointer px-3 py-2 text-sm text-ink-200 font-medium">
+            📦 매입 원가 (수량별, 단말기 상품만) — 펼치기
+          </summary>
+          <div className="p-3 grid grid-cols-2 gap-3">
+            <Field label="원가 (1대)">
+              <input
+                type="number"
+                value={form.device_cost}
+                onChange={(e) => setForm({ ...form, device_cost: e.target.value })}
+                placeholder="180000"
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+            <Field label="원가 (5대+)">
+              <input
+                type="number"
+                value={form.cost_5plus}
+                onChange={(e) => setForm({ ...form, cost_5plus: e.target.value })}
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+            <Field label="원가 (10대+)">
+              <input
+                type="number"
+                value={form.cost_10plus}
+                onChange={(e) => setForm({ ...form, cost_10plus: e.target.value })}
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+            <Field label="원가 (20대+)">
+              <input
+                type="number"
+                value={form.cost_20plus}
+                onChange={(e) => setForm({ ...form, cost_20plus: e.target.value })}
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+            <Field label="원가 (30대+)">
+              <input
+                type="number"
+                value={form.cost_30plus}
+                onChange={(e) => setForm({ ...form, cost_30plus: e.target.value })}
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+            <Field label="원가 (50대+)">
+              <input
+                type="number"
+                value={form.cost_50plus}
+                onChange={(e) => setForm({ ...form, cost_50plus: e.target.value })}
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+            <Field label="원가 (100대+)">
+              <input
+                type="number"
+                value={form.cost_100plus}
+                onChange={(e) => setForm({ ...form, cost_100plus: e.target.value })}
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+              />
+            </Field>
+          </div>
+        </details>
 
         <Field label="기본 매출액 (구버전 — 점진 폐기)">
           <input

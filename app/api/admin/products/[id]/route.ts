@@ -19,10 +19,17 @@ export async function PATCH(
   if (body.label !== undefined) update.label = body.label
   if (body.category !== undefined) update.category = body.category
   if (body.vendor !== undefined) update.vendor = body.vendor
+  if (body.device_type !== undefined) update.device_type = body.device_type
   if (body.default_amount !== undefined) update.default_amount = body.default_amount
   if (body.default_commission !== undefined) update.default_commission = body.default_commission
   if (body.customer_price !== undefined) update.customer_price = body.customer_price
   if (body.device_cost !== undefined) update.device_cost = body.device_cost
+  if (body.cost_5plus !== undefined) update.cost_5plus = body.cost_5plus
+  if (body.cost_10plus !== undefined) update.cost_10plus = body.cost_10plus
+  if (body.cost_20plus !== undefined) update.cost_20plus = body.cost_20plus
+  if (body.cost_30plus !== undefined) update.cost_30plus = body.cost_30plus
+  if (body.cost_50plus !== undefined) update.cost_50plus = body.cost_50plus
+  if (body.cost_100plus !== undefined) update.cost_100plus = body.cost_100plus
   if (body.default_period !== undefined) update.default_period = body.default_period
   if (body.is_subscription !== undefined) update.is_subscription = body.is_subscription === true
   if (body.default_monthly !== undefined) update.default_monthly = body.default_monthly
