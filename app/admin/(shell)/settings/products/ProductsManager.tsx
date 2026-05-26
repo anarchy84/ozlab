@@ -24,7 +24,11 @@ interface Product {
   code: string
   label: string
   category: string
+  vendor: string | null
   default_amount: number | null
+  default_commission: number | null
+  customer_price: number | null
+  device_cost: number | null
   default_period: string | null
   is_subscription: boolean
   default_monthly: number | null
@@ -382,9 +386,11 @@ function ProductPanel({
           <thead className="text-ink-400 text-xs">
             <tr className="border-b border-ink-700">
               <th className="text-left px-2 py-2">상품명</th>
-              <th className="text-right px-2 py-2">기본 매출액</th>
+              <th className="text-left px-2 py-2">본사</th>
+              <th className="text-right px-2 py-2">고객가격</th>
+              <th className="text-right px-2 py-2 text-brand-neon">우리 수당</th>
+              <th className="text-right px-2 py-2">기기매입가</th>
               <th className="text-center px-2 py-2">약정</th>
-              <th className="text-right px-2 py-2">월 구독액</th>
               <th className="text-center px-2 py-2">활성</th>
               <th className="text-right px-2 py-2">관리</th>
             </tr>
@@ -396,14 +402,20 @@ function ProductPanel({
                   <div className="text-ink-100 font-medium">{p.label}</div>
                   <div className="text-[11px] text-ink-500">{p.code}</div>
                 </td>
-                <td className="px-2 py-2 text-right text-ink-200 font-mono">
-                  {p.default_amount != null ? p.default_amount.toLocaleString() : '—'}
+                <td className="px-2 py-2 text-ink-300 text-xs">
+                  {p.vendor ?? '—'}
+                </td>
+                <td className="px-2 py-2 text-right text-ink-200 font-mono text-xs">
+                  {p.customer_price != null ? p.customer_price.toLocaleString() : '—'}
+                </td>
+                <td className="px-2 py-2 text-right text-brand-neon font-mono font-semibold">
+                  {p.default_commission != null ? p.default_commission.toLocaleString() : '—'}
+                </td>
+                <td className="px-2 py-2 text-right text-ink-300 font-mono text-xs">
+                  {p.device_cost != null ? p.device_cost.toLocaleString() : '—'}
                 </td>
                 <td className="px-2 py-2 text-center text-ink-300 text-xs">
                   {p.default_period ?? '—'}
-                </td>
-                <td className="px-2 py-2 text-right text-ink-300 font-mono text-xs">
-                  {p.default_monthly != null ? p.default_monthly.toLocaleString() : '—'}
                 </td>
                 <td className="px-2 py-2 text-center">
                   {p.is_active ? (
@@ -468,7 +480,11 @@ function ProductEditor({
     code: product?.code ?? '',
     label: product?.label ?? '',
     category: product?.category ?? defaultCategoryCode,
+    vendor: product?.vendor ?? '',
     default_amount: product?.default_amount?.toString() ?? '',
+    default_commission: product?.default_commission?.toString() ?? '',
+    customer_price: product?.customer_price?.toString() ?? '',
+    device_cost: product?.device_cost?.toString() ?? '',
     default_period: product?.default_period ?? '없음',
     is_subscription: product?.is_subscription ?? false,
     default_monthly: product?.default_monthly?.toString() ?? '',
@@ -492,7 +508,11 @@ function ProductEditor({
       ...(isEdit ? {} : { code: form.code.trim() }),
       label: form.label.trim(),
       category: form.category,
+      vendor: form.vendor.trim() || null,
       default_amount: form.default_amount ? Number(form.default_amount) : null,
+      default_commission: form.default_commission ? Number(form.default_commission) : null,
+      customer_price: form.customer_price ? Number(form.customer_price) : null,
+      device_cost: form.device_cost ? Number(form.device_cost) : null,
       default_period: form.default_period === '없음' ? null : form.default_period,
       is_subscription: form.is_subscription,
       default_monthly: form.default_monthly ? Number(form.default_monthly) : null,
@@ -542,28 +562,59 @@ function ProductEditor({
           />
         </Field>
 
-        <Field label="카테고리">
-          <select
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
-          >
-            <option value="">선택</option>
-            {categories.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="카테고리">
+            <select
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+            >
+              <option value="">선택</option>
+              {categories.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="본사 / 공급사">
+            <input
+              value={form.vendor}
+              onChange={(e) => setForm({ ...form, vendor: e.target.value })}
+              placeholder="KT / LG / SKB / 페이히어 / 토스"
+              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+            />
+          </Field>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="기본 매출액 (원)">
+          <Field label="고객가격 (원)">
             <input
               type="number"
-              value={form.default_amount}
-              onChange={(e) => setForm({ ...form, default_amount: e.target.value })}
-              placeholder="0 또는 1200000"
+              value={form.customer_price}
+              onChange={(e) => setForm({ ...form, customer_price: e.target.value })}
+              placeholder="38500 (월요금 또는 일시불)"
+              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
+            />
+          </Field>
+          <Field label="💰 우리 수당 (원) — 핵심">
+            <input
+              type="number"
+              value={form.default_commission}
+              onChange={(e) => setForm({ ...form, default_commission: e.target.value })}
+              placeholder="345000"
+              className="w-full px-3 py-2 bg-ink-900 border border-brand-blue text-brand-neon rounded text-sm font-bold"
+            />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="기기 매입가 (원) — 있는 경우만">
+            <input
+              type="number"
+              value={form.device_cost}
+              onChange={(e) => setForm({ ...form, device_cost: e.target.value })}
+              placeholder="500000 (단말기·키오스크 등)"
               className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
             />
           </Field>
@@ -581,6 +632,16 @@ function ProductEditor({
             </select>
           </Field>
         </div>
+
+        <Field label="기본 매출액 (구버전 — 점진 폐기)">
+          <input
+            type="number"
+            value={form.default_amount}
+            onChange={(e) => setForm({ ...form, default_amount: e.target.value })}
+            placeholder="(deprecated — customer_price 사용 권장)"
+            className="w-full px-3 py-2 bg-ink-900 border border-ink-800 text-ink-400 rounded text-xs"
+          />
+        </Field>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="구독형 여부">

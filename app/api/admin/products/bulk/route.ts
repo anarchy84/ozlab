@@ -26,12 +26,87 @@ interface InputRow {
   code?: string
   label?: string
   category?: string
+  vendor?: string | null
   default_amount?: string | number | null
+  default_commission?: string | number | null
+  customer_price?: string | number | null
+  device_cost?: string | number | null
   default_period?: string | null
   is_subscription?: string | boolean | number | null
   default_monthly?: string | number | null
   sort_order?: string | number | null
   note?: string | null
+  // 한글 헤더 (담당자가 채우는 양식)
+  '상품 이름'?: string
+  '상품이름'?: string
+  '이름'?: string
+  '분류'?: string
+  '카테고리'?: string
+  '공급 회사'?: string
+  '공급회사'?: string
+  '본사'?: string
+  '회사'?: string
+  '고객 가격'?: string | number
+  '고객가격'?: string | number
+  '가격'?: string | number
+  '우리 수당'?: string | number
+  '우리수당'?: string | number
+  '수당'?: string | number
+  '기기 값'?: string | number
+  '기기값'?: string | number
+  '기기 매입가'?: string | number
+  '약정 기간'?: string
+  '약정기간'?: string
+  '약정'?: string
+  '월 정기 결제'?: string
+  '월정기결제'?: string
+  '월결제'?: string
+  '메모'?: string
+  '비고'?: string
+}
+
+// 한글 분류값 → 영문 category code 매핑
+const KO_CATEGORY: Record<string, string> = {
+  '인터넷': 'internet',
+  'cctv': 'cctv',
+  'CCTV': 'cctv',
+  '키오스크': 'kiosk',
+  '테이블오더': 'tableorder',
+  '테오': 'tableorder',
+  '단말기': 'pos',
+  'POS': 'pos',
+  '기타': 'etc',
+}
+
+// 한글 약정 → 영문 default_period 매핑
+const KO_PERIOD: Record<string, string> = {
+  '1년': '12개월',
+  '2년': '24개월',
+  '3년': '36개월',
+  '4년': '48개월',
+  '없음': '없음',
+  '': '',
+}
+
+// 행에서 컬럼 값 가져오기 — 영문/한글 동의어 모두 시도
+function pick(r: InputRow, ...keys: string[]): unknown {
+  for (const k of keys) {
+    const v = (r as Record<string, unknown>)[k]
+    if (v !== null && v !== undefined && v !== '') return v
+  }
+  return undefined
+}
+
+// label 에서 자동 code 생성 (한글 양식엔 code 컬럼 없음)
+function makeCodeFromLabel(label: string): string {
+  const slug = label
+    .toLowerCase()
+    .replace(/[가-힣]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  if (slug.length >= 3) return slug
+  // 한글만 있는 경우 → 타임스탬프 기반
+  return 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6)
 }
 
 interface BulkBody {
@@ -124,29 +199,37 @@ export async function POST(req: NextRequest) {
 
   rows.forEach((r, i) => {
     const idx = i + 1
-    const code = cleanStr(r.code, 60)
-    const label = cleanStr(r.label, 200)
-    const category = cleanStr(r.category, 60)
+    // 영문/한글 동의어 모두 인식
+    const label = cleanStr(pick(r, 'label', '상품 이름', '상품이름', '이름'), 200)
+    let code = cleanStr(pick(r, 'code'), 60)
+    // code 비어있으면 label 에서 자동 생성
+    if (!code && label) code = makeCodeFromLabel(label)
+
+    // category — 한글이면 영문 코드로 변환
+    const categoryRaw = cleanStr(pick(r, 'category', '분류', '카테고리'), 60)
+    const category = KO_CATEGORY[categoryRaw] ?? categoryRaw.toLowerCase()
 
     // 검증
     if (!code) {
-      results.push({ row_idx: idx, code, label, category, action: 'error', message: 'code 누락' })
+      results.push({ row_idx: idx, code, label, category, action: 'error', message: '상품 코드 또는 상품 이름이 비어 있음' })
       return
     }
     if (!label) {
-      results.push({ row_idx: idx, code, label, category, action: 'error', message: 'label 누락' })
+      results.push({ row_idx: idx, code, label, category, action: 'error', message: '상품 이름이 비어 있음' })
       return
     }
     if (!category) {
-      results.push({ row_idx: idx, code, label, category, action: 'error', message: 'category 누락' })
+      results.push({ row_idx: idx, code, label, category, action: 'error', message: '분류(카테고리)가 비어 있음' })
       return
     }
-    const period = cleanStr(r.default_period, 20)
+    // 약정 — 한글이면 영문 매핑
+    const periodRaw = cleanStr(pick(r, 'default_period', '약정 기간', '약정기간', '약정'), 20)
+    const period = KO_PERIOD[periodRaw] ?? periodRaw
     if (period && !PERIOD_ALLOWED.includes(period)) {
       results.push({
         row_idx: idx, code, label, category,
         action: 'error',
-        message: `default_period 는 ${PERIOD_ALLOWED.filter(Boolean).join('/')} 중 하나`,
+        message: `약정 기간은 ${PERIOD_ALLOWED.filter(Boolean).join('/')} 중 하나`,
       })
       return
     }
@@ -169,16 +252,30 @@ export async function POST(req: NextRequest) {
     // 액션 결정
     const action: 'insert' | 'update' = existingCodes.has(code) ? 'update' : 'insert'
 
+    const vendorVal       = cleanStr(pick(r, 'vendor', '공급 회사', '공급회사', '본사', '회사'), 40) || null
+    const customerPriceVal = toNumber(pick(r, 'customer_price', '고객 가격', '고객가격', '가격'))
+    const commissionVal    = toNumber(pick(r, 'default_commission', '우리 수당', '우리수당', '수당'))
+    const deviceCostVal    = toNumber(pick(r, 'device_cost', '기기 값', '기기값', '기기 매입가'))
+    const noteVal          = cleanStr(pick(r, 'note', '메모', '비고'), 500) || null
+    const isSubVal         = toBool(pick(r, 'is_subscription', '월 정기 결제', '월정기결제', '월결제'))
+    const defaultMonthly   = toNumber(pick(r, 'default_monthly'))
+    // 월 정기 결제이면 customer_price 를 default_monthly 로도 자동 세팅
+    const finalMonthly     = defaultMonthly ?? (isSubVal ? customerPriceVal : null)
+
     const payload: Record<string, unknown> = {
       code,
       label,
       category,
+      vendor: vendorVal,
       default_amount: toNumber(r.default_amount),
+      default_commission: commissionVal,
+      customer_price: customerPriceVal,
+      device_cost: deviceCostVal,
       default_period: period || null,
-      is_subscription: toBool(r.is_subscription),
-      default_monthly: toNumber(r.default_monthly),
+      is_subscription: isSubVal,
+      default_monthly: finalMonthly,
       sort_order: toNumber(r.sort_order) ?? 0,
-      note: cleanStr(r.note, 500) || null,
+      note: noteVal,
     }
 
     if (action === 'insert') {

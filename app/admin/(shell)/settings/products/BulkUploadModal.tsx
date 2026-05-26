@@ -21,6 +21,10 @@ const HEADERS = [
   'code',
   'label',
   'category',
+  'vendor',
+  'customer_price',
+  'default_commission',
+  'device_cost',
   'default_amount',
   'default_period',
   'is_subscription',
@@ -129,21 +133,44 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
     }
   }
 
-  function downloadTemplate() {
+  function downloadTemplateKo() {
+    // 담당자용 — 한글 헤더 CSV
     const csv =
       '﻿' +
-      HEADERS.join(',') +
+      '상품 이름,분류,공급 회사,고객 가격,우리 수당,기기 값,약정 기간,월 정기 결제,메모' +
       '\n' +
       [
-        'TERM_OZ_10,오즈랩페이 10.1인치 단말기,단말기,1200000,36개월,FALSE,,10,POS 일체형',
-        'NET_KT_500,KT 인터넷 500M,인터넷,330000,36개월,TRUE,33000,20,월 33000원',
-        'TABLE_ORDER_BASIC,테이블오더 베이직,테이블오더,500000,,FALSE,,30,',
+        'KT 인터넷 1G 3년,인터넷,KT,38500,345000,,3년,예,',
+        'KT 인터넷 500M 3년,인터넷,KT,33000,325000,,3년,예,',
+        '에스원 CCTV 2회선,CCTV,에스원,30000,250000,,3년,예,',
+        '페이히어 키오스크 기본형,키오스크,페이히어,10000,300000,500000,없음,,60개월 할부',
+        '토스단말기,단말기,토스,0,300000,500000,없음,,VAN 수수료는 따로 들어옴',
       ].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `products_template_${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = `상품_등록양식_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function downloadTemplateEn() {
+    // 영문 헤더 — IT 직접 작성용 (선택)
+    const csv =
+      '﻿' +
+      HEADERS.join(',') +
+      '\n' +
+      [
+        'kt-internet-1g-3y,KT 인터넷 1G 3년약정,internet,KT,38500,345000,,,36개월,TRUE,38500,10,',
+        'cctv-s1-2ch,에스원 CCTV 2회선,cctv,에스원,30000,250000,,,36개월,TRUE,30000,30,',
+        'kiosk-payhere-basic,페이히어 키오스크 베이직,kiosk,페이히어,10000,300000,500000,,무약정,FALSE,,40,60개월 할부',
+      ].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `products_template_en_${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -176,33 +203,44 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
 
           {step === 'pick' && (
             <div className="space-y-4">
-              <div className="rounded border border-ink-700 bg-ink-900/50 p-4 text-sm text-ink-300 space-y-2">
-                <p className="font-semibold text-ink-100">📋 양식</p>
-                <p>
-                  CSV 파일은 다음 9개 컬럼을 헤더로 가집니다 (순서 무관):
-                  <br />
-                  <code className="text-xs bg-ink-900 px-1.5 py-0.5 rounded">
-                    code, label, category, default_amount, default_period, is_subscription, default_monthly, sort_order, note
-                  </code>
-                </p>
-                <p className="text-xs text-ink-400">
-                  • <strong>code/label/category</strong>는 필수<br />
-                  • <strong>code 중복</strong> 시 기존 상품을 갱신<br />
-                  • <strong>모르는 카테고리</strong>는 자동 생성 (어드민에서 라벨 수정 가능)<br />
-                  • <strong>default_period</strong>: 없음 / 12개월 / 24개월 / 36개월 / 48개월<br />
-                  • <strong>is_subscription</strong>: TRUE / FALSE
-                </p>
+              <div className="rounded border border-ink-700 bg-ink-900/50 p-4 text-sm text-ink-300 space-y-3">
+                <p className="font-semibold text-ink-100">📋 한글·영문 양식 둘 다 OK</p>
+                <div className="text-xs text-ink-400 space-y-1.5">
+                  <div>
+                    <strong className="text-brand-neon">담당자용 (한글)</strong> 컬럼:
+                    <code className="block mt-1 text-[11px] bg-ink-900 p-2 rounded text-ink-200">
+                      상품 이름 · 분류 · 공급 회사 · 고객 가격 · 우리 수당 · 기기 값 · 약정 기간 · 월 정기 결제 · 메모
+                    </code>
+                  </div>
+                  <div className="pt-1.5">
+                    <strong className="text-ink-200">필수</strong>: 상품 이름 · 분류 · 우리 수당<br />
+                    <strong>분류</strong>: 인터넷 / CCTV / 키오스크 / 테이블오더 / 단말기 / 기타<br />
+                    <strong>약정 기간</strong>: 1년 / 2년 / 3년 / 4년 / 없음<br />
+                    <strong>월 정기 결제</strong>: 예 (또는 비움)<br />
+                    같은 <strong>상품 이름</strong>으로 다시 올리면 갱신 / 모르는 분류는 자동 생성
+                  </div>
+                </div>
+                <div className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded p-2">
+                  💡 엑셀(.xlsx)에 채운 후 <strong>[파일 → 다른 이름으로 저장 → CSV UTF-8]</strong>로 변환해서 올리세요.
+                </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <button
                   type="button"
-                  onClick={downloadTemplate}
-                  className="px-3 py-2 text-sm border border-ink-700 text-ink-200 rounded hover:bg-ink-800"
+                  onClick={downloadTemplateKo}
+                  className="px-3 py-2 text-sm bg-brand-blue/20 border border-brand-blue text-brand-neon rounded font-medium hover:bg-brand-blue/30"
                 >
-                  📄 양식 다운로드 (CSV)
+                  📄 한글 양식 받기 (담당자용)
                 </button>
-                <label className="px-3 py-2 text-sm bg-brand-blue text-white rounded font-medium cursor-pointer hover:bg-brand-dark">
+                <button
+                  type="button"
+                  onClick={downloadTemplateEn}
+                  className="px-3 py-2 text-sm border border-ink-700 text-ink-400 rounded hover:bg-ink-800"
+                >
+                  영문 양식 (선택)
+                </button>
+                <label className="px-3 py-2 text-sm bg-brand-blue text-white rounded font-medium cursor-pointer hover:bg-brand-dark ml-auto">
                   📁 CSV 파일 선택
                   <input
                     type="file"
