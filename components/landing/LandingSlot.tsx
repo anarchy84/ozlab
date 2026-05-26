@@ -35,7 +35,7 @@ interface Draft {
 }
 
 const fieldClass =
-  'w-full rounded-lg border border-ink-150 bg-white px-3 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-[#03C75A] focus:ring-2 focus:ring-[#03C75A]/15'
+  'w-full rounded-lg border border-ink-150 bg-white px-3 py-2.5 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-300 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10'
 
 const labelClass = 'text-xs font-extrabold uppercase tracking-[0.12em] text-ink-500'
 
@@ -188,10 +188,10 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
     <div data-landing-slot-shell={slotKey} className="relative">
       {showBuilder && (
         <div className="container-oz py-5">
-          <div className="rounded-lg border border-dashed border-[#03C75A]/35 bg-[#F2FFF7] p-4 shadow-sm">
+          <div className="rounded-lg border border-dashed border-brand-blue/35 bg-brand-tint/60 p-4 shadow-sm">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-extrabold text-[#008F3F]">랜딩 섹션 빌더 · {label}</p>
+                <p className="text-sm font-extrabold text-brand-deep">랜딩 섹션 빌더 · {label}</p>
                 <p className="mt-1 text-xs text-ink-500">
                   raw HTML 없이 안전한 템플릿 섹션을 추가, 수정, 순서 변경할 수 있습니다.
                 </p>
@@ -223,7 +223,7 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
           {showBuilder && (
             <div className="container-oz">
               <div className="mb-[-12px] flex flex-wrap items-center justify-end gap-2">
-                <span className="rounded-pill bg-[#020806] px-3 py-1 text-xs font-bold text-white shadow-sm">
+                <span className="rounded-pill bg-ink-900 px-3 py-1 text-xs font-bold text-white shadow-sm">
                   {LANDING_MODULE_LABELS[item.item_type]} · {label}
                 </span>
                 <button
@@ -599,7 +599,7 @@ function ModuleFields({
             type="checkbox"
             checked={content.reverse === true}
             onChange={(event) => updateContent({ reverse: event.target.checked })}
-            className="h-4 w-4 accent-[#03C75A]"
+            className="h-4 w-4 accent-brand-blue"
           />
           이미지와 텍스트 위치 반전
         </label>
