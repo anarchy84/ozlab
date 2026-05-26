@@ -5,7 +5,8 @@
 'use client'
 
 import { EditableText } from '@/components/editable/EditableText'
-import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
+import { EditableVisualSlot } from '@/components/editable/EditableVisualSlot'
+import { pickImageOrUndef, pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -120,76 +121,90 @@ export function PlacePlus({ blocks }: Props) {
           </ul>
         </div>
 
-        {/* 우측 배지 목업 */}
+        {/* 우측 배지 목업 — 삭제/숨김 또는 실제 네이버 검색 화면 이미지로 변경 가능 */}
         <div>
-          <div className="place-badge-demo">
-            <div className="flex items-center gap-2 pb-3 border-b border-ink-100 mb-3">
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-extrabold"
-                style={{ background: '#3A7BFF' }}
-              >
-                N
-              </div>
-              <div className="text-sm font-semibold">
-                <EditableText
-                  as="span"
-                  blockKey="home.placeplus.demo.title"
-                  fallback='네이버 플레이스 · "홍대 맛집"'
-                  value={pickTextOrUndef(blocks, 'home.placeplus.demo.title')}
-                  pagePath="/"
-                />
-              </div>
-            </div>
-
-            {items.map((it) => (
-              <div
-                key={it.idx}
-                className="place-item"
-                style={it.plus ? undefined : { opacity: 0.55 }}
-              >
-                <div className={`place-thumb ${it.thumbClass}`} />
-                <div className="place-body">
-                  <div className="place-title">
-                    <EditableText
-                      as="span"
-                      blockKey={`home.placeplus.demo.item${it.idx}.name`}
-                      fallback={it.name}
-                      value={pickTextOrUndef(
-                        blocks,
-                        `home.placeplus.demo.item${it.idx}.name`
-                      )}
-                      pagePath="/"
-                    />
-                    {it.plus && <span className="place-plus-mark">place+</span>}
-                  </div>
-                  <div className="place-meta text-xs text-ink-500 mt-1">
-                    <EditableText
-                      as="span"
-                      blockKey={`home.placeplus.demo.item${it.idx}.meta`}
-                      fallback={it.meta}
-                      value={pickTextOrUndef(
-                        blocks,
-                        `home.placeplus.demo.item${it.idx}.meta`
-                      )}
-                      pagePath="/"
-                    />
-                  </div>
-                  <div className="text-xs text-ink-400 mt-1">
-                    <EditableText
-                      as="span"
-                      blockKey={`home.placeplus.demo.item${it.idx}.sub`}
-                      fallback={it.sub}
-                      value={pickTextOrUndef(
-                        blocks,
-                        `home.placeplus.demo.item${it.idx}.sub`
-                      )}
-                      pagePath="/"
-                    />
-                  </div>
+          <EditableVisualSlot
+            modeKey="home.placeplus.demo.mode"
+            modeValue={pickTextOrUndef(blocks, 'home.placeplus.demo.mode')}
+            imageKey="home.placeplus.demo.image"
+            imageValue={pickImageOrUndef(blocks, 'home.placeplus.demo.image')}
+            pagePath="/"
+            label="place+ 검색 목업"
+            imageLabel="네이버 플레이스 검색 실제 화면"
+            imageHint="실제 네이버 검색/플레이스 화면 캡처 이미지"
+            aspect="4/3"
+            imageClassName="rounded-xl bg-brand-tint/40"
+            defaultClassName="flex items-center justify-center p-3 sm:p-5"
+          >
+            <div className="place-badge-demo w-full">
+              <div className="mb-3 flex items-center gap-2 border-b border-ink-100 pb-3">
+                <div
+                  className="flex h-5 w-5 items-center justify-center rounded-full text-xs font-extrabold text-white"
+                  style={{ background: '#3A7BFF' }}
+                >
+                  N
+                </div>
+                <div className="text-sm font-semibold">
+                  <EditableText
+                    as="span"
+                    blockKey="home.placeplus.demo.title"
+                    fallback='네이버 플레이스 · "홍대 맛집"'
+                    value={pickTextOrUndef(blocks, 'home.placeplus.demo.title')}
+                    pagePath="/"
+                  />
                 </div>
               </div>
-            ))}
-          </div>
+
+              {items.map((it) => (
+                <div
+                  key={it.idx}
+                  className="place-item"
+                  style={it.plus ? undefined : { opacity: 0.55 }}
+                >
+                  <div className={`place-thumb ${it.thumbClass}`} />
+                  <div className="place-body">
+                    <div className="place-title">
+                      <EditableText
+                        as="span"
+                        blockKey={`home.placeplus.demo.item${it.idx}.name`}
+                        fallback={it.name}
+                        value={pickTextOrUndef(
+                          blocks,
+                          `home.placeplus.demo.item${it.idx}.name`
+                        )}
+                        pagePath="/"
+                      />
+                      {it.plus && <span className="place-plus-mark">place+</span>}
+                    </div>
+                    <div className="place-meta mt-1 text-xs text-ink-500">
+                      <EditableText
+                        as="span"
+                        blockKey={`home.placeplus.demo.item${it.idx}.meta`}
+                        fallback={it.meta}
+                        value={pickTextOrUndef(
+                          blocks,
+                          `home.placeplus.demo.item${it.idx}.meta`
+                        )}
+                        pagePath="/"
+                      />
+                    </div>
+                    <div className="mt-1 text-xs text-ink-400">
+                      <EditableText
+                        as="span"
+                        blockKey={`home.placeplus.demo.item${it.idx}.sub`}
+                        fallback={it.sub}
+                        value={pickTextOrUndef(
+                          blocks,
+                          `home.placeplus.demo.item${it.idx}.sub`
+                        )}
+                        pagePath="/"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </EditableVisualSlot>
           <p className="text-center text-sm text-ink-500 mt-4 break-keep">
             <EditableText
               as="span"

@@ -6,7 +6,8 @@
 
 import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
-import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
+import { EditableVisualSlot } from '@/components/editable/EditableVisualSlot'
+import { pickImageOrUndef, pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 
 interface Props {
   blocks: Record<string, ContentBlock>
@@ -144,17 +145,31 @@ export function ReviewAutomation({ blocks }: Props) {
           ))}
         </div>
 
-        {/* 리뷰 카드 목업 — 편집 블록 없이 정적 (디자인용) */}
-        <div className="max-w-[520px] mx-auto mt-14">
-          <div className="review-mock">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex gap-2 items-center">
+        {/* 리뷰 카드 목업 — 이미지를 업로드하면 실제 화면 이미지로 대체 */}
+        <EditableVisualSlot
+          modeKey="home.review.mock.mode"
+          modeValue={pickTextOrUndef(blocks, 'home.review.mock.mode')}
+          imageKey="home.review.mock.image"
+          imageValue={pickImageOrUndef(blocks, 'home.review.mock.image')}
+          pagePath="/"
+          label="리뷰 카드 목업"
+          imageLabel="리뷰 자동화 실제 화면 이미지"
+          imageHint="네이버 리뷰/영수증 리뷰 화면 캡처 또는 제작 이미지"
+          imageTheme="dark"
+          className="mx-auto mt-14 max-w-[560px]"
+          imageClassName="rounded-xl"
+          defaultClassName="flex items-center justify-center p-3"
+          aspect="560/230"
+        >
+          <div className="review-mock w-full max-w-[520px]">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <div
-                  className="w-9 h-9 rounded-full"
+                  className="h-9 w-9 rounded-full"
                   style={{ background: 'linear-gradient(135deg,#ffd8a0,#ff9d5c)' }}
                 />
                 <div>
-                  <div className="font-bold text-sm">
+                  <div className="text-sm font-bold">
                     <EditableText
                       as="span"
                       blockKey="home.review.mock.name"
@@ -168,7 +183,7 @@ export function ReviewAutomation({ blocks }: Props) {
               </div>
               <div className="text-xs text-ink-400">방금 전</div>
             </div>
-            <div className="text-sm text-ink-700 leading-relaxed">
+            <div className="text-sm leading-relaxed text-ink-700">
               <EditableText
                 as="span"
                 blockKey="home.review.mock.body"
@@ -177,11 +192,11 @@ export function ReviewAutomation({ blocks }: Props) {
                 pagePath="/"
               />
             </div>
-            <div className="mt-3 p-2.5 bg-[#F6F8FF] rounded-lg text-xs text-[#1F4DBD] font-semibold">
+            <div className="mt-3 rounded-lg bg-[#F6F8FF] p-2.5 text-xs font-semibold text-[#1F4DBD]">
               💰 네이버페이 포인트 지급완료 · 영수증 리뷰 1건 추가
             </div>
           </div>
-        </div>
+        </EditableVisualSlot>
       </div>
     </section>
   )

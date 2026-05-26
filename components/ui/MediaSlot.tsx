@@ -32,6 +32,7 @@
 // ─────────────────────────────────────────────
 
 import { Icon } from '@iconify/react'
+import type { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/lib/utils/cn'
 import type { ImageValue } from '@/lib/content-blocks'
 import { EditOverlay } from '@/components/editable/EditOverlay'
@@ -92,6 +93,10 @@ interface MediaSlotProps {
   imgClassName?: string
   /** 플레이스홀더 테마 */
   theme?: 'light' | 'dark'
+  /** 이미지가 없을 때 보여줄 기존 목업/컴포넌트. 관리자면 이 영역도 이미지로 교체 가능 */
+  fallback?: ReactNode
+  /** fallback wrapper className */
+  fallbackClassName?: string
 }
 
 /**
@@ -120,6 +125,8 @@ export default function MediaSlot({
   className,
   imgClassName,
   theme = 'light',
+  fallback,
+  fallbackClassName,
 }: MediaSlotProps) {
   const defaultIcon = icon ?? getDefaultIcon(usage)
 
@@ -174,24 +181,28 @@ export default function MediaSlot({
     )
   ) : null
 
-  const inner = hasImage ? (
-    imageNode
-  ) : (
-    <Placeholder
-      label={label}
-      hint={hint}
-      icon={defaultIcon}
-      filename={legacyFilename ?? blockKey ?? 'unnamed'}
-      theme={theme}
-    />
-  )
+  const fallbackNode = fallback ? (
+    <div className={cn('absolute inset-0', fallbackClassName)}>{fallback}</div>
+  ) : null
+
+  const inner = hasImage
+    ? imageNode
+    : fallbackNode ?? (
+        <Placeholder
+          label={label}
+          hint={hint}
+          icon={defaultIcon}
+          filename={legacyFilename ?? blockKey ?? 'unnamed'}
+          theme={theme}
+        />
+      )
 
   const baseClassName = cn(
     'relative overflow-hidden',
     !fill && 'inline-block',
     className,
   )
-  const baseStyle: React.CSSProperties = { aspectRatio: aspect }
+  const baseStyle: CSSProperties = { aspectRatio: aspect }
 
   // blockKey 없으면 편집 불가 — 그냥 내용만 렌더
   if (!blockKey) {
