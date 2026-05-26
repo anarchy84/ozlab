@@ -15,6 +15,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { DbStatus } from '@/lib/admin/types'
+import {
+  INDUSTRY_OPTIONS,
+  REGION_OPTIONS,
+  normalizeConsultationOption,
+} from '@/lib/consultation-options'
 import RevenueModal, { type RevenueDraft } from './RevenueModal'
 
 export interface ConsultationFull {
@@ -572,14 +577,16 @@ export function ConsultationDetailModal({
                   value={customerDraft.store_name}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, store_name: value }))}
                 />
-                <CustomerInput
+                <CustomerSelect
                   label="업종"
                   value={customerDraft.industry}
+                  options={INDUSTRY_OPTIONS}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, industry: value }))}
                 />
-                <CustomerInput
+                <CustomerSelect
                   label="지역"
                   value={customerDraft.region}
+                  options={REGION_OPTIONS}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, region: value }))}
                 />
                 <CustomerInput
@@ -873,13 +880,49 @@ function CustomerInput({
   )
 }
 
+function CustomerSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: readonly string[]
+  onChange: (value: string) => void
+}) {
+  const normalizedValue = normalizeConsultationOption(value, options)
+  const hasKnownValue = !normalizedValue || options.includes(normalizedValue)
+
+  return (
+    <label className="block">
+      <span className="block text-xs text-ink-500 mb-1">{label}</span>
+      <select
+        value={normalizedValue}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
+      >
+        <option value="">선택해주세요</option>
+        {!hasKnownValue && (
+          <option value={normalizedValue}>기존 값: {normalizedValue}</option>
+        )}
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 function toCustomerDraft(c: ConsultationFull): CustomerDraft {
   return {
     name: c.name ?? '',
     phone: c.phone ?? '',
     store_name: c.store_name ?? '',
-    industry: c.industry ?? '',
-    region: c.region ?? '',
+    industry: normalizeConsultationOption(c.industry, INDUSTRY_OPTIONS),
+    region: normalizeConsultationOption(c.region, REGION_OPTIONS),
     device_type: c.device_type ?? '',
     contract_period: c.contract_period ?? '',
     callable_time: c.callable_time ?? '',

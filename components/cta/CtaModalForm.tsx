@@ -18,6 +18,7 @@ import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
+import { INDUSTRY_OPTIONS, REGION_OPTIONS } from '@/lib/consultation-options'
 import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 const STANDARD_IDS = new Set([
@@ -312,6 +313,7 @@ function DynamicField({
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => void
 }) {
+  const selectOptions = getStandardSelectOptions(field) ?? field.options ?? []
   const inputClass =
     'w-full px-3 py-2 rounded text-sm bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-brand-blue'
 
@@ -342,7 +344,7 @@ function DynamicField({
             className={inputClass}
           >
             <option value="">선택해주세요</option>
-            {(field.options ?? []).map((o) => (
+            {selectOptions.map((o) => (
               <option key={o} value={o}>{o}</option>
             ))}
           </select>
@@ -376,6 +378,12 @@ function DynamicField({
       </div>
     </label>
   )
+}
+
+function getStandardSelectOptions(field: CtaFormField): readonly string[] | null {
+  if (field.id === 'industry') return INDUSTRY_OPTIONS
+  if (field.id === 'region') return REGION_OPTIONS
+  return null
 }
 
 // 폴백 — form_fields 비어있을 때

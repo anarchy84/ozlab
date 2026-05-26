@@ -37,6 +37,7 @@ import {
   type CtaDisplayConfig,
   type CtaPosition,
 } from '@/lib/admin/types'
+import { INDUSTRY_OPTIONS, REGION_OPTIONS } from '@/lib/consultation-options'
 
 // ─── 라벨 사전 ────────────────────────────────
 const TYPE_LABELS: Record<CtaType, string> = {
@@ -84,8 +85,8 @@ const DEFAULT_FIELDS: CtaFormField[] = [
   { id: 'name', label: '사장님 성함', type: 'text', required: true, placeholder: '홍길동' },
   { id: 'phone', label: '연락처', type: 'phone', required: true, placeholder: '010-0000-0000' },
   { id: 'store_name', label: '매장명', type: 'text', required: false, placeholder: '매장 상호명' },
-  { id: 'industry', label: '업종', type: 'select', required: false, options: ['음식점·카페', '소매·판매', '서비스·뷰티', '기타'] },
-  { id: 'region', label: '지역', type: 'select', required: false, options: ['서울', '경기·인천', '부산·경남', '대구·경북', '광주·전라', '대전·충청', '강원', '제주'] },
+  { id: 'industry', label: '업종', type: 'select', required: false, options: [...INDUSTRY_OPTIONS] },
+  { id: 'region', label: '지역', type: 'select', required: false, options: [...REGION_OPTIONS] },
   { id: 'message', label: '원하시는 구성 / 남기실 말씀', type: 'textarea', required: false, placeholder: '예) 10.1인치 POS 세트 견적 궁금합니다' },
 ]
 

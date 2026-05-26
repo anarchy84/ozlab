@@ -16,6 +16,7 @@ import { EditableText } from '@/components/editable/EditableText'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
+import { INDUSTRY_OPTIONS, REGION_OPTIONS } from '@/lib/consultation-options'
 import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 interface Props {
@@ -44,19 +45,6 @@ const INITIAL: FormState = {
   consent_privacy: false,
   _hp: '',
 }
-
-// 산업 / 지역 옵션 (selectbox)
-const INDUSTRY_OPTIONS = ['음식점 · 카페', '소매 · 판매', '서비스 · 뷰티', '기타']
-const REGION_OPTIONS = [
-  '서울',
-  '경기·인천',
-  '부산·경남',
-  '대구·경북',
-  '광주·전라',
-  '대전·충청',
-  '강원',
-  '제주',
-]
 
 export function ApplyForm({ blocks }: Props) {
   const [form, setForm] = useState<FormState>(INITIAL)
