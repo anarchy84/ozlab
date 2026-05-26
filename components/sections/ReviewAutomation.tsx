@@ -41,13 +41,13 @@ export function ReviewAutomation({ blocks }: Props) {
       id="review"
       className="py-section bg-surface-dark text-white relative overflow-hidden"
     >
-      {/* 그린 글로우 (우상단) */}
+      {/* 브랜드 블루-퍼플 글로우 (우상단) */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-[20%] -right-[10%] w-[60%] h-[140%] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(23, 224, 109, 0.2), transparent 70%)',
+            'radial-gradient(circle, rgba(58, 123, 255, 0.22), rgba(120, 97, 255, 0.14) 42%, transparent 72%)',
           filter: 'blur(80px)',
         }}
       />

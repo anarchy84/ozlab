@@ -36,7 +36,7 @@ type FeatureMeta = {
   // MediaSlot 힌트
   visualHint: string
   visualLabel: string
-  visualClass: 'green' | 'dark'
+  visualClass: 'brand' | 'dark'
   reverse: boolean
 }
 
@@ -57,7 +57,7 @@ const FEATURES: FeatureMeta[] = [
     ],
     visualHint: 'assets/ok-pair.png',
     visualLabel: '결제 단말기',
-    visualClass: 'green',
+    visualClass: 'brand',
     reverse: false,
   },
   {
@@ -248,8 +248,8 @@ export function Features({ blocks }: Props) {
               {/* 비주얼 */}
               <div
                 className={`rounded-2xl overflow-hidden ${
-                  f.visualClass === 'green'
-                    ? 'bg-gradient-to-br from-[#e8fbef] to-[#c8f2d6]'
+                  f.visualClass === 'brand'
+                    ? 'bg-gradient-to-br from-brand-soft via-white to-brand-tint'
                     : 'bg-ink-900'
                 }`}
               >

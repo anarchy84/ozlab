@@ -186,7 +186,7 @@ export function ApplyForm({ blocks }: Props) {
         className="pointer-events-none absolute -top-[20%] -right-[10%] w-[600px] h-[600px] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(23, 224, 109, 0.2), transparent 70%)',
+            'radial-gradient(circle, rgba(58, 123, 255, 0.22), rgba(120, 97, 255, 0.14) 42%, transparent 72%)',
           filter: 'blur(80px)',
         }}
       />

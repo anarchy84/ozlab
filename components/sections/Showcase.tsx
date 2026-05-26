@@ -29,13 +29,13 @@ export function Showcase({ blocks, ctas }: Props) {
     // showcase-dark 안에 grid md:grid-cols-2 가 있어서 페이지 전체가
     // 좌우 2단으로 갈라지고 container-oz 가 좌측 좁은 컬럼에 갇혔던 버그.
     <section className="py-section bg-surface-dark text-white relative overflow-hidden">
-      {/* 그린 글로우 (우상단 radial gradient blur) */}
+      {/* 브랜드 블루-퍼플 글로우 (우상단 radial gradient blur) */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-[20%] -right-[10%] w-[60%] h-[140%] rounded-full"
         style={{
           background:
-            'radial-gradient(circle, rgba(23, 224, 109, 0.25), transparent 70%)',
+            'radial-gradient(circle, rgba(58, 123, 255, 0.24), rgba(120, 97, 255, 0.16) 42%, transparent 72%)',
           filter: 'blur(80px)',
         }}
       />
