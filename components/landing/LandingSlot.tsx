@@ -88,8 +88,23 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const nextSortOrder =
-    orderedItems.length > 0 ? Math.max(...orderedItems.map((item) => item.sort_order)) + 10 : 10
+  function getInsertSortOrder(afterIndex: number) {
+    const previous = afterIndex >= 0 ? orderedItems[afterIndex] : null
+    const next = orderedItems[afterIndex + 1] ?? null
+
+    if (!previous && !next) return 10
+    if (!previous && next) return next.sort_order - 10
+    if (previous && !next) return previous.sort_order + 10
+
+    const middle = Math.floor((previous!.sort_order + next!.sort_order) / 2)
+    return middle > previous!.sort_order && middle < next!.sort_order
+      ? middle
+      : previous!.sort_order + 1
+  }
+
+  function openCreateDraft(type: LandingModuleType, afterIndex: number) {
+    setDraft(createDraft(type, getInsertSortOrder(afterIndex)))
+  }
 
   async function requestJson(url: string, init: RequestInit) {
     const response = await fetch(url, {
@@ -120,7 +135,7 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
           item_type: draft.item_type,
           title: draft.title.trim() || null,
           content: draft.content,
-          sort_order: draft.sort_order ?? nextSortOrder,
+          sort_order: draft.sort_order ?? getInsertSortOrder(orderedItems.length - 1),
           variant_key: draft.variant_key.trim() || 'A',
           traffic_weight: clampWeight(draft.traffic_weight),
           experiment_key: draft.experiment_key.trim() || null,
@@ -138,7 +153,7 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
 
   async function deleteItem(item: LandingSlotItem) {
     const ok = window.confirm('이 섹션을 삭제할까요? 삭제 후에는 복구하기 어렵습니다.')
-    if (!ok) return
+    if (!ok) return false
     setSaving(true)
     setError(null)
     try {
@@ -146,12 +161,22 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
         method: 'DELETE',
         body: JSON.stringify({ id: item.id, page_path: pagePath }),
       })
+      if (draft?.id === item.id) setDraft(null)
       router.refresh()
+      return true
     } catch (err) {
       setError(err instanceof Error ? err.message : '삭제에 실패했습니다.')
+      return false
     } finally {
       setSaving(false)
     }
+  }
+
+  async function deleteDraftItem() {
+    if (!draft?.id) return
+    const target = orderedItems.find((item) => item.id === draft.id)
+    if (!target) return
+    await deleteItem(target)
   }
 
   async function moveItem(item: LandingSlotItem, direction: -1 | 1) {
@@ -187,80 +212,83 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
   return (
     <div data-landing-slot-shell={slotKey} className="relative">
       {showBuilder && (
-        <div className="container-oz py-5">
-          <div className="rounded-lg border border-dashed border-brand-blue/35 bg-brand-tint/60 p-4 shadow-sm">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm font-extrabold text-brand-deep">랜딩 섹션 빌더 · {label}</p>
-                <p className="mt-1 text-xs text-ink-500">
-                  raw HTML 없이 안전한 템플릿 섹션을 추가, 수정, 순서 변경할 수 있습니다.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {LANDING_MODULE_TYPES.map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setDraft(createDraft(type, nextSortOrder))}
-                    className="btn btn-ghost sm bg-white"
-                  >
-                    + {LANDING_MODULE_LABELS[type]}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {error && (
-              <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
-                {error}
-              </p>
-            )}
-          </div>
+        <div className="container-oz py-4">
+          <LandingInsertBar
+            label={`랜딩 섹션 빌더 · ${label}`}
+            description="이 위치에 새 섹션을 추가합니다. 기존 섹션은 아래 컨트롤에서 편집, 이동, 삭제할 수 있습니다."
+            disabled={saving}
+            onAdd={(type) => openCreateDraft(type, -1)}
+          />
+          {error && (
+            <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
+              {error}
+            </p>
+          )}
         </div>
       )}
 
       {orderedItems.map((item, index) => (
         <div key={item.id} className="relative">
           {showBuilder && (
-            <div className="container-oz">
-              <div className="mb-[-12px] flex flex-wrap items-center justify-end gap-2">
-                <span className="rounded-pill bg-ink-900 px-3 py-1 text-xs font-bold text-white shadow-sm">
-                  {LANDING_MODULE_LABELS[item.item_type]} · {label}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => moveItem(item, -1)}
-                  disabled={index === 0 || saving}
-                  className="btn btn-ghost sm bg-white disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  위로
-                </button>
-                <button
-                  type="button"
-                  onClick={() => moveItem(item, 1)}
-                  disabled={index === orderedItems.length - 1 || saving}
-                  className="btn btn-ghost sm bg-white disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  아래로
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDraft(draftFromItem(item))}
-                  className="btn btn-primary sm"
-                >
-                  편집
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteItem(item)}
-                  disabled={saving}
-                  className="btn btn-ghost sm bg-white text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  삭제
-                </button>
+            <div className="container-oz relative z-10">
+              <div className="mb-[-14px] flex flex-col gap-2 rounded-lg border border-brand-blue/20 bg-white/95 px-3 py-2 shadow-brand backdrop-blur md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-pill bg-brand-soft px-3 py-1 text-xs font-extrabold text-brand-deep">
+                    {LANDING_MODULE_LABELS[item.item_type]}
+                  </span>
+                  <span className="text-xs font-bold text-ink-500">
+                    {item.title ?? item.content.title ?? label}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => moveItem(item, -1)}
+                    disabled={index === 0 || saving}
+                    className="rounded-pill border border-ink-150 bg-white px-3 py-1.5 text-xs font-extrabold text-ink-700 shadow-sm transition-colors hover:border-brand-blue/40 hover:text-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    위로
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveItem(item, 1)}
+                    disabled={index === orderedItems.length - 1 || saving}
+                    className="rounded-pill border border-ink-150 bg-white px-3 py-1.5 text-xs font-extrabold text-ink-700 shadow-sm transition-colors hover:border-brand-blue/40 hover:text-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    아래로
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDraft(draftFromItem(item))}
+                    disabled={saving}
+                    className="rounded-pill bg-brand-blue px-3 py-1.5 text-xs font-extrabold text-white shadow-brand transition-colors hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    편집
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteItem(item)}
+                    disabled={saving}
+                    className="rounded-pill border border-red-200 bg-white px-3 py-1.5 text-xs font-extrabold text-red-600 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    삭제
+                  </button>
+                </div>
               </div>
             </div>
           )}
           <LandingModuleRenderer item={item} showPlaceholders={showBuilder} />
+          {showBuilder && (
+            <div className="container-oz py-4">
+              <LandingInsertBar
+                label={`${item.title ?? item.content.title ?? LANDING_MODULE_LABELS[item.item_type]} 아래에 추가`}
+                description="선택한 섹션 바로 아래에 새 요소를 삽입합니다."
+                compact
+                disabled={saving}
+                onAdd={(type) => openCreateDraft(type, index)}
+              />
+            </div>
+          )}
         </div>
       ))}
 
@@ -274,8 +302,51 @@ export function LandingSlot({ pagePath, slotKey, label, items = [] }: Props) {
           error={error}
           pagePath={pagePath}
           slotKey={slotKey}
+          onDelete={draft.id ? deleteDraftItem : undefined}
         />
       )}
+    </div>
+  )
+}
+
+function LandingInsertBar({
+  label,
+  description,
+  compact = false,
+  disabled,
+  onAdd,
+}: {
+  label: string
+  description: string
+  compact?: boolean
+  disabled?: boolean
+  onAdd: (type: LandingModuleType) => void
+}) {
+  return (
+    <div
+      className={`rounded-lg border border-dashed border-brand-blue/35 bg-brand-tint/70 shadow-sm ${
+        compact ? 'px-3 py-3' : 'p-4'
+      }`}
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-sm font-extrabold text-brand-deep">{label}</p>
+          <p className="mt-1 text-xs text-ink-500">{description}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {LANDING_MODULE_TYPES.map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => onAdd(type)}
+              disabled={disabled}
+              className="rounded-pill border border-ink-150 bg-white px-4 py-2 text-sm font-extrabold text-ink-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-blue/40 hover:text-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              + {LANDING_MODULE_LABELS[type]}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -289,6 +360,7 @@ function LandingModuleEditor({
   error,
   pagePath,
   slotKey,
+  onDelete,
 }: {
   draft: Draft
   setDraft: Dispatch<SetStateAction<Draft | null>>
@@ -298,6 +370,7 @@ function LandingModuleEditor({
   error: string | null
   pagePath: string
   slotKey: string
+  onDelete?: () => void
 }) {
   const [uploading, setUploading] = useState(false)
 
@@ -344,6 +417,9 @@ function LandingModuleEditor({
             <h2 className="mt-1 text-xl font-extrabold text-ink-900">
               {draft.id ? '섹션 편집' : '섹션 추가'}
             </h2>
+            <p className="mt-1 text-sm text-ink-500">
+              기존 요소도 타입을 바꿔 이미지, 텍스트, CTA, FAQ 섹션으로 다시 구성할 수 있습니다.
+            </p>
           </div>
           <button type="button" onClick={onClose} className="btn btn-ghost sm">
             닫기
@@ -461,13 +537,27 @@ function LandingModuleEditor({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-ink-100 px-5 py-4">
-          <button type="button" onClick={onClose} className="btn btn-ghost">
-            취소
-          </button>
-          <button type="button" onClick={onSave} disabled={saving} className="btn btn-primary">
-            {saving ? '저장 중' : '저장'}
-          </button>
+        <div className="flex flex-col gap-3 border-t border-ink-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={onDelete}
+                disabled={saving}
+                className="rounded-pill border border-red-200 bg-white px-4 py-2 text-sm font-extrabold text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                이 섹션 삭제
+              </button>
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button type="button" onClick={onClose} className="btn btn-ghost">
+              취소
+            </button>
+            <button type="button" onClick={onSave} disabled={saving} className="btn btn-primary">
+              {saving ? '저장 중' : '저장'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

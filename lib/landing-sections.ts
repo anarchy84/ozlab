@@ -70,20 +70,44 @@ export interface LandingSlotDefinition {
   label: string
 }
 
+const SERVICE_PAGE_PATHS = [
+  '/naver-pos',
+  '/apple-pay-pos',
+  '/internet',
+  '/business/torder',
+  '/business/cctv',
+]
+
+const SERVICE_PAGE_SLOTS = [
+  { slotKey: 'page.after_hero', label: '히어로 아래' },
+  { slotKey: 'page.after_intro', label: '소개 섹션 아래' },
+  { slotKey: 'page.after_catalog', label: '상품/구성 섹션 아래' },
+  { slotKey: 'page.after_proof', label: '근거/지표 섹션 아래' },
+  { slotKey: 'page.after_guide', label: '가이드 섹션 아래' },
+  { slotKey: 'page.after_process', label: '진행 방식 섹션 아래' },
+  { slotKey: 'page.before_faq', label: 'FAQ 위' },
+  { slotKey: 'page.before_consult', label: '상담 CTA 위' },
+]
+
 export const LANDING_SLOT_DEFINITIONS: LandingSlotDefinition[] = [
   { pagePath: '/', slotKey: 'home.after_hero', label: '홈 히어로 아래' },
-  { pagePath: '/', slotKey: 'home.before_apply', label: '홈 상담폼 위' },
-  { pagePath: '/naver-pos', slotKey: 'page.after_hero', label: '히어로 아래' },
-  { pagePath: '/naver-pos', slotKey: 'page.before_consult', label: '상담 CTA 위' },
-  { pagePath: '/apple-pay-pos', slotKey: 'page.after_hero', label: '히어로 아래' },
-  { pagePath: '/apple-pay-pos', slotKey: 'page.before_consult', label: '상담 CTA 위' },
-  { pagePath: '/internet', slotKey: 'page.after_hero', label: '히어로 아래' },
-  { pagePath: '/internet', slotKey: 'page.before_consult', label: '상담 CTA 위' },
-  { pagePath: '/business/torder', slotKey: 'page.after_hero', label: '히어로 아래' },
-  { pagePath: '/business/torder', slotKey: 'page.before_consult', label: '상담 CTA 위' },
-  { pagePath: '/business/cctv', slotKey: 'page.after_hero', label: '히어로 아래' },
-  { pagePath: '/business/cctv', slotKey: 'page.before_consult', label: '상담 CTA 위' },
+  { pagePath: '/', slotKey: 'home.after_painpoints', label: '불편 포인트 아래' },
+  { pagePath: '/', slotKey: 'home.after_showcase', label: '쇼케이스 아래' },
+  { pagePath: '/', slotKey: 'home.after_features', label: '핵심 기능 아래' },
+  { pagePath: '/', slotKey: 'home.after_review', label: '리뷰 자동화 아래' },
+  { pagePath: '/', slotKey: 'home.after_placeplus', label: '플레이스+ 아래' },
+  { pagePath: '/', slotKey: 'home.after_mechanism', label: '작동 방식 아래' },
+  { pagePath: '/', slotKey: 'home.after_pricing', label: '가격 안내 아래' },
+  { pagePath: '/', slotKey: 'home.after_promotion', label: '프로모션 아래' },
+  { pagePath: '/', slotKey: 'home.after_testimonials', label: '고객 후기 아래' },
+  { pagePath: '/', slotKey: 'home.before_apply', label: 'FAQ 아래 · 상담폼 위' },
+  ...SERVICE_PAGE_PATHS.flatMap((pagePath) =>
+    SERVICE_PAGE_SLOTS.map((slot) => ({ pagePath, ...slot }))
+  ),
   { pagePath: '/marketing-support', slotKey: 'marketing.after_hero', label: '히어로 아래' },
+  { pagePath: '/marketing-support', slotKey: 'marketing.after_benefits', label: '지원 내용 아래' },
+  { pagePath: '/marketing-support', slotKey: 'marketing.after_why', label: '플레이스 설명 아래' },
+  { pagePath: '/marketing-support', slotKey: 'marketing.before_cta', label: '신청 CTA 위' },
   { pagePath: '/marketing-support', slotKey: 'marketing.before_faq', label: 'FAQ 위' },
 ]
 

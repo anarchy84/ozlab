@@ -44,6 +44,15 @@ const proofPoints = [
 export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: LandingSlotsByKey }) {
   const blocks = useBlocks()
   const faqs = marketingSupportFaqsForBlocks(blocks)
+  const renderLandingSlot = (slotKey: string, label: string) => (
+    <LandingSlot
+      pagePath={PAGE_PATH}
+      slotKey={slotKey}
+      label={label}
+      items={landingSlots[slotKey]}
+    />
+  )
+
   return (
     <div className="bg-white text-ink-900">
       <section className="relative overflow-hidden bg-surface-dark py-section-tight text-white">
@@ -187,12 +196,7 @@ export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: 
         </div>
       </section>
 
-      <LandingSlot
-        pagePath={PAGE_PATH}
-        slotKey="marketing.after_hero"
-        label="히어로 아래"
-        items={landingSlots['marketing.after_hero']}
-      />
+      {renderLandingSlot('marketing.after_hero', '히어로 아래')}
 
       <section id="event-benefits" className="py-section">
         <div className="container-oz">
@@ -258,6 +262,7 @@ export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: 
           </div>
         </div>
       </section>
+      {renderLandingSlot('marketing.after_benefits', '지원 내용 아래')}
 
       <section className="bg-ink-50 py-section-tight">
         <div className="container-oz">
@@ -329,6 +334,9 @@ export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: 
           </div>
         </div>
       </section>
+      {renderLandingSlot('marketing.after_why', '플레이스 설명 아래')}
+
+      {renderLandingSlot('marketing.before_cta', '신청 CTA 위')}
 
       <section className="py-section-tight">
         <div className="container-oz">
@@ -379,12 +387,7 @@ export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: 
         </div>
       </section>
 
-      <LandingSlot
-        pagePath={PAGE_PATH}
-        slotKey="marketing.before_faq"
-        label="FAQ 위"
-        items={landingSlots['marketing.before_faq']}
-      />
+      {renderLandingSlot('marketing.before_faq', 'FAQ 위')}
 
       <section className="bg-ink-50 py-section">
         <div className="container-oz">

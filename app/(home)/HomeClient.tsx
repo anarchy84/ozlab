@@ -46,33 +46,41 @@ interface Props {
 export default function HomeClient({ blocks, ctasByPlacement, landingSlots }: Props) {
   // 자동 트리거 CTA (modal_form/floating_button/sticky_bar/toast) 모두 평탄화
   const allCtas = Object.values(ctasByPlacement).flat().filter(Boolean) as CtaButton[]
+  const renderLandingSlot = (slotKey: string, label: string) => (
+    <LandingSlot
+      pagePath="/"
+      slotKey={slotKey}
+      label={label}
+      items={landingSlots[slotKey]}
+    />
+  )
+
   return (
     <>
       <PromoStrip blocks={blocks} />
       <Nav blocks={blocks} ctas={ctasByPlacement.nav} />
       <Hero blocks={blocks} ctas={ctasByPlacement.hero} />
-      <LandingSlot
-        pagePath="/"
-        slotKey="home.after_hero"
-        label="홈 히어로 아래"
-        items={landingSlots['home.after_hero']}
-      />
+      {renderLandingSlot('home.after_hero', '홈 히어로 아래')}
       <Painpoints blocks={blocks} />
+      {renderLandingSlot('home.after_painpoints', '불편 포인트 아래')}
       <Showcase blocks={blocks} ctas={ctasByPlacement.showcase} />
+      {renderLandingSlot('home.after_showcase', '쇼케이스 아래')}
       <Features blocks={blocks} />
+      {renderLandingSlot('home.after_features', '핵심 기능 아래')}
       <ReviewAutomation blocks={blocks} />
+      {renderLandingSlot('home.after_review', '리뷰 자동화 아래')}
       <PlacePlus blocks={blocks} />
+      {renderLandingSlot('home.after_placeplus', '플레이스+ 아래')}
       <Mechanism blocks={blocks} />
+      {renderLandingSlot('home.after_mechanism', '작동 방식 아래')}
       <Pricing blocks={blocks} />
+      {renderLandingSlot('home.after_pricing', '가격 안내 아래')}
       <Promotion blocks={blocks} ctas={ctasByPlacement.promotion} />
+      {renderLandingSlot('home.after_promotion', '프로모션 아래')}
       <Testimonials blocks={blocks} />
+      {renderLandingSlot('home.after_testimonials', '고객 후기 아래')}
       <FAQ blocks={blocks} />
-      <LandingSlot
-        pagePath="/"
-        slotKey="home.before_apply"
-        label="홈 상담폼 위"
-        items={landingSlots['home.before_apply']}
-      />
+      {renderLandingSlot('home.before_apply', 'FAQ 아래 · 상담폼 위')}
       <ApplyForm blocks={blocks} />
       <Footer blocks={blocks} ctas={ctasByPlacement.footer} />
       <FloatingCTA blocks={blocks} ctas={ctasByPlacement.floating} />

@@ -161,6 +161,14 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
 
   // blockKey 헬퍼
   const k = (suffix: string) => `service.${pageKey}.${suffix}`
+  const renderLandingSlot = (slotKey: string, label: string) => (
+    <LandingSlot
+      pagePath={pagePath}
+      slotKey={slotKey}
+      label={label}
+      items={landingSlots[slotKey]}
+    />
+  )
 
   return (
     <div className="bg-white text-ink-900">
@@ -304,12 +312,7 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
         </div>
       </section>
 
-      <LandingSlot
-        pagePath={pagePath}
-        slotKey="page.after_hero"
-        label="히어로 아래"
-        items={landingSlots['page.after_hero']}
-      />
+      {renderLandingSlot('page.after_hero', '히어로 아래')}
 
       {/* INTRO */}
       <section className="py-section">
@@ -334,6 +337,7 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
           </div>
         </div>
       </section>
+      {renderLandingSlot('page.after_intro', '소개 섹션 아래')}
 
       {/* CATALOG */}
       <section className="bg-ink-50 py-section">
@@ -359,6 +363,7 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
           </div>
         </div>
       </section>
+      {renderLandingSlot('page.after_catalog', '상품/구성 섹션 아래')}
 
       {/* PROOF */}
       <section className="py-section">
@@ -397,6 +402,7 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
           </div>
         </div>
       </section>
+      {renderLandingSlot('page.after_proof', '근거/지표 섹션 아래')}
 
       {/* GUIDE */}
       <section className="bg-surface-dark py-section text-white">
@@ -444,6 +450,7 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
           </div>
         </div>
       </section>
+      {renderLandingSlot('page.after_guide', '가이드 섹션 아래')}
 
       {/* PROCESS */}
       <section className="py-section">
@@ -503,6 +510,9 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
           </div>
         </div>
       </section>
+      {renderLandingSlot('page.after_process', '진행 방식 섹션 아래')}
+
+      {renderLandingSlot('page.before_faq', 'FAQ 위')}
 
       {/* FAQ */}
       <section className="bg-ink-50 py-section">
@@ -542,12 +552,7 @@ export function ServiceLanding({ data, pageKey, pagePath, landingSlots = {} }: P
         </div>
       </section>
 
-      <LandingSlot
-        pagePath={pagePath}
-        slotKey="page.before_consult"
-        label="상담 CTA 위"
-        items={landingSlots['page.before_consult']}
-      />
+      {renderLandingSlot('page.before_consult', '상담 CTA 위')}
 
       {/* CONSULT */}
       <section id="consult" className="bg-surface-dark py-section text-white">
