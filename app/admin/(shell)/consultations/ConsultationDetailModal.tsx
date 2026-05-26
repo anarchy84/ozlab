@@ -584,9 +584,10 @@ export function ConsultationDetailModal({
                 <button
                   type="button"
                   onClick={() => setCustomerEditing(true)}
-                  className="rounded border border-ink-700 px-2 py-1 text-xs font-bold text-ink-300 hover:bg-ink-800 hover:text-ink-100"
+                  className="inline-flex items-center gap-1 rounded bg-brand-blue/15 px-2.5 py-1 text-xs font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-colors"
+                  title="고객 정보 수정 (박스 클릭으로도 진입 가능)"
                 >
-                  수정
+                  <span>✏️</span> 수정
                 </button>
               )}
             </div>
@@ -650,22 +651,34 @@ export function ConsultationDetailModal({
               </div>
             ) : (
               <>
-                <Field label="고객명" value={c.name} />
-                <Field label="연락처" value={c.phone} mono />
-                <Field label="매장명" value={c.store_name ?? '-'} />
-                <Field label="업종" value={c.industry ?? '-'} />
-                <Field label="지역" value={c.region ?? '-'} />
-                <Field label="단말기" value={c.device_type ?? '-'} />
-                <Field label="약정" value={c.contract_period ?? '-'} />
-                <Field label="통화가능시간" value={c.callable_time ?? '-'} />
+                {/*
+                  보기 모드 Field 들 — 어디든 클릭하면 편집 모드 진입.
+                  박스가 인풋처럼 보였던 기존 UX 문제(수정 버튼을 못 찾음) 보완.
+                */}
+                <Field label="고객명" value={c.name} onEdit={() => setCustomerEditing(true)} />
+                <Field label="연락처" value={c.phone} mono onEdit={() => setCustomerEditing(true)} />
+                <Field label="매장명" value={c.store_name ?? '-'} onEdit={() => setCustomerEditing(true)} />
+                <Field label="업종" value={c.industry ?? '-'} onEdit={() => setCustomerEditing(true)} />
+                <Field label="지역" value={c.region ?? '-'} onEdit={() => setCustomerEditing(true)} />
+                <Field label="단말기" value={c.device_type ?? '-'} onEdit={() => setCustomerEditing(true)} />
+                <Field label="약정" value={c.contract_period ?? '-'} onEdit={() => setCustomerEditing(true)} />
+                <Field label="통화가능시간" value={c.callable_time ?? '-'} onEdit={() => setCustomerEditing(true)} />
                 <div>
                   <label className="block text-xs text-ink-500 mb-1">
                     고객 메시지
                   </label>
-                  <div className="w-full px-2 py-1.5 text-sm bg-ink-900 border border-ink-700 text-ink-200 rounded min-h-[72px] whitespace-pre-wrap break-words">
+                  <button
+                    type="button"
+                    onClick={() => setCustomerEditing(true)}
+                    className="group w-full text-left px-2 py-1.5 text-sm text-ink-200 rounded min-h-[72px] whitespace-pre-wrap break-words border border-transparent hover:border-brand-blue/40 hover:bg-ink-900/50 cursor-pointer transition-colors"
+                    title="클릭해서 수정"
+                  >
                     {c.message || <span className="text-ink-500">(없음)</span>}
-                  </div>
+                  </button>
                 </div>
+                <p className="text-[11px] text-ink-500 italic pt-1">
+                  💡 박스를 클릭하거나 위쪽 <strong className="text-brand-blue">✏️ 수정</strong> 버튼을 누르면 편집할 수 있어요.
+                </p>
               </>
             )}
           </section>
@@ -866,25 +879,47 @@ export function ConsultationDetailModal({
   )
 }
 
+/**
+ * 보기 모드 표시 필드.
+ * onEdit prop 이 있으면 박스 자체가 클릭 가능 — hover 시 시각 시그널 + 클릭 시 편집 모드 진입.
+ * 평평한 디자인(투명 테두리)으로 인풋스러움을 줄이고 hover 시 브랜드 컬러 outline 으로 클릭 가능성 시그널.
+ */
 function Field({
   label,
   value,
   mono = false,
+  onEdit,
 }: {
   label: string
   value: string
   mono?: boolean
+  onEdit?: () => void
 }) {
+  const baseClass = `w-full text-left px-2 py-1.5 text-sm text-ink-200 rounded break-words ${
+    mono ? 'font-mono' : ''
+  }`
+
+  if (onEdit) {
+    return (
+      <div>
+        <label className="block text-xs text-ink-500 mb-1">{label}</label>
+        <button
+          type="button"
+          onClick={onEdit}
+          className={`group ${baseClass} border border-transparent hover:border-brand-blue/40 hover:bg-ink-900/50 cursor-pointer transition-colors`}
+          title="클릭해서 수정"
+        >
+          {value}
+        </button>
+      </div>
+    )
+  }
+
+  // onEdit 없을 때 (다른 곳에서 read-only 표시용) — 기존 디자인 유지
   return (
     <div>
       <label className="block text-xs text-ink-500 mb-1">{label}</label>
-      <div
-        className={`w-full px-2 py-1.5 text-sm bg-ink-900 border border-ink-700 text-ink-200 rounded break-words ${
-          mono ? 'font-mono' : ''
-        }`}
-      >
-        {value}
-      </div>
+      <div className={`${baseClass} bg-ink-900 border border-ink-700`}>{value}</div>
     </div>
   )
 }
