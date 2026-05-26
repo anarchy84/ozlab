@@ -66,8 +66,8 @@
     border-radius: 50%;
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(3, 199, 90, 0.4),
-      rgba(3, 199, 90, 0.08) 45%,
+      rgba(58, 123, 255, 0.4),
+      rgba(58, 123, 255, 0.08) 45%,
       transparent 70%
     );
     filter: blur(50px);
@@ -113,7 +113,7 @@
     right: -10%;
     width: 60%;
     height: 140%;
-    background: radial-gradient(circle, rgba(23, 224, 109, 0.25), transparent 70%);
+    background: radial-gradient(circle, rgba(124, 140, 255, 0.25), transparent 70%);
     filter: blur(80px);
     pointer-events: none;
   }
@@ -354,7 +354,18 @@
     @apply inline-flex items-center justify-center gap-2 rounded-pill font-bold transition-all px-5 py-3 text-[15px];
   }
   .btn-primary {
-    @apply bg-brand-blue text-white hover:bg-brand-dark shadow-green;
+    /* 리브랜드 — 블루→퍼플 그라데이션 + 글로우 */
+    @apply text-white shadow-brand;
+    background: linear-gradient(135deg, #3A7BFF 0%, #5670FF 50%, #7861FF 100%);
+    background-size: 200% auto;
+    transition: background-position 0.4s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  }
+  .btn-primary:hover {
+    background-position: right center;
+    box-shadow: 0 16px 36px -8px rgba(120, 97, 255, 0.5);
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
   }
   .btn-ghost {
     @apply bg-transparent text-ink-700 border border-ink-200 hover:bg-ink-50;
@@ -768,12 +779,12 @@ html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
   .eyebrow-dark {
     @apply inline-flex items-center gap-1.5 text-[13px] font-semibold tracking-wide px-3 py-1.5 rounded-pill;
     color: #7C8CFF;
-    background: rgba(23, 224, 109, 0.12);
+    background: rgba(124, 140, 255, 0.12);
   }
 
   /* 네이버 그린 하이라이트 마커 */
   .hl-green {
-    background: linear-gradient(transparent 58%, rgba(3, 199, 90, 0.25) 58%);
+    background: linear-gradient(transparent 58%, rgba(58, 123, 255, 0.25) 58%);
     color: inherit;
     padding: 0 2px;
   }

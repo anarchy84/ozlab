@@ -137,7 +137,16 @@ export default async function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
         />
       </head>
-      <body className="min-h-screen flex flex-col antialiased bg-white text-[#101828]">
+      <body
+        className="min-h-screen flex flex-col antialiased text-brand-ink"
+        style={{
+          // 리브랜드 — 전체 페이지 subtle 인디고-퍼플 그라데이션
+          // 헤더(흰배경) 와 자연스럽게 연결되도록 매우 옅게. 어드민(/admin) 도 own bg 가 덮어씀.
+          background:
+            'linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 30%, #F6F8FF 65%, #F4F0FF 100%)',
+          backgroundAttachment: 'fixed',
+        }}
+      >
         {/*
           GTM (Google Tag Manager) — DB 우선 ID
             - /admin/* 자동 차단 (컴포넌트 내부)
