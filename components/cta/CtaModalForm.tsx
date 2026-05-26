@@ -180,7 +180,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     >
       {sent ? (
         <div className="text-center py-8 px-4">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-naver-green/15 text-4xl">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue/15 text-4xl">
             ✅
           </div>
           <h3 className="text-2xl font-extrabold text-white">신청이 접수되었습니다</h3>
@@ -196,7 +196,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
             </a>
             <a
               href={SITE_PHONE_HREF}
-              className="rounded-full bg-naver-green px-4 py-2.5 text-sm font-bold text-white hover:bg-naver-dark"
+              className="rounded-full bg-brand-blue px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-dark"
             >
               {SITE_PHONE} 전화하기
             </a>
@@ -266,7 +266,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
             type="submit"
             disabled={submitting}
             className="w-full py-2.5 rounded text-sm font-bold text-black disabled:opacity-50"
-            style={{ background: dc.button_color ?? '#17e06d' }}
+            style={{ background: dc.button_color ?? '#7C8CFF' }}
           >
             {submitting ? '신청 처리 중…' : (cta.label || '무료 상담 신청')}
           </button>
@@ -313,7 +313,7 @@ function DynamicField({
   ) => void
 }) {
   const inputClass =
-    'w-full px-3 py-2 rounded text-sm bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-naver-green'
+    'w-full px-3 py-2 rounded text-sm bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-brand-blue'
 
   return (
     <label className="block text-sm">

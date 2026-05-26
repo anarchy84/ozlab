@@ -251,7 +251,7 @@ export default function AlertRulesClient({
         <div
           className={`rounded-md border px-4 py-3 text-sm ${
             msg.kind === 'ok'
-              ? 'border-naver-green/40 bg-naver-green/5 text-naver-neon'
+              ? 'border-brand-blue/40 bg-brand-blue/5 text-brand-neon'
               : 'border-accent-red/40 bg-accent-red/5 text-accent-red'
           }`}
         >
@@ -310,7 +310,7 @@ export default function AlertRulesClient({
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                           rule.is_active
-                            ? 'bg-naver-green/20 text-naver-neon'
+                            ? 'bg-brand-blue/20 text-brand-neon'
                             : 'bg-ink-800 text-ink-500'
                         }`}
                       >
@@ -343,7 +343,7 @@ export default function AlertRulesClient({
                       type="button"
                       onClick={() => evaluateRule(rule)}
                       disabled={busy}
-                      className="rounded border border-naver-green/40 px-2 py-1 text-xs text-naver-neon hover:bg-naver-green/10 disabled:opacity-30"
+                      className="rounded border border-brand-blue/40 px-2 py-1 text-xs text-brand-neon hover:bg-brand-blue/10 disabled:opacity-30"
                     >
                       평가
                     </button>
@@ -367,7 +367,7 @@ export default function AlertRulesClient({
       <section className="rounded-lg border border-ink-700 bg-ink-900/30 p-4 text-sm text-ink-300 space-y-2">
         <h3 className="font-bold text-ink-100">참고</h3>
         <div className="text-xs text-ink-400 space-y-1">
-          <div>· <strong>채널 등록</strong>: <a href="/admin/settings/slack" className="text-naver-neon underline">슬랙 알림 설정</a> 에서 먼저 채널 등록.</div>
+          <div>· <strong>채널 등록</strong>: <a href="/admin/settings/slack" className="text-brand-neon underline">슬랙 알림 설정</a> 에서 먼저 채널 등록.</div>
           <div>· <strong>등록된 채널</strong>: {availableChannels.length === 0 ? '(없음 — 슬랙 설정 먼저!)' : availableChannels.map((c) => c.code).join(', ')}</div>
           <div>· <strong>등록된 사용자</strong>: {availableUsers.filter((u) => u.slack_user_id).length}명 (슬랙 ID 매핑 완료)</div>
           <div>· <strong>cron 스케줄</strong>: <code>/api/cron/alerts</code> 매시간 / <code>/api/cron/daily-digest</code> 매일 07:00 KST</div>

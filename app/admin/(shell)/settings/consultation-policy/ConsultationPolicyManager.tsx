@@ -84,7 +84,7 @@ export default function ConsultationPolicyManager({ initialSettings, embedded = 
           <span
             className={`w-fit shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${
               settings.source === 'database'
-                ? 'bg-naver-green/15 text-naver-neon'
+                ? 'bg-brand-blue/15 text-brand-neon'
                 : 'bg-amber-500/15 text-amber-300'
             }`}
           >
@@ -97,7 +97,7 @@ export default function ConsultationPolicyManager({ initialSettings, embedded = 
             제한 기간
           </label>
           <div>
-            <div className="flex max-w-xs items-center rounded-lg border border-ink-700 bg-ink-900 focus-within:border-naver-green">
+            <div className="flex max-w-xs items-center rounded-lg border border-ink-700 bg-ink-900 focus-within:border-brand-blue">
               <input
                 id="duplicate-days"
                 type="number"
@@ -122,7 +122,7 @@ export default function ConsultationPolicyManager({ initialSettings, embedded = 
             type="button"
             onClick={save}
             disabled={saving || !dirty || parsedDays === null}
-            className="rounded-full bg-naver-green px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-naver-dark disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-brand-blue px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? '저장 중...' : '정책 저장'}
           </button>
@@ -141,7 +141,7 @@ export default function ConsultationPolicyManager({ initialSettings, embedded = 
         </div>
 
         {message && (
-          <div className="mt-4 rounded border border-naver-green/30 bg-naver-green/10 px-3 py-2 text-sm text-naver-neon">
+          <div className="mt-4 rounded border border-brand-blue/30 bg-brand-blue/10 px-3 py-2 text-sm text-brand-neon">
             {message}
           </div>
         )}
@@ -158,7 +158,7 @@ export default function ConsultationPolicyManager({ initialSettings, embedded = 
         )}
       </section>
 
-      <section className="rounded-lg border border-naver-green/20 bg-naver-green/5 p-4 text-sm leading-relaxed text-ink-300">
+      <section className="rounded-lg border border-brand-blue/20 bg-brand-blue/5 p-4 text-sm leading-relaxed text-ink-300">
         <h2 className="mb-2 font-bold text-ink-100">정책 기준</h2>
         <p className="text-ink-400">
           중복 기준은 연락처 숫자만 비교합니다. 하이픈, 공백 등 입력 형태가 달라도

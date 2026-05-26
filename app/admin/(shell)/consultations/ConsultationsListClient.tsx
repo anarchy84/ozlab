@@ -188,7 +188,7 @@ export function ConsultationsListClient({
             onClick={toggleExpanded}
             className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${
               expanded
-                ? 'bg-naver-green/20 text-naver-neon border-naver-green/40'
+                ? 'bg-brand-blue/20 text-brand-neon border-brand-blue/40'
                 : 'bg-ink-800 text-ink-300 border-ink-700 hover:bg-ink-700'
             }`}
           >
@@ -207,7 +207,7 @@ export function ConsultationsListClient({
                     type="checkbox"
                     checked={allChecked}
                     onChange={toggleAll}
-                    className="w-4 h-4 accent-naver-green cursor-pointer"
+                    className="w-4 h-4 accent-brand-blue cursor-pointer"
                   />
                 </th>
               )}
@@ -216,10 +216,10 @@ export function ConsultationsListClient({
               <th className="text-left px-3 py-3 font-semibold">매체/그룹</th>
               {canSeeAttribution && expanded && (
                 <>
-                  <th className="text-left px-3 py-3 font-semibold bg-naver-green/5">캠페인</th>
-                  <th className="text-left px-3 py-3 font-semibold bg-naver-green/5">키워드</th>
-                  <th className="text-left px-3 py-3 font-semibold bg-naver-green/5">소재</th>
-                  <th className="text-left px-3 py-3 font-semibold bg-naver-green/5">랜딩</th>
+                  <th className="text-left px-3 py-3 font-semibold bg-brand-blue/5">캠페인</th>
+                  <th className="text-left px-3 py-3 font-semibold bg-brand-blue/5">키워드</th>
+                  <th className="text-left px-3 py-3 font-semibold bg-brand-blue/5">소재</th>
+                  <th className="text-left px-3 py-3 font-semibold bg-brand-blue/5">랜딩</th>
                 </>
               )}
               <th className="text-left px-3 py-3 font-semibold">상담원/배정</th>
@@ -244,7 +244,7 @@ export function ConsultationsListClient({
                   key={c.id}
                   className={`transition-colors ${
                     isSelected
-                      ? 'bg-naver-green/10'
+                      ? 'bg-brand-blue/10'
                       : 'hover:bg-ink-800/40'
                   }`}
                 >
@@ -255,7 +255,7 @@ export function ConsultationsListClient({
                         checked={isSelected}
                         onChange={() => toggleOne(c.id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-4 h-4 accent-naver-green cursor-pointer mt-1"
+                        className="w-4 h-4 accent-brand-blue cursor-pointer mt-1"
                       />
                     </td>
                   )}
@@ -305,7 +305,7 @@ export function ConsultationsListClient({
                     <>
                       <td
                         onClick={() => setOpenId(c.id)}
-                        className="px-3 py-3 align-top text-xs bg-naver-green/5 cursor-pointer"
+                        className="px-3 py-3 align-top text-xs bg-brand-blue/5 cursor-pointer"
                       >
                         {c.utm_campaign ? (
                           <span className="text-ink-200">{c.utm_campaign}</span>
@@ -315,7 +315,7 @@ export function ConsultationsListClient({
                       </td>
                       <td
                         onClick={() => setOpenId(c.id)}
-                        className="px-3 py-3 align-top text-xs bg-naver-green/5 cursor-pointer"
+                        className="px-3 py-3 align-top text-xs bg-brand-blue/5 cursor-pointer"
                       >
                         {c.inferred_keyword ? (
                           <span
@@ -334,7 +334,7 @@ export function ConsultationsListClient({
                       </td>
                       <td
                         onClick={() => setOpenId(c.id)}
-                        className="px-3 py-3 align-top text-xs bg-naver-green/5 cursor-pointer"
+                        className="px-3 py-3 align-top text-xs bg-brand-blue/5 cursor-pointer"
                       >
                         {c.inferred_creative ? (
                           <span className="text-ink-200">{c.inferred_creative}</span>
@@ -344,7 +344,7 @@ export function ConsultationsListClient({
                       </td>
                       <td
                         onClick={() => setOpenId(c.id)}
-                        className="px-3 py-3 align-top text-xs bg-naver-green/5 max-w-[180px] cursor-pointer"
+                        className="px-3 py-3 align-top text-xs bg-brand-blue/5 max-w-[180px] cursor-pointer"
                       >
                         {c.inferred_landing_title ? (
                           <span className="text-emerald-300 line-clamp-2 break-keep">

@@ -152,7 +152,7 @@ export default function MediaLibrary({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="px-4 py-2 bg-naver-green hover:bg-naver-dark disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
+              className="px-4 py-2 bg-brand-blue hover:bg-brand-dark disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
             >
               {uploading ? '업로드 중...' : '+ 이미지 업로드'}
             </button>
@@ -211,7 +211,7 @@ export default function MediaLibrary({
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       onClick={() => copyUrl(url)}
-                      className="px-3 py-1.5 bg-naver-green text-white text-xs font-bold rounded-lg"
+                      className="px-3 py-1.5 bg-brand-blue text-white text-xs font-bold rounded-lg"
                     >
                       URL 복사
                     </button>

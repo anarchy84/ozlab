@@ -65,7 +65,7 @@ function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2.5 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-naver-green/50 focus:border-naver-green"
+          className="w-full px-3 py-2.5 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue"
           placeholder="ourteam.kr@gmail.com"
         />
       </div>
@@ -80,7 +80,7 @@ function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-3 py-2.5 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-naver-green/50 focus:border-naver-green"
+          className="w-full px-3 py-2.5 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 placeholder-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue"
           placeholder="••••••••"
         />
       </div>
@@ -88,7 +88,7 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 bg-naver-green hover:bg-naver-dark disabled:opacity-50 text-white font-bold rounded-lg transition-colors"
+        className="w-full py-2.5 bg-brand-blue hover:bg-brand-dark disabled:opacity-50 text-white font-bold rounded-lg transition-colors"
       >
         {loading ? '로그인 중...' : '로그인'}
       </button>
@@ -103,7 +103,7 @@ export default function AdminLoginPage() {
         {/* 로고 */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-ink-100 flex items-center justify-center gap-2">
-            <span className="text-naver-neon">●</span>
+            <span className="text-brand-neon">●</span>
             오즈랩페이
           </h1>
           <p className="text-ink-400 text-sm mt-1">관리자 로그인</p>

@@ -103,7 +103,7 @@ export default function PermissionsMatrix() {
             type="checkbox"
             checked={showLegacy}
             onChange={(e) => setShowLegacy(e.target.checked)}
-            className="w-4 h-4 accent-naver-green"
+            className="w-4 h-4 accent-brand-blue"
           />
           레거시 role 표시 (admin·marketer·viewer)
         </label>
@@ -160,7 +160,7 @@ export default function PermissionsMatrix() {
                               disabled={disabled || saving === k}
                               className={`w-7 h-7 rounded transition-all ${
                                 granted
-                                  ? 'bg-naver-green text-white'
+                                  ? 'bg-brand-blue text-white'
                                   : 'bg-ink-700 text-ink-500 hover:bg-ink-600'
                               } ${disabled ? 'opacity-60 cursor-default' : 'cursor-pointer'}`}
                             >
@@ -194,7 +194,7 @@ function Group({
   return (
     <>
       <tr className="bg-ink-800/50">
-        <td colSpan={99} className="px-3 py-1.5 text-[11px] font-bold text-naver-neon uppercase tracking-wider">
+        <td colSpan={99} className="px-3 py-1.5 text-[11px] font-bold text-brand-neon uppercase tracking-wider">
           {group}
         </td>
       </tr>

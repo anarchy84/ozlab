@@ -58,7 +58,7 @@ export default async function BlogListPage() {
     <div className="bg-white text-ink-900 min-h-screen">
       <header className="bg-surface-dark text-white py-16">
         <div className="container-oz">
-          <Link href="/" className="text-naver-neon text-sm hover:underline">
+          <Link href="/" className="text-brand-neon text-sm hover:underline">
             ← 오즈랩페이 홈
           </Link>
           <EditableText
@@ -90,11 +90,11 @@ export default async function BlogListPage() {
             {posts.map((p) => (
               <li
                 key={p.id}
-                className="border border-ink-150 rounded-lg p-6 hover:border-naver-green/50 hover:shadow-md transition-all bg-white"
+                className="border border-ink-150 rounded-lg p-6 hover:border-brand-blue/50 hover:shadow-md transition-all bg-white"
               >
                 <Link href={`/blog/${p.slug}`} className="block">
                   <div className="flex items-center gap-2 text-xs text-ink-500 mb-2">
-                    <span className="px-2 py-0.5 rounded bg-naver-soft text-naver-deep font-medium">
+                    <span className="px-2 py-0.5 rounded bg-brand-soft text-brand-deep font-medium">
                       {getCategoryLabel(p.category)}
                     </span>
                     {p.is_pinned && (
@@ -150,7 +150,7 @@ export default async function BlogListPage() {
           />
           <Link
             href="/#apply"
-            className="inline-block px-6 py-3 bg-naver-green text-white rounded font-bold hover:bg-naver-dark transition-colors"
+            className="inline-block px-6 py-3 bg-brand-blue text-white rounded font-bold hover:bg-brand-dark transition-colors"
           >
             <EditableText
               as="span"

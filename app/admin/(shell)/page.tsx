@@ -180,10 +180,10 @@ export default async function AdminDashboardPage() {
                 <tr key={r.channel} className="hover:bg-ink-800/40 transition-colors">
                   <td className="px-4 py-2 text-ink-200 font-medium">{r.channel}</td>
                   <td className="px-4 py-2 text-right text-ink-200">{r.leads}</td>
-                  <td className="px-4 py-2 text-right text-naver-neon font-semibold">
+                  <td className="px-4 py-2 text-right text-brand-neon font-semibold">
                     {r.conversions}
                   </td>
-                  <td className="px-4 py-2 text-right text-naver-neon">
+                  <td className="px-4 py-2 text-right text-brand-neon">
                     {r.cvr.toFixed(2)}%
                   </td>
                   <td className="px-4 py-2 text-right text-ink-400">{r.unapproved}</td>
@@ -206,7 +206,7 @@ export default async function AdminDashboardPage() {
           {isSuperAdmin(profile.role) && (
             <Link
               href="/admin/settings/cta"
-              className="text-xs text-naver-neon hover:text-naver-green"
+              className="text-xs text-brand-neon hover:text-brand-blue"
             >
               CTA 관리 →
             </Link>
@@ -241,10 +241,10 @@ export default async function AdminDashboardPage() {
                     {c.utm_campaign ?? '-'}
                   </td>
                   <td className="px-4 py-2 text-right text-ink-200">{c.lead_count}</td>
-                  <td className="px-4 py-2 text-right text-naver-neon font-semibold">
+                  <td className="px-4 py-2 text-right text-brand-neon font-semibold">
                     {c.conversion_count}
                   </td>
-                  <td className="px-4 py-2 text-right text-naver-neon">
+                  <td className="px-4 py-2 text-right text-brand-neon">
                     {c.conversion_rate_pct ?? '0.00'}%
                   </td>
                   <td className="px-4 py-2 text-right text-ink-400">+{c.week_count}</td>
@@ -261,7 +261,7 @@ export default async function AdminDashboardPage() {
           <h2 className="font-bold text-ink-100">최근 신청</h2>
           <Link
             href="/admin/consultations"
-            className="text-sm text-naver-neon hover:text-naver-green transition-colors"
+            className="text-sm text-brand-neon hover:text-brand-blue transition-colors"
           >
             전체 보기 →
           </Link>
@@ -312,7 +312,7 @@ export default async function AdminDashboardPage() {
       >
         <Link
           href="/admin/consultations"
-          className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-naver-green/50 hover:bg-ink-800/50 transition-all"
+          className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-brand-blue/50 hover:bg-ink-800/50 transition-all"
         >
           <p className="text-base font-bold text-ink-100">상담 목록 관리</p>
           <p className="text-sm text-ink-400 mt-1 break-keep">
@@ -323,7 +323,7 @@ export default async function AdminDashboardPage() {
           <>
             <Link
               href="/admin/users"
-              className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-naver-green/50 hover:bg-ink-800/50 transition-all"
+              className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-brand-blue/50 hover:bg-ink-800/50 transition-all"
             >
               <p className="text-base font-bold text-ink-100">사용자 관리</p>
               <p className="text-sm text-ink-400 mt-1 break-keep">
@@ -332,7 +332,7 @@ export default async function AdminDashboardPage() {
             </Link>
             <Link
               href="/admin/settings/statuses"
-              className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-naver-green/50 hover:bg-ink-800/50 transition-all"
+              className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-brand-blue/50 hover:bg-ink-800/50 transition-all"
             >
               <p className="text-base font-bold text-ink-100">상태 관리</p>
               <p className="text-sm text-ink-400 mt-1 break-keep">
@@ -344,7 +344,7 @@ export default async function AdminDashboardPage() {
         <Link
           href="/"
           target="_blank"
-          className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-naver-green/50 hover:bg-ink-800/50 transition-all"
+          className="bg-surface-darkSoft border border-ink-700 rounded-lg p-5 hover:border-brand-blue/50 hover:bg-ink-800/50 transition-all"
         >
           <p className="text-base font-bold text-ink-100">사이트 보기 / 편집</p>
           <p className="text-sm text-ink-400 mt-1 break-keep">

@@ -58,7 +58,7 @@ export function Promotion({ blocks, ctas }: Props) {
                 pagePath="/"
               />
               <br />
-              <span style={{ color: '#17e06d' }}>
+              <span style={{ color: '#7C8CFF' }}>
                 <EditableText
                   as="span"
                   blockKey="home.promotion.headline.line2"

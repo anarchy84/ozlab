@@ -26,7 +26,7 @@ interface OzLogoProps {
  */
 export function OzLogo({
   size = 28,
-  color = '#03c75a',
+  color = '#3A7BFF',
   showWord = true,
   dark = false,
 }: OzLogoProps) {

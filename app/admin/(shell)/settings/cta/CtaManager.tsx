@@ -119,7 +119,7 @@ export function CtaManager({
           <button
             type="button"
             onClick={() => setWizardCreate(true)}
-            className="px-3 py-1.5 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark transition-colors"
+            className="px-3 py-1.5 text-sm font-medium bg-brand-blue text-white rounded hover:bg-brand-dark transition-colors"
           >
             🪄 폼 빌더 마법사
           </button>
@@ -249,10 +249,10 @@ export function CtaManager({
                   <td className="px-2 py-2 text-right text-ink-200">
                     {perf?.lead_count ?? 0}
                   </td>
-                  <td className="px-2 py-2 text-right text-naver-neon font-semibold">
+                  <td className="px-2 py-2 text-right text-brand-neon font-semibold">
                     {perf?.conversion_count ?? 0}
                   </td>
-                  <td className="px-2 py-2 text-right text-naver-neon">
+                  <td className="px-2 py-2 text-right text-brand-neon">
                     {perf?.conversion_rate_pct ?? '0.00'}%
                   </td>
                   <td className="px-2 py-2 text-center">
@@ -267,7 +267,7 @@ export function CtaManager({
                     <button
                       type="button"
                       onClick={() => setWizardCta(c)}
-                      className="text-xs text-naver-neon hover:text-naver-green mr-2"
+                      className="text-xs text-brand-neon hover:text-brand-blue mr-2"
                     >
                       🪄 편집
                     </button>
@@ -453,7 +453,7 @@ function AddCtaModal({
           <button
             type="submit"
             disabled={submitting || !label.trim()}
-            className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark disabled:opacity-50"
+            className="px-3 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark disabled:opacity-50"
           >
             {submitting ? '추가 중...' : '추가'}
           </button>

@@ -104,7 +104,7 @@ export function StatusesManager({ initialStatuses }: { initialStatuses: DbStatus
         <button
           type="button"
           onClick={() => setShowAdd(true)}
-          className="px-3 py-1.5 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark transition-colors"
+          className="px-3 py-1.5 text-sm font-medium bg-brand-blue text-white rounded hover:bg-brand-dark transition-colors"
         >
           + 새 상태 추가
         </button>
@@ -151,7 +151,7 @@ export function StatusesManager({ initialStatuses }: { initialStatuses: DbStatus
                         patchField(st.id, 'sort_order', v)
                       }
                     }}
-                    className="w-14 px-1 py-0.5 text-xs bg-ink-900 border border-ink-700 text-ink-100 rounded focus:outline-none focus:border-naver-green"
+                    className="w-14 px-1 py-0.5 text-xs bg-ink-900 border border-ink-700 text-ink-100 rounded focus:outline-none focus:border-brand-blue"
                   />
                 </td>
                 <td className="px-2 py-2">
@@ -162,7 +162,7 @@ export function StatusesManager({ initialStatuses }: { initialStatuses: DbStatus
                       const v = e.target.value.trim()
                       if (v && v !== st.code) patchField(st.id, 'code', v)
                     }}
-                    className="w-24 px-1 py-0.5 text-xs font-mono bg-ink-900 border border-ink-700 text-ink-100 rounded focus:outline-none focus:border-naver-green"
+                    className="w-24 px-1 py-0.5 text-xs font-mono bg-ink-900 border border-ink-700 text-ink-100 rounded focus:outline-none focus:border-brand-blue"
                   />
                 </td>
                 <td className="px-2 py-2">
@@ -319,7 +319,7 @@ function AddStatusModal({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="예: 콜백 요청"
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -339,7 +339,7 @@ function AddStatusModal({
               type="number"
               value={sortOrder}
               onChange={(e) => setSortOrder(parseInt(e.target.value, 10) || 999)}
-              className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+              className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
             />
           </label>
         </div>
@@ -365,7 +365,7 @@ function AddStatusModal({
           <button
             type="submit"
             disabled={submitting || !code.trim() || !label.trim()}
-            className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark disabled:opacity-50"
+            className="px-3 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark disabled:opacity-50"
           >
             {submitting ? '추가 중...' : '추가'}
           </button>

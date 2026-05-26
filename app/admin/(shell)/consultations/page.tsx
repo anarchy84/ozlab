@@ -171,7 +171,7 @@ export default async function ConsultationsListPage({
               href={href}
               className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${
                 isActive
-                  ? 'bg-naver-green text-white border-naver-green font-bold'
+                  ? 'bg-brand-blue text-white border-brand-blue font-bold'
                   : 'bg-ink-800 text-ink-300 border-ink-700 hover:bg-ink-700'
               }`}
             >
@@ -195,7 +195,7 @@ export default async function ConsultationsListPage({
             name="q"
             defaultValue={q}
             placeholder="홍길동 / 010-1234 / 강남식당"
-            className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded-md text-sm focus:outline-none focus:border-naver-green"
+            className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded-md text-sm focus:outline-none focus:border-brand-blue"
           />
         </div>
         <div>
@@ -207,7 +207,7 @@ export default async function ConsultationsListPage({
             name="from"
             type="date"
             defaultValue={dateFrom}
-            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-naver-green"
+            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-brand-blue"
           />
         </div>
         <div>
@@ -219,7 +219,7 @@ export default async function ConsultationsListPage({
             name="to"
             type="date"
             defaultValue={dateTo}
-            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-naver-green"
+            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-brand-blue"
           />
         </div>
         <div>
@@ -230,7 +230,7 @@ export default async function ConsultationsListPage({
             id="status_id"
             name="status_id"
             defaultValue={statusId}
-            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-naver-green"
+            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-brand-blue"
           >
             <option value="">전체</option>
             {statuses.map((s) => (
@@ -248,7 +248,7 @@ export default async function ConsultationsListPage({
             id="channel"
             name="channel"
             defaultValue={channel}
-            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-naver-green"
+            className="px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded-md text-sm focus:outline-none focus:border-brand-blue"
           >
             <option value="">전체</option>
             {channels.map((c) => (
@@ -260,7 +260,7 @@ export default async function ConsultationsListPage({
         </div>
         <button
           type="submit"
-          className="px-4 py-2 bg-naver-green text-white rounded-md text-sm font-bold hover:bg-naver-dark transition-colors"
+          className="px-4 py-2 bg-brand-blue text-white rounded-md text-sm font-bold hover:bg-brand-dark transition-colors"
         >
           적용
         </button>

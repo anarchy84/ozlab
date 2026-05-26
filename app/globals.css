@@ -44,7 +44,7 @@
   }
 
   *:focus-visible {
-    outline: 2px solid #03c75a;
+    outline: 2px solid #3A7BFF;
     outline-offset: 2px;
   }
 }
@@ -77,13 +77,13 @@
     animation: float 5s ease-in-out infinite;
   }
   .hero-tag .dot {
-    @apply w-2 h-2 rounded-full bg-naver-green;
+    @apply w-2 h-2 rounded-full bg-brand-blue;
   }
   .hero-tag.t1 { top: 10%; left: -4%; animation-delay: 0s; }
   .hero-tag.t2 { top: 48%; right: -6%; animation-delay: 1s; }
   .hero-tag.t3 { bottom: 14%; left: 6%; animation-delay: 2s; }
   .hero-tag.t4 { top: 18%; right: 4%; animation-delay: 1.5s; background: #0a0a0a; color: white; }
-  .hero-tag.t4 .dot { background: #17e06d; }
+  .hero-tag.t4 .dot { background: #7C8CFF; }
 
   /* ── Painpoints 카드 ─────────────────────── */
   .pain-card {
@@ -123,7 +123,7 @@
     @apply relative bg-white/5 border border-white/10 rounded-lg p-6 text-white backdrop-blur-sm;
   }
   .flow-step .idx {
-    @apply inline-block bg-naver-neon text-ink-900 text-xs font-extrabold px-2 py-1 rounded-sm tracking-wider mb-3;
+    @apply inline-block bg-brand-neon text-ink-900 text-xs font-extrabold px-2 py-1 rounded-sm tracking-wider mb-3;
   }
   .flow-step h4 {
     @apply text-white text-lg font-bold mb-2;
@@ -132,7 +132,7 @@
     @apply text-white/70 text-sm leading-relaxed;
   }
   .flow-arrow {
-    @apply hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 text-naver-neon z-10 bg-surface-dark rounded-full w-10 h-10 items-center justify-center;
+    @apply hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 text-brand-neon z-10 bg-surface-dark rounded-full w-10 h-10 items-center justify-center;
   }
   .review-mock {
     @apply bg-white rounded-xl p-6 shadow-lg;
@@ -152,14 +152,14 @@
     @apply w-16 h-16 rounded-md flex-shrink-0 bg-ink-200;
   }
   .place-thumb.a { background: linear-gradient(135deg, #ffc6a0, #ff7a45); }
-  .place-thumb.b { background: linear-gradient(135deg, #a0ffcb, #17e06d); }
+  .place-thumb.b { background: linear-gradient(135deg, #D5DBFF, #7C8CFF); }
   .place-thumb.c { background: linear-gradient(135deg, #e0e0e0, #9a9a9a); }
   .place-body { @apply flex-1 min-w-0; }
   .place-title {
     @apply text-[15px] font-bold text-ink-900 flex items-center gap-2;
   }
   .place-plus-mark {
-    @apply inline-block bg-naver-green text-white text-[11px] font-extrabold px-1.5 py-0.5 rounded-sm;
+    @apply inline-block bg-brand-blue text-white text-[11px] font-extrabold px-1.5 py-0.5 rounded-sm;
   }
   .place-meta {
     @apply text-xs text-ink-500 flex gap-2 mt-1;
@@ -173,7 +173,7 @@
     @apply bg-white border border-ink-150 rounded-lg p-6 text-center;
   }
   .mech-icon {
-    @apply w-14 h-14 mx-auto rounded-full bg-naver-soft text-naver-deep flex items-center justify-center mb-4;
+    @apply w-14 h-14 mx-auto rounded-full bg-brand-soft text-brand-deep flex items-center justify-center mb-4;
   }
   .mech-item h4 {
     @apply text-ink-900 text-lg font-bold mb-2;
@@ -187,13 +187,13 @@
     @apply relative bg-white border border-ink-150 rounded-xl p-6 text-center shadow-sm transition-shadow hover:shadow-md;
   }
   .price-card.featured {
-    @apply border-naver-green border-2 shadow-green;
+    @apply border-brand-blue border-2 shadow-green;
   }
   .price-tag {
     @apply inline-block bg-ink-100 text-ink-600 text-[11px] font-extrabold px-2 py-1 rounded-sm tracking-wider mb-3;
   }
   .price-card.featured .price-tag {
-    @apply bg-naver-green text-white;
+    @apply bg-brand-blue text-white;
   }
   .price-card h3 {
     @apply text-ink-900 text-base font-bold mb-4 min-h-[48px];
@@ -211,7 +211,7 @@
     @apply text-ink-900 text-2xl font-extrabold mb-3;
   }
   .price-now small {
-    @apply block text-naver-deep text-xs font-semibold mb-1;
+    @apply block text-brand-deep text-xs font-semibold mb-1;
   }
   .price-color {
     @apply flex justify-center gap-3 text-xs text-ink-500;
@@ -234,7 +234,7 @@
     @apply flex items-center gap-3;
   }
   .quote-avatar {
-    @apply w-11 h-11 rounded-full bg-naver-soft text-naver-deep font-extrabold flex items-center justify-center text-lg;
+    @apply w-11 h-11 rounded-full bg-brand-soft text-brand-deep font-extrabold flex items-center justify-center text-lg;
   }
   .quote-name {
     @apply text-sm font-bold text-ink-900;
@@ -254,7 +254,7 @@
     @apply w-8 h-8 rounded-full bg-ink-100 text-ink-600 flex items-center justify-center flex-shrink-0 ml-4 transition-transform;
   }
   .faq-item[data-open='true'] .faq-q .ic {
-    @apply bg-naver-green text-white rotate-45;
+    @apply bg-brand-blue text-white rotate-45;
   }
   .faq-a {
     @apply overflow-hidden max-h-0 transition-all duration-300 text-ink-500 text-[15px] leading-relaxed;
@@ -270,7 +270,7 @@
   .form-field input,
   .form-field select,
   .form-field textarea {
-    @apply w-full px-4 py-3 border border-ink-200 rounded-md bg-white text-ink-900 text-base leading-normal focus:border-naver-green focus:outline-none transition-colors;
+    @apply w-full px-4 py-3 border border-ink-200 rounded-md bg-white text-ink-900 text-base leading-normal focus:border-brand-blue focus:outline-none transition-colors;
     min-height: 52px;
   }
   .form-field textarea {
@@ -280,7 +280,7 @@
     @apply flex items-start gap-3 text-sm text-ink-600 mt-5 leading-relaxed;
   }
   .form-check input {
-    @apply mt-1 h-5 w-5 shrink-0 accent-naver-green;
+    @apply mt-1 h-5 w-5 shrink-0 accent-brand-blue;
   }
   .form-card {
     @apply rounded-xl border border-white/10 bg-white p-6 shadow-lg sm:p-8;
@@ -302,7 +302,7 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background-color: #e6faed;
+    background-color: #EDF1FF;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 12.5 L10 16.5 L18 8' stroke='%23016e33' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-repeat: no-repeat;
     background-position: center;
@@ -354,7 +354,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-pill font-bold transition-all px-5 py-3 text-[15px];
   }
   .btn-primary {
-    @apply bg-naver-green text-white hover:bg-naver-dark shadow-green;
+    @apply bg-brand-blue text-white hover:bg-brand-dark shadow-green;
   }
   .btn-ghost {
     @apply bg-transparent text-ink-700 border border-ink-200 hover:bg-ink-50;
@@ -471,16 +471,16 @@ html.light [data-admin-shell] .text-ink-500,
 html.light [data-admin-shell] .text-ink-600 {
   color: #6b7280 !important;
 }
-html.light [data-admin-shell] .text-naver-neon {
-  color: #019544 !important;
+html.light [data-admin-shell] .text-brand-neon {
+  color: #1F4DBD !important;
 }
 html.light [data-admin-shell] .hover\:text-ink-100:hover,
 html.light [data-admin-shell] .hover\:text-ink-200:hover,
 html.light [data-admin-shell] .hover\:text-white:hover {
   color: #111827 !important;
 }
-html.light [data-admin-shell] .hover\:text-naver-neon:hover {
-  color: #019544 !important;
+html.light [data-admin-shell] .hover\:text-brand-neon:hover {
+  color: #1F4DBD !important;
 }
 html.light [data-admin-shell] .placeholder-ink-600::placeholder,
 html.light [data-admin-shell] .placeholder-ink-500::placeholder {
@@ -489,8 +489,8 @@ html.light [data-admin-shell] .placeholder-ink-500::placeholder {
 html.light [data-admin-shell] .disabled\:bg-ink-900:disabled {
   background-color: #f3f4f6 !important;
 }
-html.light [data-admin-shell] .bg-naver-green.text-white,
-html.light [data-admin-shell] .hover\:bg-naver-dark:hover.text-white,
+html.light [data-admin-shell] .bg-brand-blue.text-white,
+html.light [data-admin-shell] .hover\:bg-brand-dark:hover.text-white,
 html.light [data-admin-shell] .bg-accent-red.text-white,
 html.light [data-admin-shell] .bg-red-600.text-white,
 html.light [data-admin-shell] .bg-emerald-600.text-white,
@@ -498,7 +498,7 @@ html.light [data-admin-shell] .bg-amber-600.text-white,
 html.light [data-admin-shell] .bg-blue-600.text-white {
   color: #ffffff !important;
 }
-html.light [data-admin-shell] .bg-naver-neon.text-ink-900 {
+html.light [data-admin-shell] .bg-brand-neon.text-ink-900 {
   color: #0a0a0a !important;
 }
 html.light [data-admin-shell] input,
@@ -628,7 +628,7 @@ html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
   width: 12px;
   height: 12px;
   margin: -6px;
-  border: 2px solid #03c75a;
+  border: 2px solid #3A7BFF;
   border-radius: 9999px;
   background: #0a0a0a;
   opacity: 0;
@@ -647,7 +647,7 @@ html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
   cursor: nesw-resize;
 }
 .ProseMirror a {
-  color: #17e06d;
+  color: #7C8CFF;
   text-decoration: underline;
 }
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -708,7 +708,7 @@ html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
 .content-prose ul { list-style: disc; }
 .content-prose ol { list-style: decimal; }
 .content-prose a {
-  color: #019544;
+  color: #1F4DBD;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -763,11 +763,11 @@ html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
 
   /* eyebrow 칩 */
   .eyebrow {
-    @apply inline-flex items-center gap-1.5 text-[13px] font-semibold tracking-wide text-naver-deep bg-naver-soft px-3 py-1.5 rounded-pill;
+    @apply inline-flex items-center gap-1.5 text-[13px] font-semibold tracking-wide text-brand-deep bg-brand-soft px-3 py-1.5 rounded-pill;
   }
   .eyebrow-dark {
     @apply inline-flex items-center gap-1.5 text-[13px] font-semibold tracking-wide px-3 py-1.5 rounded-pill;
-    color: #17e06d;
+    color: #7C8CFF;
     background: rgba(23, 224, 109, 0.12);
   }
 
@@ -778,7 +778,7 @@ html.light [data-admin-shell] .ProseMirror [data-resize-handle] {
     padding: 0 2px;
   }
   .hl-solid {
-    background: #03c75a;
+    background: #3A7BFF;
     color: white;
     padding: 0 0.18em;
     border-radius: 4px;

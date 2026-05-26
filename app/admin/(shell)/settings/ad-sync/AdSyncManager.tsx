@@ -95,7 +95,7 @@ export default function AdSyncManager() {
           href="/admin/help/utm"
           target="_blank"
           rel="noopener"
-          className="text-xs text-naver-neon hover:underline"
+          className="text-xs text-brand-neon hover:underline"
         >
           🎯 UTM 표준 가이드 보기 ↗
         </a>
@@ -127,7 +127,7 @@ export default function AdSyncManager() {
             type="button"
             onClick={runSync}
             disabled={working || !config.sheet_csv_url}
-            className="px-4 py-2 bg-naver-green text-white text-sm font-bold rounded hover:bg-naver-dark disabled:opacity-50"
+            className="px-4 py-2 bg-brand-blue text-white text-sm font-bold rounded hover:bg-brand-dark disabled:opacity-50"
           >
             🔄 지금 동기화
           </button>
@@ -137,7 +137,7 @@ export default function AdSyncManager() {
           <p className="text-[11px] text-ink-500">
             마지막 동기화 : {new Date(config.last_synced_at).toLocaleString('ko-KR')}
             {' · '}
-            <span className={config.last_status === 'success' ? 'text-naver-neon' : 'text-red-400'}>
+            <span className={config.last_status === 'success' ? 'text-brand-neon' : 'text-red-400'}>
               {config.last_status}
             </span>
             {' · '}
@@ -199,7 +199,7 @@ spend            : 광고비 / 비용 ── 콤마(,)·₩·원 자동 제거`}
                     <td className="px-3 py-1.5 text-right font-mono text-ink-200">
                       {m.conversions.toLocaleString()}
                     </td>
-                    <td className="px-3 py-1.5 text-right font-mono text-naver-neon">
+                    <td className="px-3 py-1.5 text-right font-mono text-brand-neon">
                       {Number(m.spend).toLocaleString()}
                     </td>
                     <td className="px-3 py-1.5 text-ink-500">{m.source ?? '—'}</td>

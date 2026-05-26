@@ -41,7 +41,7 @@ export function HelpFloatingButton() {
             href="/admin/help"
             target="_blank"
             onClick={() => setOpen(false)}
-            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-naver-neon transition-colors"
+            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-brand-neon transition-colors"
           >
             <div className="font-medium">📘 운영 가이드</div>
             <div className="text-[11px] text-ink-500 mt-0.5">
@@ -52,7 +52,7 @@ export function HelpFloatingButton() {
             href="/admin/help/utm"
             target="_blank"
             onClick={() => setOpen(false)}
-            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-naver-neon transition-colors"
+            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-brand-neon transition-colors"
           >
             <div className="font-medium">🎯 UTM 표준 가이드</div>
             <div className="text-[11px] text-ink-500 mt-0.5">
@@ -63,7 +63,7 @@ export function HelpFloatingButton() {
             href="/admin/help/tracking"
             target="_blank"
             onClick={() => setOpen(false)}
-            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-naver-neon transition-colors"
+            className="block px-3 py-2.5 text-sm text-ink-100 hover:bg-ink-800 hover:text-brand-neon transition-colors"
           >
             <div className="font-medium">📊 광고 추적 인프라</div>
             <div className="text-[11px] text-ink-500 mt-0.5">
@@ -83,8 +83,8 @@ export function HelpFloatingButton() {
         onClick={() => setOpen((v) => !v)}
         className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl font-bold transition-all ${
           open
-            ? 'bg-naver-dark text-white scale-95'
-            : 'bg-naver-green text-white hover:bg-naver-dark hover:scale-105'
+            ? 'bg-brand-dark text-white scale-95'
+            : 'bg-brand-blue text-white hover:bg-brand-dark hover:scale-105'
         }`}
         title="도움말"
         aria-label="도움말"

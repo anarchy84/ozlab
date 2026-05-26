@@ -144,7 +144,7 @@ function buildInitialState(initial?: CtaButton): WizardState {
     display_config: {
       title: '3분 무료 상담 신청',
       description: '사장님 정보를 남겨주시면 영업일 24시간 내 연락드려요.',
-      button_color: '#17e06d',
+      button_color: '#7C8CFF',
       bg_color: '#0f1115',
       position: 'bottom-right',
       show_close: true,
@@ -311,7 +311,7 @@ export function CtaWizardModal({ mode, initial, onClose, onSaved }: Props) {
               <button
                 type="button"
                 onClick={nextStep}
-                className="px-4 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark"
+                className="px-4 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark"
               >
                 다음 →
               </button>
@@ -320,7 +320,7 @@ export function CtaWizardModal({ mode, initial, onClose, onSaved }: Props) {
                 type="button"
                 onClick={handleSave}
                 disabled={submitting}
-                className="px-4 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark disabled:opacity-50"
+                className="px-4 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark disabled:opacity-50"
               >
                 {submitting ? '저장 중…' : '💾 저장'}
               </button>
@@ -355,7 +355,7 @@ function Step1Type({
               onClick={() => patch('cta_type', t)}
               className={`text-left p-4 rounded border transition-colors ${
                 selected
-                  ? 'border-naver-green bg-naver-green/10'
+                  ? 'border-brand-blue bg-brand-blue/10'
                   : 'border-ink-700 hover:border-ink-500 bg-ink-900'
               }`}
             >
@@ -426,7 +426,7 @@ function Step2Fields({
           <button
             type="button"
             onClick={addField}
-            className="text-xs px-2 py-1 bg-naver-green text-white rounded hover:bg-naver-dark"
+            className="text-xs px-2 py-1 bg-brand-blue text-white rounded hover:bg-brand-dark"
           >
             + 필드 추가
           </button>
@@ -580,7 +580,7 @@ function Step3Trigger({
               }}
               className={`p-3 rounded border text-left ${
                 selected
-                  ? 'border-naver-green bg-naver-green/10'
+                  ? 'border-brand-blue bg-brand-blue/10'
                   : 'border-ink-700 hover:border-ink-500 bg-ink-900'
               }`}
             >
@@ -665,7 +665,7 @@ function Step4Design({
           <span className="text-ink-200">버튼 색상</span>
           <input
             type="color"
-            value={dc.button_color ?? '#17e06d'}
+            value={dc.button_color ?? '#7C8CFF'}
             onChange={(e) => update('button_color', e.target.value)}
             className="mt-1 w-full h-9 bg-ink-900 border border-ink-700 rounded cursor-pointer"
           />

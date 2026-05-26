@@ -227,7 +227,7 @@ export default function SlackSettingsClient({
         <div
           className={`rounded-md border px-4 py-3 text-sm ${
             msg.kind === 'ok'
-              ? 'border-naver-green/40 bg-naver-green/5 text-naver-neon'
+              ? 'border-brand-blue/40 bg-brand-blue/5 text-brand-neon'
               : 'border-accent-red/40 bg-accent-red/5 text-accent-red'
           }`}
         >
@@ -246,7 +246,7 @@ export default function SlackSettingsClient({
           href="https://api.slack.com/apps"
           target="_blank"
           rel="noreferrer"
-          className="text-naver-neon underline"
+          className="text-brand-neon underline"
         >
           api.slack.com/apps
         </a>{' '}
@@ -276,7 +276,7 @@ export default function SlackSettingsClient({
               <tbody className="divide-y divide-ink-800">
                 {channels.map((ch) => (
                   <tr key={ch.id} className="text-ink-200">
-                    <td className="px-3 py-2 font-mono text-xs text-naver-neon">{ch.code}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-brand-neon">{ch.code}</td>
                     <td className="px-3 py-2">
                       <div className="font-medium">{ch.label}</div>
                       {ch.channel_purpose && (
@@ -293,7 +293,7 @@ export default function SlackSettingsClient({
                         disabled={busy}
                         className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                           ch.is_active
-                            ? 'bg-naver-green/20 text-naver-neon'
+                            ? 'bg-brand-blue/20 text-brand-neon'
                             : 'bg-ink-800 text-ink-500'
                         }`}
                       >
@@ -392,7 +392,7 @@ export default function SlackSettingsClient({
             type="button"
             onClick={handleCreateChannel}
             disabled={busy || !newCode || !newLabel || !newUrl}
-            className="rounded-md bg-naver-green px-5 py-2 text-sm font-bold text-white transition hover:bg-naver-dark disabled:opacity-50"
+            className="rounded-md bg-brand-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-dark disabled:opacity-50"
           >
             {busy ? '저장 중…' : '추가'}
           </button>
@@ -478,7 +478,7 @@ function UserRow({
           type="button"
           onClick={() => onSave({ slack_user_id: sid.trim() || null })}
           disabled={busy || !dirty}
-          className="rounded border border-naver-green/40 px-2 py-1 text-xs text-naver-neon hover:bg-naver-green/10 disabled:opacity-30"
+          className="rounded border border-brand-blue/40 px-2 py-1 text-xs text-brand-neon hover:bg-brand-blue/10 disabled:opacity-30"
         >
           저장
         </button>

@@ -100,7 +100,7 @@ export default function SeoPanel({
           value={focusKeyword}
           onChange={(e) => onFocusKeywordChange(e.target.value)}
           placeholder="예: 카드 단말기 0원"
-          className="w-full px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+          className="w-full px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
         />
       </section>
 

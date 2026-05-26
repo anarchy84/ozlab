@@ -202,7 +202,7 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
                 >
                   📄 양식 다운로드 (CSV)
                 </button>
-                <label className="px-3 py-2 text-sm bg-naver-green text-white rounded font-medium cursor-pointer hover:bg-naver-dark">
+                <label className="px-3 py-2 text-sm bg-brand-blue text-white rounded font-medium cursor-pointer hover:bg-brand-dark">
                   📁 CSV 파일 선택
                   <input
                     type="file"
@@ -224,7 +224,7 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
 
               {/* 요약 카드 */}
               <div className="grid grid-cols-4 gap-3 text-sm">
-                <SummaryCard label="신규" value={summary.insert} color="text-naver-neon" />
+                <SummaryCard label="신규" value={summary.insert} color="text-brand-neon" />
                 <SummaryCard label="업데이트" value={summary.update} color="text-blue-300" />
                 <SummaryCard label="에러" value={summary.error} color="text-red-300" />
                 <SummaryCard label="신규 카테고리" value={summary.new_categories.length} color="text-amber-300" />
@@ -276,7 +276,7 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
               <div className="text-5xl">✅</div>
               <h4 className="text-xl font-bold text-ink-100">업로드 완료</h4>
               <p className="text-sm text-ink-300">
-                신규 <strong className="text-naver-neon">{summary.insert}</strong>건 ·
+                신규 <strong className="text-brand-neon">{summary.insert}</strong>건 ·
                 업데이트 <strong className="text-blue-300">{summary.update}</strong>건
                 {summary.new_categories.length > 0 && (
                   <> · 신규 카테고리 <strong className="text-amber-300">{summary.new_categories.length}</strong>개</>
@@ -311,7 +311,7 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
                 type="button"
                 onClick={commit}
                 disabled={submitting || (summary?.error ?? 0) > 0}
-                className="px-4 py-1.5 text-sm bg-naver-green text-white rounded font-bold hover:bg-naver-dark disabled:opacity-50"
+                className="px-4 py-1.5 text-sm bg-brand-blue text-white rounded font-bold hover:bg-brand-dark disabled:opacity-50"
                 title={(summary?.error ?? 0) > 0 ? '에러를 모두 수정해야 업로드 가능' : ''}
               >
                 {submitting
@@ -324,7 +324,7 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
             <button
               type="button"
               onClick={() => { onDone(); onClose() }}
-              className="px-4 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark"
+              className="px-4 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark"
             >
               완료
             </button>
@@ -346,7 +346,7 @@ function SummaryCard({ label, value, color }: { label: string; value: number; co
 
 function ActionBadge({ action }: { action: RowResult['action'] }) {
   const map: Record<RowResult['action'], { label: string; cls: string }> = {
-    insert: { label: '✓ 신규', cls: 'bg-naver-green/20 text-naver-neon border-naver-green/40' },
+    insert: { label: '✓ 신규', cls: 'bg-brand-blue/20 text-brand-neon border-brand-blue/40' },
     update: { label: '🔄 갱신', cls: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
     skip:   { label: '⏭ skip', cls: 'bg-ink-700 text-ink-400 border-ink-600' },
     error:  { label: '✗ 에러', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },

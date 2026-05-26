@@ -147,7 +147,7 @@ export default function HeadSettingsForm({ initial }: Props) {
       <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-ink-200">
         ⚠️ <strong className="text-ink-100">슈퍼어드민 전용.</strong>{' '}
         잘못된 HTML/스크립트를 박으면 사이트가 깨질 수 있습니다. 저장 후 시크릿모드로
-        퍼블릭 페이지(예: <code className="text-naver-neon">/</code>) 직접 열어 확인하세요.
+        퍼블릭 페이지(예: <code className="text-brand-neon">/</code>) 직접 열어 확인하세요.
       </div>
 
       {/* 구조화 필드 */}
@@ -166,7 +166,7 @@ export default function HeadSettingsForm({ initial }: Props) {
               value={values[f.key] ?? ''}
               onChange={(e) => setField(f.key, e.target.value)}
               placeholder={f.placeholder}
-              className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-sm text-ink-100 focus:border-naver-green focus:outline-none"
+              className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 text-sm text-ink-100 focus:border-brand-blue focus:outline-none"
             />
             <p className="text-xs text-ink-500">{f.help}</p>
             {errors[f.key] && (
@@ -193,7 +193,7 @@ export default function HeadSettingsForm({ initial }: Props) {
               placeholder={f.placeholder}
               rows={14}
               spellCheck={false}
-              className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 font-mono text-xs text-ink-100 focus:border-naver-green focus:outline-none"
+              className="rounded-md border border-ink-700 bg-ink-900 px-3 py-2 font-mono text-xs text-ink-100 focus:border-brand-blue focus:outline-none"
             />
             <div className="flex items-center justify-between text-xs text-ink-500">
               <span>{f.help}</span>
@@ -215,7 +215,7 @@ export default function HeadSettingsForm({ initial }: Props) {
             <span
               className={
                 msg.kind === 'ok'
-                  ? 'text-naver-neon'
+                  ? 'text-brand-neon'
                   : 'text-accent-red'
               }
             >
@@ -227,7 +227,7 @@ export default function HeadSettingsForm({ initial }: Props) {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="rounded-md bg-naver-green px-5 py-2 text-sm font-bold text-white transition hover:bg-naver-dark disabled:opacity-50"
+          className="rounded-md bg-brand-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-dark disabled:opacity-50"
         >
           {saving ? '저장 중…' : '저장'}
         </button>

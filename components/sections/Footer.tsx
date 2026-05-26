@@ -4,7 +4,6 @@
 // ─────────────────────────────────────────────
 'use client'
 
-import { OzLogo } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableLink } from '@/components/editable/EditableLink'
 import { DynamicCTA } from '@/components/cta/DynamicCTA'
@@ -46,7 +45,13 @@ export function Footer({ blocks, ctas }: Props) {
         {/* 좌측 — 로고 + 카피 */}
         <div>
           <div className="mb-4">
-            <OzLogo size={28} dark />
+            {/* 리브랜드 — 다크 배경용 흰 로고 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/ozlabpay-logo-horizontal-white.png"
+              alt="오즈랩페이"
+              className="h-8 w-auto"
+            />
           </div>
           <p className="text-sm leading-relaxed mb-2">
             <EditableText

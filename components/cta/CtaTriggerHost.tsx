@@ -166,7 +166,7 @@ function SingleTriggeredCta({ cta }: { cta: CtaButton }) {
           type="button"
           onClick={() => setModalOpen(true)}
           className="fixed z-50 px-5 py-3 rounded-full shadow-2xl text-sm font-bold text-black hover:scale-105 transition-transform"
-          style={{ background: dc.button_color ?? '#17e06d', ...pos }}
+          style={{ background: dc.button_color ?? '#7C8CFF', ...pos }}
         >
           {cta.label || '무료 상담'}
         </button>
@@ -210,7 +210,7 @@ function SingleTriggeredCta({ cta }: { cta: CtaButton }) {
             type="button"
             onClick={() => setModalOpen(true)}
             className="px-4 py-1.5 rounded font-bold text-black text-xs"
-            style={{ background: dc.button_color ?? '#17e06d' }}
+            style={{ background: dc.button_color ?? '#7C8CFF' }}
           >
             {cta.label || '무료 상담'}
           </button>
@@ -256,7 +256,7 @@ function SingleTriggeredCta({ cta }: { cta: CtaButton }) {
             type="button"
             onClick={() => setModalOpen(true)}
             className="mt-3 w-full py-2 rounded text-xs font-bold text-black"
-            style={{ background: dc.button_color ?? '#17e06d' }}
+            style={{ background: dc.button_color ?? '#7C8CFF' }}
           >
             {cta.label || '무료 상담'}
           </button>

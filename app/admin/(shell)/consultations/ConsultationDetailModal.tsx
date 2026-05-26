@@ -402,7 +402,7 @@ export function ConsultationDetailModal({
                     <button
                       type="button"
                       onClick={unblockAll}
-                      className="block w-full text-left px-3 py-2 text-sm text-naver-neon hover:bg-ink-800"
+                      className="block w-full text-left px-3 py-2 text-sm text-brand-neon hover:bg-ink-800"
                     >
                       블랙리스트 해제
                     </button>
@@ -539,7 +539,7 @@ export function ConsultationDetailModal({
                     type="button"
                     onClick={saveCustomerInfo}
                     disabled={saving}
-                    className="rounded bg-naver-green px-2 py-1 text-xs font-bold text-white hover:bg-naver-dark disabled:opacity-50"
+                    className="rounded bg-brand-blue px-2 py-1 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-50"
                   >
                     저장
                   </button>
@@ -668,7 +668,7 @@ export function ConsultationDetailModal({
               type="button"
               onClick={saveAll}
               disabled={saving}
-              className="w-full py-2 text-sm bg-naver-green text-white rounded font-bold hover:bg-naver-dark disabled:opacity-50"
+              className="w-full py-2 text-sm bg-brand-blue text-white rounded font-bold hover:bg-brand-dark disabled:opacity-50"
             >
               {saving ? '저장 중...' : '💾 저장'}
             </button>
@@ -780,7 +780,7 @@ export function ConsultationDetailModal({
                         )}
                         <span
                           className={
-                            m.success ? 'text-naver-neon' : 'text-red-400'
+                            m.success ? 'text-brand-neon' : 'text-red-400'
                           }
                         >
                           {m.success ? '✓' : '✗'}
@@ -1070,7 +1070,7 @@ function RevenueCard({
   }
 
   return (
-    <div className="bg-naver-green/5 border border-naver-green/30 rounded-lg p-4">
+    <div className="bg-brand-blue/5 border border-brand-blue/30 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-bold text-ink-100">
           💰 매출 (개통)
@@ -1081,7 +1081,7 @@ function RevenueCard({
         <button
           type="button"
           onClick={onAdd}
-          className="px-3 py-1 bg-naver-green text-white text-xs font-bold rounded hover:bg-naver-dark"
+          className="px-3 py-1 bg-brand-blue text-white text-xs font-bold rounded hover:bg-brand-dark"
         >
           + 매출 등록
         </button>
@@ -1128,7 +1128,7 @@ function RevenueCard({
                     사은품 <span className="text-amber-300">{Number(r.gift_amount).toLocaleString()}</span>원
                   </span>
                   <span>
-                    순매출 <span className="text-naver-neon font-bold">{Number(r.net_amount).toLocaleString()}</span>원
+                    순매출 <span className="text-brand-neon font-bold">{Number(r.net_amount).toLocaleString()}</span>원
                   </span>
                 </div>
                 {(r.contract_period || r.monthly_amount) && (
@@ -1147,7 +1147,7 @@ function RevenueCard({
           </ul>
 
           {/* 합계 */}
-          <div className="mt-3 pt-2 border-t border-naver-green/30 flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono">
+          <div className="mt-3 pt-2 border-t border-brand-blue/30 flex flex-wrap gap-x-4 gap-y-1 text-xs font-mono">
             <span className="text-ink-400">
               누적 매출 <span className="text-ink-100">{totalAmount.toLocaleString()}</span>원
             </span>
@@ -1155,7 +1155,7 @@ function RevenueCard({
               사은품 <span className="text-amber-300">{totalGift.toLocaleString()}</span>원
             </span>
             <span className="text-ink-400">
-              순매출 <span className="text-naver-neon font-bold">{totalNet.toLocaleString()}</span>원
+              순매출 <span className="text-brand-neon font-bold">{totalNet.toLocaleString()}</span>원
             </span>
             {daysToFirstRevenue != null && (
               <span className="text-ink-500">

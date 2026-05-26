@@ -20,14 +20,28 @@ const config: Config = {
     extend: {
       // ── 컬러 ─────────────────────────────────────
       colors: {
-        // 네이버 그린 계열 — 브랜드 프라이머리
+        // ⭐ 오즈랩페이 신규 브랜드 (2026-05-26 로고 리브랜드)
+        //    OZ 심볼: 인디고→퍼플 그라데이션, labPay: 미드나잇 네이비
+        brand: {
+          blue:    '#3A7BFF', // OZ 시작 — 인디고 블루 (CTA·링크·프라이머리)
+          mid:     '#5670FF', // 그라데이션 중간
+          violet:  '#7861FF', // OZ 끝 — 보라 (액센트·하이라이트)
+          dark:    '#2E63E0', // hover (blue 의 deep)
+          deep:    '#1F4DBD', // 강조 텍스트
+          soft:    '#EDF1FF', // soft 배경 (eyebrow 칩)
+          tint:    '#F6F8FF', // 섹션 그라데이션 끝
+          neon:    '#7C8CFF', // 다크 배경 액센트 (밝은 인디고)
+          ink:     '#1A2A3A', // 워드마크 차콜 네이비
+        },
+        // 하위호환 alias — 묶음 2 에서 grep 치환 후 제거 예정
+        // 현재는 brand 와 동일 값으로 매핑 (즉시 톤 변경 효과)
         naver: {
-          green:   '#03c75a', // --naver-green
-          dark:    '#02b350', // --naver-green-dark  (hover)
-          deep:    '#019544', // --naver-green-deep  (강조 텍스트)
-          soft:    '#e6faed', // --naver-green-soft  (eyebrow 배경)
-          tint:    '#f1fbf4', // --naver-green-tint  (섹션 그라데이션 끝)
-          neon:    '#17e06d', // --neon-green        (다크 배경에서 액센트)
+          green:   '#3A7BFF', // → brand.blue
+          dark:    '#2E63E0', // → brand.dark
+          deep:    '#1F4DBD', // → brand.deep
+          soft:    '#EDF1FF', // → brand.soft
+          tint:    '#F6F8FF', // → brand.tint
+          neon:    '#7C8CFF', // → brand.neon
         },
         // 잉크 그레이스케일 — 11단
         ink: {
@@ -112,7 +126,16 @@ const config: Config = {
         sm:    '0 1px 2px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06)',
         md:    '0 4px 12px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.04)',
         lg:    '0 20px 40px -12px rgba(0,0,0,.12), 0 8px 20px -8px rgba(0,0,0,.08)',
-        green: '0 12px 30px -8px rgba(3,199,90,.35)', // --shadow-green (CTA)
+        green: '0 12px 30px -8px rgba(58,123,255,.35)', // 리브랜드 — 블루 글로우로 변경
+        brand: '0 12px 30px -8px rgba(58,123,255,.35)',
+        violet: '0 12px 30px -8px rgba(120,97,255,.35)',
+      },
+
+      // ── 브랜드 그라데이션 (배경) ────────────────
+      backgroundImage: {
+        'brand-gradient':      'linear-gradient(135deg, #3A7BFF 0%, #5670FF 50%, #7861FF 100%)',
+        'brand-gradient-soft': 'linear-gradient(135deg, #EDF1FF 0%, #F4F0FF 100%)',
+        'brand-radial':        'radial-gradient(ellipse at top left, rgba(58,123,255,.15) 0%, transparent 60%)',
       },
 
       // ── 레이아웃 ────────────────────────────────

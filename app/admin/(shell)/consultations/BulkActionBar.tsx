@@ -82,7 +82,7 @@ export function BulkActionBar({
   }
 
   return (
-    <div className="sticky top-14 z-30 bg-naver-green/15 backdrop-blur border border-naver-green/40 rounded-lg p-3 mb-3 shadow-lg">
+    <div className="sticky top-14 z-30 bg-brand-blue/15 backdrop-blur border border-brand-blue/40 rounded-lg p-3 mb-3 shadow-lg">
       <div className="flex flex-wrap items-center gap-3">
         <div className="text-sm text-ink-100">
           ✓ <strong>{count}건</strong> 선택됨

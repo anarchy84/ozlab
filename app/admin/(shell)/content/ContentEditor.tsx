@@ -176,7 +176,7 @@ export default function ContentEditor({
           <button
             onClick={() => handleSave(true)}
             disabled={saving || !form.title}
-            className="px-4 py-2 bg-naver-green hover:bg-naver-dark disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
+            className="px-4 py-2 bg-brand-blue hover:bg-brand-dark disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
           >
             {saving ? '저장 중...' : '발행'}
           </button>
@@ -193,7 +193,7 @@ export default function ContentEditor({
             value={form.title}
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="제목을 입력하세요"
-            className="w-full px-4 py-3 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-xl font-bold placeholder-ink-600 focus:outline-none focus:ring-2 focus:ring-naver-green"
+            className="w-full px-4 py-3 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-xl font-bold placeholder-ink-600 focus:outline-none focus:ring-2 focus:ring-brand-blue"
           />
 
           {/* slug */}
@@ -205,7 +205,7 @@ export default function ContentEditor({
               type="text"
               value={form.slug}
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
-              className="flex-1 px-2 py-1 bg-ink-900 border border-ink-700 rounded text-ink-300 text-xs focus:outline-none focus:ring-1 focus:ring-naver-green"
+              className="flex-1 px-2 py-1 bg-ink-900 border border-ink-700 rounded text-ink-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-blue"
             />
           </div>
 
@@ -221,7 +221,7 @@ export default function ContentEditor({
               value={form.excerpt}
               onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
               rows={2}
-              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-naver-green resize-none"
+              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
               placeholder="글을 요약하는 1~2문장"
             />
           </Field>
@@ -232,7 +232,7 @@ export default function ContentEditor({
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -247,7 +247,7 @@ export default function ContentEditor({
                 value={form.tags}
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
                 placeholder="POS, 카드단말기, 자영업"
-                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </Field>
             <Field label="작성자명">
@@ -255,7 +255,7 @@ export default function ContentEditor({
                 type="text"
                 value={form.author_name}
                 onChange={(e) => setForm({ ...form, author_name: e.target.value })}
-                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 rounded-lg text-ink-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </Field>
             <div className="flex items-end">
@@ -264,7 +264,7 @@ export default function ContentEditor({
                   type="checkbox"
                   checked={form.is_pinned}
                   onChange={(e) => setForm({ ...form, is_pinned: e.target.checked })}
-                  className="w-4 h-4 accent-naver-green"
+                  className="w-4 h-4 accent-brand-blue"
                 />
                 <span className="text-sm text-ink-200">📌 목록 상단에 고정</span>
               </label>
@@ -279,7 +279,7 @@ export default function ContentEditor({
                 type="text"
                 value={form.meta_title}
                 onChange={(e) => setForm({ ...form, meta_title: e.target.value })}
-                className="w-full px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-naver-green"
+                className="w-full px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
               />
             </Field>
             <Field label="메타 설명 (120~160자 권장)" small>
@@ -287,7 +287,7 @@ export default function ContentEditor({
                 value={form.meta_description}
                 onChange={(e) => setForm({ ...form, meta_description: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-naver-green resize-none"
+                className="w-full px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue resize-none"
               />
             </Field>
             <Field label="대표 이미지 URL" small>
@@ -297,7 +297,7 @@ export default function ContentEditor({
                   value={form.cover_image}
                   onChange={(e) => setForm({ ...form, cover_image: e.target.value })}
                   placeholder="https://..."
-                  className="min-w-0 flex-1 px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-naver-green"
+                  className="min-w-0 flex-1 px-3 py-2 bg-ink-800 border border-ink-700 rounded text-ink-100 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
                 />
                 <button
                   type="button"

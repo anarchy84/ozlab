@@ -177,7 +177,7 @@ export function ReviewAutomation({ blocks }: Props) {
                 pagePath="/"
               />
             </div>
-            <div className="mt-3 p-2.5 bg-[#f1fbf4] rounded-lg text-xs text-[#019544] font-semibold">
+            <div className="mt-3 p-2.5 bg-[#F6F8FF] rounded-lg text-xs text-[#1F4DBD] font-semibold">
               💰 네이버페이 포인트 지급완료 · 영수증 리뷰 1건 추가
             </div>
           </div>

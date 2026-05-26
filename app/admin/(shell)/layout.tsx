@@ -94,11 +94,16 @@ export default async function AdminShellLayout({
           <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 overflow-hidden">
             <Link
               href="/admin"
-              className="font-bold text-ink-100 flex items-center gap-1.5 whitespace-nowrap"
+              className="font-bold text-ink-100 flex items-center gap-2 whitespace-nowrap"
             >
-              <span className="text-naver-neon">●</span>
-              <span className="hidden md:inline">오즈랩페이</span>
-              <span className="md:hidden">OZ</span>
+              {/* 리브랜드 — 신규 OZ 심볼 (다크 헤더 위 흰 글자형) */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/ozlabpay-logo-symbol.png"
+                alt="오즈랩페이"
+                className="h-7 w-auto"
+              />
+              <span className="hidden md:inline text-sm">오즈랩페이</span>
             </Link>
             <AdminTopNav items={mainMenu} />
           </div>

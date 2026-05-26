@@ -156,7 +156,7 @@ export default function RevenueModal({
             <select
               value={productId}
               onChange={(e) => setProductId(e.target.value)}
-              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
             >
               <option value="">선택 안 함 (직접 입력)</option>
               {products.map((p) => (
@@ -191,7 +191,7 @@ export default function RevenueModal({
 
         <div className="text-xs text-ink-400 -mt-2">
           순매출 ={' '}
-          <span className={net >= 0 ? 'text-naver-neon font-bold' : 'text-red-400'}>
+          <span className={net >= 0 ? 'text-brand-neon font-bold' : 'text-red-400'}>
             {net.toLocaleString()}원
           </span>
         </div>
@@ -260,7 +260,7 @@ export default function RevenueModal({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-naver-green text-white rounded text-sm font-bold hover:bg-naver-dark disabled:opacity-50"
+            className="px-4 py-2 bg-brand-blue text-white rounded text-sm font-bold hover:bg-brand-dark disabled:opacity-50"
           >
             {saving ? '저장 중…' : isEdit ? '수정' : '매출 등록'}
           </button>

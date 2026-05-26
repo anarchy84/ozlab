@@ -87,7 +87,7 @@ export default function SeoSettingsClient({ initialPages }: Props) {
         <div
           className={`rounded-md border px-4 py-3 text-sm ${
             msg.kind === 'ok'
-              ? 'border-naver-green/40 bg-naver-green/5 text-naver-neon'
+              ? 'border-brand-blue/40 bg-brand-blue/5 text-brand-neon'
               : 'border-accent-red/40 bg-accent-red/5 text-accent-red'
           }`}
         >
@@ -123,7 +123,7 @@ export default function SeoSettingsClient({ initialPages }: Props) {
             type="button"
             onClick={addPage}
             disabled={!newPath}
-            className="rounded-md bg-naver-green px-4 py-2 text-sm font-bold text-white hover:bg-naver-dark disabled:opacity-50"
+            className="rounded-md bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-brand-dark disabled:opacity-50"
           >
             추가
           </button>
@@ -205,7 +205,7 @@ function PageCard({
       {/* 헤더 — 경로 + 활성 토글 + 저장 */}
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <code className="text-sm font-mono text-naver-neon truncate">{local.page_path}</code>
+          <code className="text-sm font-mono text-brand-neon truncate">{local.page_path}</code>
           {local.page_label && (
             <span className="text-xs text-ink-500 truncate">· {local.page_label}</span>
           )}
@@ -223,7 +223,7 @@ function PageCard({
             type="button"
             onClick={handleSave}
             disabled={!dirty || busy}
-            className="rounded-md bg-naver-green px-3 py-1 text-xs font-bold text-white hover:bg-naver-dark disabled:opacity-30"
+            className="rounded-md bg-brand-blue px-3 py-1 text-xs font-bold text-white hover:bg-brand-dark disabled:opacity-30"
           >
             {busy ? '저장중' : '저장'}
           </button>
@@ -269,7 +269,7 @@ function PageCard({
             {local.og_image_url && (
               <code className="text-xs font-mono text-ink-500 truncate">{local.og_image_url}</code>
             )}
-            {uploading && <span className="text-xs text-naver-neon">업로드 중…</span>}
+            {uploading && <span className="text-xs text-brand-neon">업로드 중…</span>}
           </div>
         </div>
 

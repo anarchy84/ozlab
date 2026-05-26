@@ -16,6 +16,8 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
+import { Fragment, type NodeType } from '@tiptap/pm/model'
+import { TextSelection, type EditorState } from '@tiptap/pm/state'
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -58,6 +60,7 @@ export default function TipTapEditor({ content, onChange, placeholder = '내용�
   // editorProps 안에서 클로저로 직접 editor 변수를 못 잡으므로 ref 로 전달.
   // schema-safe 한 chain().insertContent() 호출에 필요.
   const editorRef = useRef<Editor | null>(null)
+  const lastCursorPosRef = useRef<number | null>(null)
 
   const editor = useEditor({
     extensions: [
@@ -94,6 +97,13 @@ export default function TipTapEditor({ content, onChange, placeholder = '내용�
     content,
     onUpdate: ({ editor: e }) => {
       onChange(e.getHTML())
+    },
+    onSelectionUpdate: ({ editor: e }) => {
+      const { selection, doc } = e.state
+      const isWholeDocSelection = selection.from <= 0 && selection.to >= doc.content.size
+      if (!isWholeDocSelection) {
+        lastCursorPosRef.current = selection.$head.pos
+      }
     },
     shouldRerenderOnTransaction: true,
     editorProps: {
@@ -212,6 +222,15 @@ export default function TipTapEditor({ content, onChange, placeholder = '내용�
 
   const handleImageClick = () => setMediaPickerOpen(true)
 
+  const applyHeading = (level: 2 | 3) => {
+    const commandPos = resolveCommandPos(editor, lastCursorPosRef.current)
+    editor
+      .chain()
+      .focus()
+      .command(({ state, dispatch }) => applyHeadingToSingleLine(state, dispatch, level, commandPos))
+      .run()
+  }
+
   const imageAttrs = editor?.isActive('image') ? editor.getAttributes('image') : null
   const imageWidth = getImageWidth(imageAttrs?.width)
 
@@ -240,16 +259,16 @@ export default function TipTapEditor({ content, onChange, placeholder = '내용�
   if (!editor) return null
 
   return (
-    <div className="relative overflow-hidden rounded-lg border border-ink-700 bg-ink-800">
-      <div className="sticky top-0 z-30 isolate flex max-w-full flex-nowrap gap-1 overflow-x-auto border-b border-ink-700 bg-ink-900 px-2 py-2 shadow-sm sm:flex-wrap sm:overflow-visible">
+    <div className="relative overflow-visible rounded-lg border border-ink-700 bg-ink-800">
+      <div className="sticky top-[104px] z-40 isolate flex max-w-full flex-nowrap gap-1 overflow-x-auto rounded-t-lg border-b border-ink-700 bg-ink-900 px-2 py-2 shadow-lg sm:top-[68px] sm:flex-wrap sm:overflow-visible">
         <ToolBtn
           active={editor.isActive('heading', { level: 2 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() => applyHeading(2)}
           label="H2"
         />
         <ToolBtn
           active={editor.isActive('heading', { level: 3 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() => applyHeading(3)}
           label="H3"
         />
         <div className="w-px bg-ink-700 mx-1" />
@@ -402,6 +421,134 @@ function clampImageWidth(value: number) {
   return Math.min(1200, Math.max(120, value))
 }
 
+function resolveCommandPos(editor: Editor, lastCursorPos: number | null) {
+  const { selection, doc } = editor.state
+  const isWholeDocSelection = selection.from <= 0 && selection.to >= doc.content.size
+  const pos = isWholeDocSelection && lastCursorPos !== null
+    ? lastCursorPos
+    : selection.$head.pos
+
+  return clampDocTextPos(doc.content.size, pos)
+}
+
+function clampDocTextPos(docSize: number, pos: number) {
+  if (docSize <= 2) return 1
+  return Math.min(Math.max(pos, 1), docSize - 1)
+}
+
+function applyHeadingToSingleLine(
+  state: EditorState,
+  dispatch: ((tr: EditorState['tr']) => void) | undefined,
+  level: 2 | 3,
+  commandPos: number,
+) {
+  const { doc, schema } = state
+  const paragraphType = schema.nodes.paragraph
+  const headingType = schema.nodes.heading
+  if (!paragraphType || !headingType) return false
+
+  const $pos = doc.resolve(clampDocTextPos(doc.content.size, commandPos))
+  const parent = $pos.parent
+  if (!parent.isTextblock) return false
+  if (parent.type.name !== 'paragraph' && parent.type.name !== 'heading') return false
+
+  const targetType =
+    parent.type.name === 'heading' && parent.attrs.level === level
+      ? paragraphType
+      : headingType
+  const targetAttrs = buildHeadingAttrs(targetType, parent.attrs, level)
+
+  const parentPos = $pos.before($pos.depth)
+  const container = $pos.node($pos.depth - 1)
+  const containerIndex = $pos.index($pos.depth - 1)
+  const hardBreakSegments = getHardBreakSegments(parent)
+
+  if (!dispatch) return true
+
+  try {
+    if (hardBreakSegments.length <= 1) {
+      if (!container.canReplaceWith(containerIndex, containerIndex + 1, targetType)) {
+        return false
+      }
+      const tr = state.tr.setNodeMarkup(parentPos, targetType, targetAttrs)
+      tr.setSelection(TextSelection.create(tr.doc, clampDocTextPos(tr.doc.content.size, commandPos)))
+      dispatch(tr.scrollIntoView())
+      return true
+    }
+
+    const segmentIndex = findSegmentIndex(hardBreakSegments, $pos.parentOffset)
+    const replacementNodes = hardBreakSegments.map((segment, index) => {
+      const type = index === segmentIndex ? targetType : parent.type
+      const attrs = index === segmentIndex
+        ? targetAttrs
+        : filterNodeAttrs(parent.type, parent.attrs)
+      return type.create(attrs, parent.content.cut(segment.from, segment.to))
+    })
+    const replacement = Fragment.fromArray(replacementNodes)
+    if (!container.canReplace(containerIndex, containerIndex + 1, replacement)) {
+      return false
+    }
+
+    let selectedBlockPos = parentPos
+    for (let i = 0; i < segmentIndex; i += 1) {
+      selectedBlockPos += replacementNodes[i].nodeSize
+    }
+
+    const selectedSegment = hardBreakSegments[segmentIndex]
+    const selectedNode = replacementNodes[segmentIndex]
+    const offsetInSegment = Math.min(
+      Math.max($pos.parentOffset - selectedSegment.from, 0),
+      selectedNode.content.size,
+    )
+    const nextSelectionPos = selectedBlockPos + 1 + offsetInSegment
+
+    const tr = state.tr.replaceWith(parentPos, parentPos + parent.nodeSize, replacement)
+    tr.setSelection(TextSelection.create(tr.doc, clampDocTextPos(tr.doc.content.size, nextSelectionPos)))
+    dispatch(tr.scrollIntoView())
+    return true
+  } catch {
+    return false
+  }
+}
+
+function getHardBreakSegments(parent: EditorState['doc']) {
+  const breaks: number[] = []
+  parent.forEach((child, offset) => {
+    if (child.type.name === 'hardBreak') breaks.push(offset)
+  })
+
+  if (breaks.length === 0) {
+    return [{ from: 0, to: parent.content.size }]
+  }
+
+  const segments: Array<{ from: number; to: number }> = []
+  let from = 0
+  for (const breakOffset of breaks) {
+    segments.push({ from, to: breakOffset })
+    from = breakOffset + 1
+  }
+  segments.push({ from, to: parent.content.size })
+  return segments
+}
+
+function findSegmentIndex(segments: Array<{ from: number; to: number }>, offset: number) {
+  const found = segments.findIndex((segment) => offset >= segment.from && offset <= segment.to)
+  return found >= 0 ? found : Math.max(0, segments.length - 1)
+}
+
+function buildHeadingAttrs(type: NodeType, sourceAttrs: Record<string, unknown>, level: 2 | 3) {
+  const nextSource = type.name === 'heading' ? { ...sourceAttrs, level } : sourceAttrs
+  return filterNodeAttrs(type, nextSource)
+}
+
+function filterNodeAttrs(type: NodeType, sourceAttrs: Record<string, unknown>) {
+  const attrs: Record<string, unknown> = {}
+  for (const key of Object.keys(type.spec.attrs ?? {})) {
+    if (sourceAttrs[key] !== undefined) attrs[key] = sourceAttrs[key]
+  }
+  return attrs
+}
+
 function ToolBtn({
   active,
   onClick,
@@ -420,6 +567,7 @@ function ToolBtn({
   return (
     <button
       type="button"
+      onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       title={title ?? label}
       aria-label={title ?? label}

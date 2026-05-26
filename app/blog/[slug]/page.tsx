@@ -83,11 +83,11 @@ export default async function BlogPostPage({ params }: Params) {
       <header className="bg-surface-dark text-white py-12">
         <div className="container-oz max-w-3xl mx-auto">
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/blog" className="text-naver-neon hover:underline">
+            <Link href="/blog" className="text-brand-neon hover:underline">
               ← 블로그 목록
             </Link>
             <span className="text-ink-500">·</span>
-            <span className="px-2 py-0.5 rounded bg-naver-green/20 text-naver-neon text-xs font-medium">
+            <span className="px-2 py-0.5 rounded bg-brand-blue/20 text-brand-neon text-xs font-medium">
               {getCategoryLabel(post.category)}
             </span>
           </div>
@@ -155,7 +155,7 @@ export default async function BlogPostPage({ params }: Params) {
           </p>
           <Link
             href="/#apply"
-            className="inline-block px-6 py-3 bg-naver-green text-white rounded font-bold hover:bg-naver-dark transition-colors"
+            className="inline-block px-6 py-3 bg-brand-blue text-white rounded font-bold hover:bg-brand-dark transition-colors"
           >
             상담 신청하기 →
           </Link>
@@ -169,7 +169,7 @@ export default async function BlogPostPage({ params }: Params) {
               {related.map((p) => (
                 <li
                   key={p.id}
-                  className="border border-ink-150 rounded-lg p-4 hover:border-naver-green/50 transition-colors"
+                  className="border border-ink-150 rounded-lg p-4 hover:border-brand-blue/50 transition-colors"
                 >
                   <Link href={`/blog/${p.slug}`}>
                     <span className="text-xs text-ink-500">

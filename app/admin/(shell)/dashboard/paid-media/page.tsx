@@ -77,7 +77,7 @@ export default async function PaidMediaDashboardPage() {
         </div>
         <Link
           href="/admin/dashboard/sales"
-          className="text-sm text-naver-neon hover:underline"
+          className="text-sm text-brand-neon hover:underline"
         >
           ← 매출 통합 성과
         </Link>
@@ -88,7 +88,7 @@ export default async function PaidMediaDashboardPage() {
           <p className="text-ink-300 mb-3">광고 성과 데이터 없음</p>
           <Link
             href="/admin/settings/ad-sync"
-            className="text-naver-neon hover:underline text-sm"
+            className="text-brand-neon hover:underline text-sm"
           >
             → 시트 sync 설정으로 이동
           </Link>
@@ -149,7 +149,7 @@ export default async function PaidMediaDashboardPage() {
                         <td className="px-3 py-2 text-right font-mono text-ink-300">
                           {cvrCh.toFixed(2)}%
                         </td>
-                        <td className="px-3 py-2 text-right font-mono text-naver-neon">
+                        <td className="px-3 py-2 text-right font-mono text-brand-neon">
                           {v.spend.toLocaleString()}
                         </td>
                         <td className="px-3 py-2 text-right font-mono text-amber-300">
@@ -183,7 +183,7 @@ function Kpi({
   return (
     <div className="bg-surface-darkSoft border border-ink-700 rounded-lg p-3">
       <div className="text-[11px] text-ink-400">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${accent ? 'text-naver-neon' : 'text-ink-100'}`}>
+      <div className={`text-lg font-bold mt-0.5 ${accent ? 'text-brand-neon' : 'text-ink-100'}`}>
         {value}
       </div>
     </div>

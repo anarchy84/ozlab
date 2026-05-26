@@ -29,7 +29,7 @@ function renderInline(s: string): string {
   // 링크 [text](url) — escape 후라 안전
   out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, t, u) => {
     const safeUrl = u.startsWith('http') || u.startsWith('/') || u.startsWith('#') ? u : '#'
-    return `<a href="${safeUrl}" class="text-naver-deep underline hover:text-naver-dark">${t}</a>`
+    return `<a href="${safeUrl}" class="text-brand-deep underline hover:text-brand-dark">${t}</a>`
   })
   // **굵게**
   out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -119,7 +119,7 @@ export function renderMarkdown(md: string): string {
     if (trimmed.startsWith('> ')) {
       closeList()
       out.push(
-        `<blockquote class="border-l-4 border-naver-green pl-4 my-4 italic text-ink-600">${renderInline(trimmed.slice(2))}</blockquote>`,
+        `<blockquote class="border-l-4 border-brand-blue pl-4 my-4 italic text-ink-600">${renderInline(trimmed.slice(2))}</blockquote>`,
       )
       i++
       continue

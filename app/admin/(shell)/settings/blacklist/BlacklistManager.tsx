@@ -168,7 +168,7 @@ export default function BlacklistManager() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-sm">
-          <span className="rounded-full bg-naver-green/15 px-3 py-1.5 font-bold text-naver-neon">
+          <span className="rounded-full bg-brand-blue/15 px-3 py-1.5 font-bold text-brand-neon">
             활성 {entries.length}건
           </span>
           <span className="rounded-full border border-ink-700 px-3 py-1.5 text-ink-300">
@@ -196,7 +196,7 @@ export default function BlacklistManager() {
             <select
               value={formType}
               onChange={(event) => setFormType(event.target.value as AbuseBlockType)}
-              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-3 text-sm text-ink-100 outline-none focus:border-naver-green"
+              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-3 text-sm text-ink-100 outline-none focus:border-brand-blue"
             >
               {ADDABLE_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -211,7 +211,7 @@ export default function BlacklistManager() {
               value={blockValue}
               onChange={(event) => setBlockValue(event.target.value)}
               placeholder={TYPE_META[formType].placeholder}
-              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-3 text-sm text-ink-100 placeholder-ink-600 outline-none focus:border-naver-green"
+              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-3 text-sm text-ink-100 placeholder-ink-600 outline-none focus:border-brand-blue"
             />
           </label>
           <label className="space-y-1">
@@ -220,13 +220,13 @@ export default function BlacklistManager() {
               value={reason}
               onChange={(event) => setReason(event.target.value)}
               placeholder="예: 반복 신청, 경쟁사 방해 의심"
-              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-3 text-sm text-ink-100 placeholder-ink-600 outline-none focus:border-naver-green"
+              className="w-full rounded-lg border border-ink-700 bg-ink-900 px-3 py-3 text-sm text-ink-100 placeholder-ink-600 outline-none focus:border-brand-blue"
             />
           </label>
           <button
             type="submit"
             disabled={saving}
-            className="self-end rounded-full bg-naver-green px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-naver-dark disabled:cursor-not-allowed disabled:opacity-50"
+            className="self-end rounded-full bg-brand-blue px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? '처리 중...' : '추가'}
           </button>
@@ -246,7 +246,7 @@ export default function BlacklistManager() {
             <select
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value as TypeFilter)}
-              className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-2.5 text-sm text-ink-100 outline-none focus:border-naver-green"
+              className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-2.5 text-sm text-ink-100 outline-none focus:border-brand-blue"
             >
               {TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -258,7 +258,7 @@ export default function BlacklistManager() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="값, 사유, 원본 DB 검색"
-              className="min-w-0 rounded-lg border border-ink-700 bg-ink-900 px-3 py-2.5 text-sm text-ink-100 placeholder-ink-600 outline-none focus:border-naver-green sm:w-64"
+              className="min-w-0 rounded-lg border border-ink-700 bg-ink-900 px-3 py-2.5 text-sm text-ink-100 placeholder-ink-600 outline-none focus:border-brand-blue sm:w-64"
             />
             <button
               type="button"
@@ -272,7 +272,7 @@ export default function BlacklistManager() {
         </div>
 
         {message && (
-          <div className="mt-4 rounded border border-naver-green/30 bg-naver-green/10 px-3 py-2 text-sm text-naver-neon">
+          <div className="mt-4 rounded border border-brand-blue/30 bg-brand-blue/10 px-3 py-2 text-sm text-brand-neon">
             {message}
           </div>
         )}
@@ -394,7 +394,7 @@ function TypeBadge({ type }: { type: AbuseBlockType }) {
       ? 'bg-red-500/10 text-red-300 border-red-500/30'
       : type === 'ip'
         ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-        : 'bg-naver-green/10 text-naver-neon border-naver-green/30'
+        : 'bg-brand-blue/10 text-brand-neon border-brand-blue/30'
 
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${className}`}>

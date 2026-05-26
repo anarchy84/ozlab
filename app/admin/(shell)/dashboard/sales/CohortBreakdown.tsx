@@ -29,7 +29,7 @@ export function CohortBreakdown({
 }) {
   const max = Math.max(...breakdown.map((b) => b.amount), 1)
   const cardCls = accent
-    ? 'bg-naver-green/10 border-naver-green/40'
+    ? 'bg-brand-blue/10 border-brand-blue/40'
     : 'bg-surface-darkSoft border-ink-700'
 
   // 인사이트 — 당월 코호트 vs 누적 코호트 비율
@@ -50,7 +50,7 @@ export function CohortBreakdown({
           {subtitle && <p className="text-[11px] text-ink-500 mt-0.5">{subtitle}</p>}
         </div>
         <div className="text-right">
-          <div className={`font-bold ${accent ? 'text-naver-neon' : 'text-ink-100'} ${compact ? 'text-2xl' : 'text-3xl'}`}>
+          <div className={`font-bold ${accent ? 'text-brand-neon' : 'text-ink-100'} ${compact ? 'text-2xl' : 'text-3xl'}`}>
             {totalAmount.toLocaleString()}원
           </div>
           <div className="text-[11px] text-ink-400 mt-0.5">
@@ -85,7 +85,7 @@ export function CohortBreakdown({
                   <div className="h-2 bg-ink-800 rounded overflow-hidden">
                     <div
                       className={`h-full transition-all ${
-                        idx === 0 ? 'bg-naver-green' : idx === 1 ? 'bg-blue-500' : idx === 2 ? 'bg-amber-500' : 'bg-ink-600'
+                        idx === 0 ? 'bg-brand-blue' : idx === 1 ? 'bg-blue-500' : idx === 2 ? 'bg-amber-500' : 'bg-ink-600'
                       }`}
                       style={{ width: `${widthPct}%` }}
                     />

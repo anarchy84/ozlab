@@ -52,7 +52,7 @@ export function SettingsDropdown({ items }: Props) {
         className={cn(
           'flex items-center gap-1 rounded-full px-3 py-1.5 text-sm transition-colors',
           active || open
-            ? 'bg-naver-green/15 text-naver-neon font-bold'
+            ? 'bg-brand-blue/15 text-brand-neon font-bold'
             : 'text-ink-300 hover:bg-ink-800 hover:text-ink-100',
         )}
       >
@@ -75,8 +75,8 @@ export function SettingsDropdown({ items }: Props) {
                 className={cn(
                   'block px-3 py-2 text-sm transition-colors',
                   itemActive
-                    ? 'bg-naver-green/10 text-naver-neon'
-                    : 'text-ink-200 hover:bg-ink-800 hover:text-naver-neon',
+                    ? 'bg-brand-blue/10 text-brand-neon'
+                    : 'text-ink-200 hover:bg-ink-800 hover:text-brand-neon',
                 )}
               >
                 <div className="font-medium">{m.label}</div>

@@ -38,7 +38,7 @@ export function PeriodControl() {
               href={href}
               className={`px-3 py-1 text-xs rounded border transition-colors ${
                 isActive
-                  ? 'bg-naver-green text-white border-naver-green font-bold'
+                  ? 'bg-brand-blue text-white border-brand-blue font-bold'
                   : 'bg-ink-800 text-ink-300 border-ink-700 hover:bg-ink-700'
               }`}
             >

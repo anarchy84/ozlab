@@ -14,7 +14,7 @@ interface Props {
 export function PromoStrip({ blocks }: Props) {
   return (
     <div className="bg-ink-900 text-white py-3 px-6 flex justify-center items-center gap-3 text-sm flex-wrap">
-      <span className="bg-naver-green text-ink-900 text-[11px] font-extrabold px-2 py-0.5 rounded-sm tracking-wider">
+      <span className="bg-brand-blue text-ink-900 text-[11px] font-extrabold px-2 py-0.5 rounded-sm tracking-wider">
         <EditableText
           as="span"
           blockKey="home.promo.chip"

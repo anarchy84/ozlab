@@ -82,7 +82,7 @@ export function ConsultationStatusActions({ id, currentStatus }: Props) {
             disabled={busy || pending}
             className={`px-2.5 py-1 text-[12px] rounded-md border transition-colors disabled:opacity-50 ${
               a.tone === 'green'
-                ? 'border-naver-green text-naver-neon hover:bg-naver-green/15'
+                ? 'border-brand-blue text-brand-neon hover:bg-brand-blue/15'
                 : a.tone === 'red'
                 ? 'border-accent-red/60 text-accent-red hover:bg-accent-red/15'
                 : 'border-ink-700 text-ink-300 hover:bg-ink-800'

@@ -81,7 +81,7 @@ export default function ProductsManager({ myRole: _myRole }: { myRole: AdminRole
         <button
           type="button"
           onClick={() => setShowBulkUpload(true)}
-          className="shrink-0 px-3 py-2 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark"
+          className="shrink-0 px-3 py-2 text-sm font-medium bg-brand-blue text-white rounded hover:bg-brand-dark"
         >
           📥 CSV 일괄 업로드
         </button>
@@ -150,7 +150,7 @@ function CategorySide({
         <button
           type="button"
           onClick={() => setEditing('new')}
-          className="text-xs text-naver-neon hover:underline"
+          className="text-xs text-brand-neon hover:underline"
         >
           + 추가
         </button>
@@ -165,7 +165,7 @@ function CategorySide({
               key={c.id}
               className={`group flex items-center justify-between px-2 py-1.5 rounded text-sm cursor-pointer transition-colors ${
                 activeCode === c.code
-                  ? 'bg-naver-green/20 text-naver-neon'
+                  ? 'bg-brand-blue/20 text-brand-neon'
                   : 'text-ink-300 hover:bg-ink-800'
               }`}
               onClick={() => onSelect(c.code)}
@@ -271,7 +271,7 @@ function CategoryEditor({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="pos / internet / cctv …"
-              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+              className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
             />
           </div>
         )}
@@ -281,7 +281,7 @@ function CategoryEditor({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="Pos (카드단말기)"
-            className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm focus:outline-none focus:ring-2 focus:ring-naver-green"
+            className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -300,7 +300,7 @@ function CategoryEditor({
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="w-4 h-4 accent-naver-green"
+                className="w-4 h-4 accent-brand-blue"
               />
               활성
             </label>
@@ -318,7 +318,7 @@ function CategoryEditor({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 bg-naver-green text-white rounded text-sm font-bold hover:bg-naver-dark disabled:opacity-50"
+            className="px-3 py-1.5 bg-brand-blue text-white rounded text-sm font-bold hover:bg-brand-dark disabled:opacity-50"
           >
             {saving ? '저장 중…' : '저장'}
           </button>
@@ -367,7 +367,7 @@ function ProductPanel({
           type="button"
           onClick={() => setEditing('new')}
           disabled={!activeCatCode}
-          className="px-3 py-1.5 bg-naver-green text-white rounded text-xs font-bold hover:bg-naver-dark disabled:opacity-50"
+          className="px-3 py-1.5 bg-brand-blue text-white rounded text-xs font-bold hover:bg-brand-dark disabled:opacity-50"
         >
           + 새 상품
         </button>
@@ -589,7 +589,7 @@ function ProductEditor({
                 type="checkbox"
                 checked={form.is_subscription}
                 onChange={(e) => setForm({ ...form, is_subscription: e.target.checked })}
-                className="w-4 h-4 accent-naver-green"
+                className="w-4 h-4 accent-brand-blue"
               />
               월 구독형 (월 매출 위주)
             </label>
@@ -620,7 +620,7 @@ function ProductEditor({
                 type="checkbox"
                 checked={form.is_active}
                 onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="w-4 h-4 accent-naver-green"
+                className="w-4 h-4 accent-brand-blue"
               />
               활성
             </label>
@@ -647,7 +647,7 @@ function ProductEditor({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 bg-naver-green text-white rounded text-sm font-bold hover:bg-naver-dark disabled:opacity-50"
+            className="px-3 py-1.5 bg-brand-blue text-white rounded text-sm font-bold hover:bg-brand-dark disabled:opacity-50"
           >
             {saving ? '저장 중…' : '저장'}
           </button>

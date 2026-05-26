@@ -73,7 +73,7 @@ export function UsersManager({ myUserId }: { myUserId: string }) {
         <button
           type="button"
           onClick={() => setShowInvite(true)}
-          className="px-3 py-1.5 text-sm font-medium bg-naver-green text-white rounded hover:bg-naver-dark"
+          className="px-3 py-1.5 text-sm font-medium bg-brand-blue text-white rounded hover:bg-brand-dark"
         >
           + 사용자 추가
         </button>
@@ -138,7 +138,7 @@ export function UsersManager({ myUserId }: { myUserId: string }) {
                 </td>
                 <td className="px-3 py-2 text-center">
                   {u.is_active ? (
-                    <span className="text-naver-neon text-xs">🟢 활성</span>
+                    <span className="text-brand-neon text-xs">🟢 활성</span>
                   ) : (
                     <span className="text-ink-500 text-xs">⚫ 비활성</span>
                   )}
@@ -284,7 +284,7 @@ function InviteModal({
             </div>
             <div>
               <span className="text-ink-500 text-xs">임시 비밀번호</span>
-              <div className="font-mono text-naver-neon font-bold text-base">
+              <div className="font-mono text-brand-neon font-bold text-base">
                 {result.password}
               </div>
             </div>
@@ -308,7 +308,7 @@ function InviteModal({
                 setResult(null)
                 onInvited()
               }}
-              className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark"
+              className="px-3 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark"
             >
               완료
             </button>
@@ -337,7 +337,7 @@ function InviteModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="kim@ozlabpay.kr"
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -346,7 +346,7 @@ function InviteModal({
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as AdminRole)}
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           >
             {INVITABLE_ROLES.map((r) => (
               <option key={r} value={r}>
@@ -363,7 +363,7 @@ function InviteModal({
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="김상담"
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -374,7 +374,7 @@ function InviteModal({
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
             placeholder="영업1팀"
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -385,7 +385,7 @@ function InviteModal({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비우면 자동 생성 (12자 영대소+숫자+특수)"
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm font-mono focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm font-mono focus:outline-none focus:border-brand-blue"
           />
           <span className="text-[11px] text-ink-500 mt-1 block">
             8자 이상이면 그대로 사용. 그 외엔 자동 생성됩니다.
@@ -409,7 +409,7 @@ function InviteModal({
           <button
             type="submit"
             disabled={submitting || !email.trim()}
-            className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark disabled:opacity-50"
+            className="px-3 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark disabled:opacity-50"
           >
             {submitting ? '생성 중...' : '계정 생성'}
           </button>
@@ -537,7 +537,7 @@ function EditUserModal({
             value={role}
             onChange={(e) => setRole(e.target.value as AdminRole)}
             disabled={isMe}
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green disabled:bg-ink-900"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue disabled:bg-ink-900"
           >
             <option value="super_admin">👑 최고관리자</option>
             <option value="admin">🛠 운영자</option>
@@ -556,7 +556,7 @@ function EditUserModal({
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -566,7 +566,7 @@ function EditUserModal({
             type="text"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -576,7 +576,7 @@ function EditUserModal({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
-            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-naver-green"
+            className="mt-1 w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm focus:outline-none focus:border-brand-blue"
           />
         </label>
 
@@ -613,7 +613,7 @@ function EditUserModal({
           <button
             type="submit"
             disabled={submitting}
-            className="px-3 py-1.5 text-sm bg-naver-green text-white rounded hover:bg-naver-dark disabled:opacity-50"
+            className="px-3 py-1.5 text-sm bg-brand-blue text-white rounded hover:bg-brand-dark disabled:opacity-50"
           >
             {submitting ? '저장 중...' : '저장'}
           </button>
@@ -627,7 +627,7 @@ function EditUserModal({
           </p>
 
           {pwResult ? (
-            <div className="space-y-2 bg-ink-900 border border-naver-green/40 rounded p-3 text-sm">
+            <div className="space-y-2 bg-ink-900 border border-brand-blue/40 rounded p-3 text-sm">
               <div>
                 <span className="text-ink-500 text-xs">로그인 주소</span>
                 <div className="font-mono text-ink-100 break-all">{pwResult.login_url}</div>
@@ -638,7 +638,7 @@ function EditUserModal({
               </div>
               <div>
                 <span className="text-ink-500 text-xs">임시 비밀번호</span>
-                <div className="font-mono text-naver-neon font-bold text-base break-all">
+                <div className="font-mono text-brand-neon font-bold text-base break-all">
                   {pwResult.password}
                 </div>
               </div>
@@ -660,7 +660,7 @@ function EditUserModal({
                 value={pwInput}
                 onChange={(e) => setPwInput(e.target.value)}
                 placeholder="비우면 자동 생성 (12자, 안전)"
-                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm font-mono focus:outline-none focus:border-naver-green"
+                className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 placeholder-ink-500 rounded text-sm font-mono focus:outline-none focus:border-brand-blue"
               />
               {pwError && (
                 <div className="rounded border border-red-800/50 bg-red-900/20 p-2 text-xs text-red-300">

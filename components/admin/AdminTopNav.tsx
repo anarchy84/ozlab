@@ -24,7 +24,7 @@ export function AdminTopNav({ items }: { items: AdminTopNavItem[] }) {
             className={cn(
               'shrink-0 rounded-full px-3 py-1.5 transition-colors',
               active
-                ? 'bg-naver-green/15 text-naver-neon font-bold'
+                ? 'bg-brand-blue/15 text-brand-neon font-bold'
                 : 'text-ink-300 hover:bg-ink-800 hover:text-ink-100',
             )}
           >

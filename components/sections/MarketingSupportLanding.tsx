@@ -45,7 +45,7 @@ export function MarketingSupportLanding() {
   return (
     <div className="bg-white text-ink-900">
       <section className="relative overflow-hidden bg-surface-dark py-section-tight text-white">
-        <div className="pointer-events-none absolute right-[-12%] top-[-35%] h-[620px] w-[620px] rounded-full bg-naver-green/20 blur-[130px]" />
+        <div className="pointer-events-none absolute right-[-12%] top-[-35%] h-[620px] w-[620px] rounded-full bg-brand-blue/20 blur-[130px]" />
         <div className="pointer-events-none absolute bottom-[-32%] left-[-15%] h-[460px] w-[460px] rounded-full bg-white/10 blur-[110px]" />
         <div className="container-oz relative">
           <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -124,7 +124,7 @@ export function MarketingSupportLanding() {
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.04] p-6 shadow-lg backdrop-blur md:p-8">
-              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-naver-neon">
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-neon">
                 Place Marketing Event
               </p>
               <EditableText
@@ -161,7 +161,7 @@ export function MarketingSupportLanding() {
                 ))}
               </div>
               <div className="mt-7 rounded-lg bg-white p-5 text-ink-900">
-                <p className="text-xs font-extrabold text-naver-deep">지원대상</p>
+                <p className="text-xs font-extrabold text-brand-deep">지원대상</p>
                 <EditableText
                   as="p"
                   blockKey={k('hero.card.target')}
@@ -170,7 +170,7 @@ export function MarketingSupportLanding() {
                   pagePath={PAGE_PATH}
                   className="mt-2 text-lg font-extrabold leading-snug break-keep"
                 />
-                <p className="mt-4 text-xs font-extrabold text-naver-deep">지원기간</p>
+                <p className="mt-4 text-xs font-extrabold text-brand-deep">지원기간</p>
                 <EditableText
                   as="p"
                   blockKey={k('hero.card.period')}
@@ -218,7 +218,7 @@ export function MarketingSupportLanding() {
             {benefits.map((benefit, bi) => (
               <article
                 key={`benefit-${bi}`}
-                className="rounded-xl border border-ink-150 bg-white p-7 shadow-sm transition-all hover:-translate-y-0.5 hover:border-naver-green/40 hover:shadow-md"
+                className="rounded-xl border border-ink-150 bg-white p-7 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-blue/40 hover:shadow-md"
               >
                 <EditableText
                   as="p"
@@ -226,7 +226,7 @@ export function MarketingSupportLanding() {
                   fallback={benefit.no}
                   value={pickTextOrUndef(blocks, k(`benefits.cards.${bi}.no`))}
                   pagePath={PAGE_PATH}
-                  className="text-sm font-extrabold text-naver-deep"
+                  className="text-sm font-extrabold text-brand-deep"
                 />
                 <EditableText
                   as="h3"
@@ -280,7 +280,7 @@ export function MarketingSupportLanding() {
               />
             </div>
             <div className="rounded-xl border border-ink-150 bg-white p-8 shadow-sm md:p-10">
-              <p className="text-xs font-extrabold tracking-[0.18em] text-naver-deep">EVENT SUMMARY</p>
+              <p className="text-xs font-extrabold tracking-[0.18em] text-brand-deep">EVENT SUMMARY</p>
               <dl className="mt-6 space-y-5">
                 <div>
                   <dt className="text-sm font-bold text-ink-400">지원대상</dt>
@@ -323,10 +323,10 @@ export function MarketingSupportLanding() {
 
       <section className="py-section-tight">
         <div className="container-oz">
-          <div className="rounded-xl border border-ink-150 bg-gradient-to-br from-white to-naver-tint p-8 shadow-sm md:p-12">
+          <div className="rounded-xl border border-ink-150 bg-gradient-to-br from-white to-brand-tint p-8 shadow-sm md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
-                <p className="text-xs font-extrabold tracking-[0.18em] text-naver-deep">LIMITED OFFER</p>
+                <p className="text-xs font-extrabold tracking-[0.18em] text-brand-deep">LIMITED OFFER</p>
                 <EditableText
                   as="h2"
                   blockKey={k('cta.title')}
@@ -401,7 +401,7 @@ export function MarketingSupportLanding() {
                     value={pickTextOrUndef(blocks, k(`faq.items.${index}.q`))}
                     pagePath={PAGE_PATH}
                   />
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-600 transition-all group-open:rotate-45 group-open:bg-naver-green group-open:text-white">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-600 transition-all group-open:rotate-45 group-open:bg-brand-blue group-open:text-white">
                     <Icon.Plus s={18} />
                   </span>
                 </summary>

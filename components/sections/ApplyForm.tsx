@@ -282,7 +282,7 @@ export function ApplyForm({ blocks }: Props) {
           {sent ? (
             // 제출 성공 화면
             <div className="text-center py-10 px-5 text-ink-900">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-naver-soft text-4xl">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft text-4xl">
                 ✅
               </div>
               <h3 className="text-h2 text-ink-900">신청이 접수되었습니다</h3>

@@ -98,7 +98,7 @@ export default function ContentManager({
               setEditingId(null)
               setShowEditor(true)
             }}
-            className="w-full sm:w-auto px-4 py-2 bg-naver-green hover:bg-naver-dark text-white text-sm font-bold rounded-lg transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-brand-blue hover:bg-brand-dark text-white text-sm font-bold rounded-lg transition-colors"
           >
             + 새 글 작성
           </button>
@@ -113,7 +113,7 @@ export default function ContentManager({
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 text-xs rounded transition-colors ${
               filter === f
-                ? 'bg-naver-green text-white font-bold'
+                ? 'bg-brand-blue text-white font-bold'
                 : 'bg-ink-800 text-ink-300 hover:bg-ink-700'
             }`}
           >
@@ -130,7 +130,7 @@ export default function ContentManager({
           {canWrite && (
             <button
               onClick={() => setShowEditor(true)}
-              className="text-naver-neon hover:underline text-sm"
+              className="text-brand-neon hover:underline text-sm"
             >
               첫 번째 글 작성하기 →
             </button>
@@ -164,7 +164,7 @@ export default function ContentManager({
                           setEditingId(p.id)
                           setShowEditor(true)
                         }}
-                        className="text-ink-100 font-medium hover:text-naver-neon text-left break-keep"
+                        className="text-ink-100 font-medium hover:text-brand-neon text-left break-keep"
                       >
                         {p.title}
                       </button>
@@ -200,7 +200,7 @@ export default function ContentManager({
                         href={publicPostPath(p)}
                         target="_blank"
                         rel="noopener"
-                        className="text-naver-neon hover:underline text-xs mr-2"
+                        className="text-brand-neon hover:underline text-xs mr-2"
                       >
                         보기
                       </a>

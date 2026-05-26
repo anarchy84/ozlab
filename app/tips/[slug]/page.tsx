@@ -94,11 +94,11 @@ export default async function TipPostPage({ params }: Params) {
         <header className="bg-surface-dark py-12 text-white">
           <div className="container-oz mx-auto max-w-3xl">
             <div className="flex flex-wrap items-center gap-3 text-sm">
-              <Link href="/tips" className="text-naver-neon hover:underline">
+              <Link href="/tips" className="text-brand-neon hover:underline">
                 ← 꿀팁 목록
               </Link>
               <span className="text-ink-500">·</span>
-              <span className="rounded bg-naver-green/20 px-2 py-0.5 text-xs font-bold text-naver-neon">
+              <span className="rounded bg-brand-blue/20 px-2 py-0.5 text-xs font-bold text-brand-neon">
                 {getCategoryLabel(post.category)}
               </span>
             </div>
@@ -173,7 +173,7 @@ export default async function TipPostPage({ params }: Params) {
                 {related.map((item) => (
                   <li
                     key={item.id}
-                    className="rounded-lg border border-ink-150 p-4 transition-colors hover:border-naver-green/50"
+                    className="rounded-lg border border-ink-150 p-4 transition-colors hover:border-brand-blue/50"
                   >
                     <Link href={postCanonicalPath(item)}>
                       <span className="text-xs text-ink-500">

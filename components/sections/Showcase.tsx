@@ -94,7 +94,7 @@ export function Showcase({ blocks, ctas }: Props) {
               />
             </span>
             <h2 className="text-h1 text-white break-keep mt-4 mb-4">
-              <span style={{ color: '#17e06d' }}>
+              <span style={{ color: '#7C8CFF' }}>
                 <EditableText
                   as="span"
                   blockKey="home.showcase.main.headline.pre"
@@ -133,7 +133,7 @@ export function Showcase({ blocks, ctas }: Props) {
               placement="showcase"
               ctas={ctas}
               fallback={{ label: '0원으로 시작하기', href: '#apply' }}
-              className="btn lg !bg-[#17e06d] !text-ink-900"
+              className="btn lg !bg-[#7C8CFF] !text-ink-900"
             >
               <span className="flex items-center gap-2">
                 {ctas?.[0]?.label ?? '0원으로 시작하기'}

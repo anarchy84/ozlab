@@ -197,7 +197,7 @@ export default async function SalesDashboardPage({ searchParams }: { searchParam
           </a>
           <Link
             href="/admin/dashboard/paid-media"
-            className="text-sm text-naver-neon hover:underline"
+            className="text-sm text-brand-neon hover:underline"
           >
             → 광고 퍼포먼스 뷰
           </Link>
@@ -292,7 +292,7 @@ function Kpi({
   return (
     <div className="bg-surface-darkSoft border border-ink-700 rounded-lg p-3">
       <div className="text-[11px] text-ink-400">{label}</div>
-      <div className={`text-lg font-bold mt-0.5 ${accent ? 'text-naver-neon' : 'text-ink-100'}`}>
+      <div className={`text-lg font-bold mt-0.5 ${accent ? 'text-brand-neon' : 'text-ink-100'}`}>
         {value}
       </div>
     </div>

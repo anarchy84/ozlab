@@ -226,7 +226,7 @@ export default function DistributionManager({ initialPolicySettings }: Props) {
           <span
             className={`w-fit rounded-full px-3 py-1.5 text-sm font-bold ${
               rule.is_enabled
-                ? 'bg-naver-green/15 text-naver-neon'
+                ? 'bg-brand-blue/15 text-brand-neon'
                 : 'bg-amber-500/15 text-amber-300'
             }`}
           >
@@ -249,7 +249,7 @@ export default function DistributionManager({ initialPolicySettings }: Props) {
                 disabled={saving}
                 className={`rounded-full px-4 py-2 text-sm font-bold transition-colors disabled:opacity-50 ${
                   rule.is_enabled
-                    ? 'bg-naver-green text-white hover:bg-naver-dark'
+                    ? 'bg-brand-blue text-white hover:bg-brand-dark'
                     : 'border border-ink-700 text-ink-300 hover:border-ink-500 hover:text-ink-100'
                 }`}
               >
@@ -261,10 +261,10 @@ export default function DistributionManager({ initialPolicySettings }: Props) {
           <div className="rounded-lg border border-ink-700 bg-ink-900 p-4">
             <div className="text-xs font-semibold text-ink-500">분배 대상</div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <span className="rounded-full border border-naver-green/40 bg-naver-green/15 px-3 py-1.5 text-sm font-bold text-naver-neon">
+              <span className="rounded-full border border-brand-blue/40 bg-brand-blue/15 px-3 py-1.5 text-sm font-bold text-brand-neon">
                 상담사
               </span>
-              <span className="rounded-full border border-naver-green/40 bg-naver-green/15 px-3 py-1.5 text-sm font-bold text-naver-neon">
+              <span className="rounded-full border border-brand-blue/40 bg-brand-blue/15 px-3 py-1.5 text-sm font-bold text-brand-neon">
                 TM실장
               </span>
             </div>
@@ -375,7 +375,7 @@ export default function DistributionManager({ initialPolicySettings }: Props) {
             type="button"
             onClick={redistributeUnassigned}
             disabled={saving || !rule.is_enabled}
-            className="rounded-full bg-naver-green px-4 py-2 text-sm font-bold text-white hover:bg-naver-dark disabled:opacity-50"
+            className="rounded-full bg-brand-blue px-4 py-2 text-sm font-bold text-white hover:bg-brand-dark disabled:opacity-50"
           >
             미배정 DB 재분배
           </button>
@@ -420,7 +420,7 @@ function MemberRow({
           disabled={saving || !member.is_active}
           className={`rounded-full px-4 py-2 text-sm font-bold transition-colors disabled:opacity-50 ${
             enabled
-              ? 'bg-naver-green text-white hover:bg-naver-dark'
+              ? 'bg-brand-blue text-white hover:bg-brand-dark'
               : 'border border-ink-700 text-ink-300 hover:border-ink-500 hover:text-ink-100'
           }`}
         >

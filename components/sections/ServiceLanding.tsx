@@ -95,9 +95,9 @@ function ServiceCard({
   const blocks = useBlocks()
   const metaText = card.meta ?? String(index + 1).padStart(2, '0')
   return (
-    <article className="group relative h-full rounded-lg border border-ink-150 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-naver-green/40 hover:shadow-md md:p-7">
+    <article className="group relative h-full rounded-lg border border-ink-150 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-blue/40 hover:shadow-md md:p-7">
       <div className="mb-5 flex items-center justify-between gap-4">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-naver-soft text-sm font-extrabold text-naver-deep">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-sm font-extrabold text-brand-deep">
           <EditableText
             as="span"
             blockKey={`${blockKeyBase}.meta`}
@@ -106,7 +106,7 @@ function ServiceCard({
             pagePath={pagePath}
           />
         </span>
-        <span className="text-naver-deep opacity-70 transition-opacity group-hover:opacity-100">
+        <span className="text-brand-deep opacity-70 transition-opacity group-hover:opacity-100">
           {index % 3 === 0 ? <Icon.Shield s={22} /> : index % 3 === 1 ? <Icon.Card s={22} /> : <Icon.Chart s={22} />}
         </span>
       </div>
@@ -130,7 +130,7 @@ function ServiceCard({
         <ul className="mt-5 space-y-2.5">
           {card.bullets.map((bullet, bi) => (
             <li key={`${blockKeyBase}.bullet.${bi}`} className="flex items-start gap-2 text-sm text-ink-600 break-keep">
-              <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-naver-soft text-naver-deep">
+              <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-deep">
                 <Icon.Check s={13} />
               </span>
               <EditableText
@@ -161,8 +161,8 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
   return (
     <div className="bg-white text-ink-900">
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-naver-tint/70 py-section-tight">
-        <div className="pointer-events-none absolute right-[-12%] top-[-18%] h-[520px] w-[520px] rounded-full bg-naver-green/15 blur-[120px]" />
+      <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-brand-tint/70 py-section-tight">
+        <div className="pointer-events-none absolute right-[-12%] top-[-18%] h-[520px] w-[520px] rounded-full bg-brand-blue/15 blur-[120px]" />
         <div className="pointer-events-none absolute bottom-[-28%] left-[-14%] h-[420px] w-[420px] rounded-full bg-ink-900/5 blur-[100px]" />
 
         <div className="container-oz relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -237,12 +237,12 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
             <div className="rounded-xl bg-surface-dark p-5 text-white shadow-lg md:p-7">
               <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-naver-neon">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-neon">
                     Ozlab Service Desk
                   </p>
                   <p className="mt-1 text-sm text-white/60">견적 · 설치 · 운영 점검</p>
                 </div>
-                <span className="rounded-full bg-naver-green px-3 py-1 text-xs font-bold text-white">
+                <span className="rounded-full bg-brand-blue px-3 py-1 text-xs font-bold text-white">
                   LIVE
                 </span>
               </div>
@@ -269,7 +269,7 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
                       pagePath={pagePath}
                       className="text-xl font-extrabold text-white"
                     />
-                    <span className="text-naver-neon">
+                    <span className="text-brand-neon">
                       {index === 0 ? <Icon.Search s={18} /> : index === 1 ? <Icon.Shield s={18} /> : <Icon.Check s={18} />}
                     </span>
                   </div>
@@ -282,7 +282,7 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
                   {data.consultChips.map((chip, ci) => (
                     <span
                       key={`chip-${ci}`}
-                      className="rounded-pill bg-naver-soft px-3 py-1.5 text-xs font-semibold text-naver-deep"
+                      className="rounded-pill bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand-deep"
                     >
                       <EditableText
                         as="span"
@@ -410,7 +410,7 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
                   fallback={card.meta ?? String(index + 1).padStart(2, '0')}
                   value={pickTextOrUndef(blocks, k(`guide.cards.${index}.meta`))}
                   pagePath={pagePath}
-                  className="text-sm font-extrabold text-naver-neon"
+                  className="text-sm font-extrabold text-brand-neon"
                 />
                 <EditableText
                   as="h3"
@@ -466,7 +466,7 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
           <div className="space-y-4">
             {data.process.map((item, index) => (
               <article key={`process-${index}`} className="flex gap-4 rounded-lg border border-ink-150 bg-white p-5 shadow-sm">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-naver-green text-sm font-extrabold text-white">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-blue text-sm font-extrabold text-white">
                   {index + 1}
                 </span>
                 <div>
@@ -513,7 +513,7 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
                     value={pickTextOrUndef(blocks, k(`faqs.items.${fi}.q`))}
                     pagePath={pagePath}
                   />
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-600 transition-all group-open:rotate-45 group-open:bg-naver-green group-open:text-white">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-600 transition-all group-open:rotate-45 group-open:bg-brand-blue group-open:text-white">
                     <Icon.Plus s={18} />
                   </span>
                 </summary>
@@ -535,7 +535,7 @@ export function ServiceLanding({ data, pageKey, pagePath }: Props) {
       <section id="consult" className="bg-surface-dark py-section text-white">
         <div className="container-oz">
           <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-8 md:p-12">
-            <div className="pointer-events-none absolute right-[-12%] top-[-80%] h-[420px] w-[420px] rounded-full bg-naver-green/20 blur-[90px]" />
+            <div className="pointer-events-none absolute right-[-12%] top-[-80%] h-[420px] w-[420px] rounded-full bg-brand-blue/20 blur-[90px]" />
             <div className="relative grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
               <div>
                 <EditableText

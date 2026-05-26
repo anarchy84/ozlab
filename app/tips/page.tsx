@@ -110,7 +110,7 @@ export default async function TipsPage({
       <BlocksProvider blocks={blocks}>
       <div className="bg-white text-ink-900">
         <section className="relative overflow-hidden bg-surface-dark py-section-tight text-white">
-          <div className="pointer-events-none absolute right-[-12%] top-[-30%] h-[560px] w-[560px] rounded-full bg-naver-green/20 blur-[120px]" />
+          <div className="pointer-events-none absolute right-[-12%] top-[-30%] h-[560px] w-[560px] rounded-full bg-brand-blue/20 blur-[120px]" />
           <div className="pointer-events-none absolute bottom-[-35%] left-[-16%] h-[420px] w-[420px] rounded-full bg-white/10 blur-[110px]" />
           <div className="container-oz relative">
             <div className="max-w-[760px]">
@@ -174,7 +174,7 @@ export default async function TipsPage({
                     className={`shrink-0 rounded-pill px-4 py-2 text-sm font-bold transition-colors ${
                       selected
                         ? 'bg-ink-900 text-white'
-                        : 'bg-ink-100 text-ink-600 hover:bg-naver-soft hover:text-naver-deep'
+                        : 'bg-ink-100 text-ink-600 hover:bg-brand-soft hover:text-brand-deep'
                     }`}
                   >
                     {item.label}
@@ -185,7 +185,7 @@ export default async function TipsPage({
 
             {posts.length === 0 ? (
                 <div className="rounded-xl border border-ink-150 bg-ink-50 px-6 py-16 text-center">
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-naver-soft text-naver-deep">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft text-brand-deep">
                   <SearchIcon />
                 </div>
                 <h2 className="text-h3 text-ink-900">아직 발행된 꿀팁이 없습니다.</h2>
@@ -198,11 +198,11 @@ export default async function TipsPage({
                 {featured && (
                   <Link
                     href={postCanonicalPath(featured)}
-                    className="group grid overflow-hidden rounded-xl border border-ink-150 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-naver-green/40 hover:shadow-md lg:grid-cols-[1fr_0.86fr]"
+                    className="group grid overflow-hidden rounded-xl border border-ink-150 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-blue/40 hover:shadow-md lg:grid-cols-[1fr_0.86fr]"
                   >
                     <div className="p-7 md:p-10">
                       <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-ink-500">
-                        <span className="rounded-pill bg-naver-soft px-3 py-1 font-bold text-naver-deep">
+                        <span className="rounded-pill bg-brand-soft px-3 py-1 font-bold text-brand-deep">
                           추천 꿀팁
                         </span>
                         <span>{getCategoryLabel(featured.category)}</span>
@@ -211,7 +211,7 @@ export default async function TipsPage({
                         )}
                         <span>· {estimateReadMin(featured)}분 읽기</span>
                       </div>
-                      <h2 className="text-h1 text-ink-900 break-keep transition-colors group-hover:text-naver-deep">
+                      <h2 className="text-h1 text-ink-900 break-keep transition-colors group-hover:text-brand-deep">
                         {featured.title}
                       </h2>
                       {featured.excerpt && (
@@ -219,7 +219,7 @@ export default async function TipsPage({
                           {featured.excerpt}
                         </p>
                       )}
-                      <div className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-naver-deep">
+                      <div className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-brand-deep">
                         읽어보기
                         <ArrowIcon size={16} />
                       </div>
@@ -227,7 +227,7 @@ export default async function TipsPage({
                     <div className="min-h-[280px] bg-surface-dark p-6 text-white lg:min-h-full">
                       <div className="flex h-full flex-col justify-between rounded-lg border border-white/10 bg-white/[0.04] p-5">
                         <div>
-                          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-naver-neon">
+                          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-neon">
                             Ozlab Tip Board
                           </p>
                           <p className="mt-3 text-2xl font-extrabold text-white break-keep">
@@ -259,7 +259,7 @@ export default async function TipsPage({
                     <Link
                       key={post.id}
                       href={postCanonicalPath(post)}
-                      className="group flex min-h-[260px] flex-col rounded-lg border border-ink-150 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-naver-green/40 hover:shadow-md"
+                      className="group flex min-h-[260px] flex-col rounded-lg border border-ink-150 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-blue/40 hover:shadow-md"
                     >
                       <div className="mb-5 flex items-center justify-between gap-3">
                         <span className="rounded-pill bg-ink-100 px-3 py-1 text-xs font-bold text-ink-600">
@@ -267,7 +267,7 @@ export default async function TipsPage({
                         </span>
                         <span className="text-xs text-ink-400">{estimateReadMin(post)}분 읽기</span>
                       </div>
-                      <h3 className="text-xl font-bold leading-snug text-ink-900 break-keep transition-colors group-hover:text-naver-deep">
+                      <h3 className="text-xl font-bold leading-snug text-ink-900 break-keep transition-colors group-hover:text-brand-deep">
                         {post.title}
                       </h3>
                       {post.excerpt && (
@@ -281,7 +281,7 @@ export default async function TipsPage({
                             ? FORMAT_KST.format(new Date(post.published_at))
                             : '발행일 없음'}
                         </span>
-                        <span className="text-naver-deep">
+                        <span className="text-brand-deep">
                           <ArrowIcon />
                         </span>
                       </div>

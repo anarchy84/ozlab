@@ -99,7 +99,7 @@ export function CohortMatrix({
               <th
                 key={rm}
                 className={`text-center px-2 py-2 font-bold ${
-                  rm === currentMonth ? 'text-naver-neon' : 'text-ink-300'
+                  rm === currentMonth ? 'text-brand-neon' : 'text-ink-300'
                 }`}
               >
                 {monthLabel(rm)}
@@ -115,7 +115,7 @@ export function CohortMatrix({
           {months.map((lm) => (
             <tr key={lm} className="border-t border-ink-800">
               <td className={`px-2 py-2 font-bold whitespace-nowrap ${
-                lm === currentMonth ? 'text-naver-neon' : 'text-ink-300'
+                lm === currentMonth ? 'text-brand-neon' : 'text-ink-300'
               }`}>
                 {monthLabel(lm)}
                 {lm === currentMonth && <span className="text-[9px] ml-1">(당월 디비)</span>}
@@ -131,7 +131,7 @@ export function CohortMatrix({
                     key={rm}
                     className={`text-right px-2 py-2 font-mono ${
                       impossible ? 'bg-ink-900/50' : ''
-                    } ${isDiagonal ? 'border-l-2 border-naver-green/30' : ''}`}
+                    } ${isDiagonal ? 'border-l-2 border-brand-blue/30' : ''}`}
                     style={!impossible && value > 0 ? { backgroundColor: cellColor(value) } : undefined}
                     title={`${monthLabel(lm)} 디비 → ${monthLabel(rm)} 매출`}
                   >
@@ -166,13 +166,13 @@ export function CohortMatrix({
               <td
                 key={months[idx]}
                 className={`text-right px-2 py-2 font-mono font-bold ${
-                  months[idx] === currentMonth ? 'text-naver-neon' : 'text-ink-200'
+                  months[idx] === currentMonth ? 'text-brand-neon' : 'text-ink-200'
                 }`}
               >
                 {v > 0 ? `${(v / 10000).toFixed(0)}만` : '—'}
               </td>
             ))}
-            <td className="text-right px-3 py-2 font-mono text-naver-neon font-bold border-l border-ink-700">
+            <td className="text-right px-3 py-2 font-mono text-brand-neon font-bold border-l border-ink-700">
               {grandTotal > 0 ? `${(grandTotal / 10000).toFixed(0)}만` : '—'}
             </td>
           </tr>
