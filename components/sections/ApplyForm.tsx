@@ -16,7 +16,12 @@ import { EditableText } from '@/components/editable/EditableText'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
-import { INDUSTRY_OPTIONS, REGION_OPTIONS } from '@/lib/consultation-options'
+import {
+  INDUSTRY_OPTIONS,
+  REGION_OPTIONS,
+  groupOptionsByField,
+  type ConsultationFieldOption,
+} from '@/lib/consultation-options'
 import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 interface Props {
@@ -57,6 +62,33 @@ export function ApplyForm({ blocks }: Props) {
   const [attribution, setAttribution] = useState<Record<string, string>>({})
   // form_start 는 첫 필드 포커스 시 1회만 push
   const formStartedRef = useRef(false)
+
+  // 업종/지역 옵션 — DB 마스터에서 fetch. 실패하면 fallback 상수 사용.
+  const [industryOptions, setIndustryOptions] = useState<readonly string[]>(INDUSTRY_OPTIONS)
+  const [regionOptions, setRegionOptions] = useState<readonly string[]>(REGION_OPTIONS)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/consultation-options')
+        if (!res.ok) return
+        const rows = (await res.json()) as ConsultationFieldOption[]
+        if (cancelled || !Array.isArray(rows) || rows.length === 0) return
+        const grouped = groupOptionsByField(
+          // is_active 는 이미 서버에서 필터됨. 그래도 안전하게 처리
+          rows.map((r) => ({ ...r, is_active: true } as ConsultationFieldOption)),
+        )
+        if (grouped.industry.length > 0) setIndustryOptions(grouped.industry)
+        if (grouped.region.length > 0) setRegionOptions(grouped.region)
+      } catch (e) {
+        console.warn('[ApplyForm consultation-options]', e)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -384,7 +416,7 @@ export function ApplyForm({ blocks }: Props) {
                     onChange={onChange}
                   >
                     <option value="">선택해주세요</option>
-                    {INDUSTRY_OPTIONS.map((o) => (
+                    {industryOptions.map((o) => (
                       <option key={o} value={o}>
                         {o}
                       </option>
@@ -400,7 +432,7 @@ export function ApplyForm({ blocks }: Props) {
                     onChange={onChange}
                   >
                     <option value="">선택해주세요</option>
-                    {REGION_OPTIONS.map((o) => (
+                    {regionOptions.map((o) => (
                       <option key={o} value={o}>
                         {o}
                       </option>

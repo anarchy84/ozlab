@@ -18,7 +18,12 @@ import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
-import { INDUSTRY_OPTIONS, REGION_OPTIONS } from '@/lib/consultation-options'
+import {
+  INDUSTRY_OPTIONS,
+  REGION_OPTIONS,
+  groupOptionsByField,
+  type ConsultationFieldOption,
+} from '@/lib/consultation-options'
 import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 const STANDARD_IDS = new Set([
@@ -48,6 +53,32 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
   const [attribution, setAttribution] = useState<Record<string, string>>({})
   // form_start 1회만 push
   const formStartedRef = useRef(false)
+
+  // 표준 select 필드(industry/region)는 DB 옵션 마스터에서 fetch
+  const [industryOptions, setIndustryOptions] = useState<readonly string[]>(INDUSTRY_OPTIONS)
+  const [regionOptions, setRegionOptions] = useState<readonly string[]>(REGION_OPTIONS)
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/consultation-options')
+        if (!res.ok) return
+        const rows = (await res.json()) as ConsultationFieldOption[]
+        if (cancelled || !Array.isArray(rows) || rows.length === 0) return
+        const grouped = groupOptionsByField(
+          rows.map((r) => ({ ...r, is_active: true } as ConsultationFieldOption)),
+        )
+        if (grouped.industry.length > 0) setIndustryOptions(grouped.industry)
+        if (grouped.region.length > 0) setRegionOptions(grouped.region)
+      } catch (e) {
+        console.warn('[CtaModalForm consultation-options]', e)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // 어트리뷰션 머지 (마운트 시 1회) + CTA 클릭 캡처
   useEffect(() => {
@@ -242,7 +273,13 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
           </div>
 
           {fields.map((f) => (
-            <DynamicField key={f.id} field={f} value={values[f.id]} onChange={handleChange} />
+            <DynamicField
+              key={f.id}
+              field={f}
+              value={values[f.id]}
+              onChange={handleChange}
+              standardOptions={{ industry: industryOptions, region: regionOptions }}
+            />
           ))}
 
           <label className="flex items-start gap-2 text-xs text-white/80">
@@ -302,18 +339,25 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
 }
 
 // ─── 동적 단일 필드 렌더 ──
+type StandardOptions = {
+  industry: readonly string[]
+  region: readonly string[]
+}
+
 function DynamicField({
   field,
   value,
   onChange,
+  standardOptions,
 }: {
   field: CtaFormField
   value: string | boolean | undefined
   onChange: (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => void
+  standardOptions: StandardOptions
 }) {
-  const selectOptions = getStandardSelectOptions(field) ?? field.options ?? []
+  const selectOptions = getStandardSelectOptions(field, standardOptions) ?? field.options ?? []
   const inputClass =
     'w-full px-3 py-2 rounded text-sm bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-brand-blue'
 
@@ -380,9 +424,12 @@ function DynamicField({
   )
 }
 
-function getStandardSelectOptions(field: CtaFormField): readonly string[] | null {
-  if (field.id === 'industry') return INDUSTRY_OPTIONS
-  if (field.id === 'region') return REGION_OPTIONS
+function getStandardSelectOptions(
+  field: CtaFormField,
+  std: StandardOptions,
+): readonly string[] | null {
+  if (field.id === 'industry') return std.industry
+  if (field.id === 'region') return std.region
   return null
 }
 

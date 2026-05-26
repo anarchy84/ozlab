@@ -12,13 +12,16 @@
 // ─────────────────────────────────────────────
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { DbStatus } from '@/lib/admin/types'
 import {
-  INDUSTRY_OPTIONS,
-  REGION_OPTIONS,
+  FALLBACK_OPTIONS,
+  groupOptionsByField,
   normalizeConsultationOption,
+  mergeOptionsWithCurrentValue,
+  type ConsultationFieldKey,
+  type ConsultationFieldOption,
 } from '@/lib/consultation-options'
 import RevenueModal, { type RevenueDraft } from './RevenueModal'
 
@@ -162,6 +165,34 @@ export function ConsultationDetailModal({
   const [revenueModalOpen, setRevenueModalOpen] = useState(false)
   const [revenueModalAuto, setRevenueModalAuto] = useState(false)  // true면 "건너뛰기" 노출
   const [editingRevenue, setEditingRevenue] = useState<RevenueDraft | undefined>(undefined)
+
+  // 상담 입력 5종 옵션 (DB consultation_field_options) — 모달 열릴 때 1회 fetch
+  // 실패 시 FALLBACK_OPTIONS 사용
+  const [fieldOptions, setFieldOptions] = useState<Record<ConsultationFieldKey, string[]>>(() => ({
+    industry: [...FALLBACK_OPTIONS.industry],
+    region: [...FALLBACK_OPTIONS.region],
+    device_type: [...FALLBACK_OPTIONS.device_type],
+    contract_period: [...FALLBACK_OPTIONS.contract_period],
+    callable_time: [...FALLBACK_OPTIONS.callable_time],
+  }))
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/admin/consultation-options', { cache: 'no-store' })
+        if (!res.ok) return
+        const rows = (await res.json()) as ConsultationFieldOption[]
+        if (cancelled) return
+        setFieldOptions(groupOptionsByField(rows))
+      } catch (e) {
+        console.warn('[consultation-options fetch]', e)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const idx = allIds.indexOf(consultation.id)
   const prevId = idx > 0 ? allIds[idx - 1] : null
@@ -580,28 +611,31 @@ export function ConsultationDetailModal({
                 <CustomerSelect
                   label="업종"
                   value={customerDraft.industry}
-                  options={INDUSTRY_OPTIONS}
+                  options={fieldOptions.industry}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, industry: value }))}
                 />
                 <CustomerSelect
                   label="지역"
                   value={customerDraft.region}
-                  options={REGION_OPTIONS}
+                  options={fieldOptions.region}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, region: value }))}
                 />
-                <CustomerInput
+                <CustomerSelect
                   label="단말기"
                   value={customerDraft.device_type}
+                  options={fieldOptions.device_type}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, device_type: value }))}
                 />
-                <CustomerInput
+                <CustomerSelect
                   label="약정"
                   value={customerDraft.contract_period}
+                  options={fieldOptions.contract_period}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, contract_period: value }))}
                 />
-                <CustomerInput
+                <CustomerSelect
                   label="통화가능시간"
                   value={customerDraft.callable_time}
+                  options={fieldOptions.callable_time}
                   onChange={(value) => setCustomerDraft((prev) => ({ ...prev, callable_time: value }))}
                 />
                 <div>
@@ -880,6 +914,21 @@ function CustomerInput({
   )
 }
 
+/**
+ * 상담 입력 필드용 hybrid select.
+ *
+ * 동작 :
+ *   - 옵션 리스트 + 맨 끝에 "✏️ 직접입력" 항목 자동 추가
+ *   - "직접입력" 선택 시 같은 자리에 text input 노출 → 자유 텍스트 저장 가능
+ *   - 기존 자유 텍스트 데이터 보호 : 옵션에 없는 값은 "(옵션 외)" 배지로 첫 줄 표시
+ *   - 옵션 0개여도 동작 (바로 직접입력 모드로 진입 가능)
+ *
+ * 신입사원 친화 :
+ *   - placeholder "선택해주세요" 명확
+ *   - "직접입력" 항목 텍스트로 모드 전환 인지
+ */
+const CUSTOM_INPUT_TOKEN = '__custom_input__'
+
 function CustomerSelect({
   label,
   value,
@@ -891,38 +940,96 @@ function CustomerSelect({
   options: readonly string[]
   onChange: (value: string) => void
 }) {
-  const normalizedValue = normalizeConsultationOption(value, options)
-  const hasKnownValue = !normalizedValue || options.includes(normalizedValue)
+  const trimmed = value?.trim() ?? ''
+  const normalizedValue = normalizeConsultationOption(trimmed, options)
+  // 옵션 외 값(과거 자유 텍스트) 보존
+  const mergedOptions = useMemo(
+    () => mergeOptionsWithCurrentValue(options, trimmed),
+    [options, trimmed],
+  )
+  const isCustom = trimmed.length > 0 && !options.some(
+    (o) => o.replace(/\s+/g, '') === trimmed.replace(/\s+/g, ''),
+  )
+  // 직접입력 모드 토글 : 옵션에 없는 기존 값 또는 사용자가 명시 선택한 경우
+  const [customMode, setCustomMode] = useState<boolean>(isCustom)
+
+  // 옵션이 외부에서 변경되어 기존 값이 옵션에 들어오면 자동으로 select 모드 복귀
+  useEffect(() => {
+    if (!isCustom) setCustomMode(false)
+  }, [isCustom])
+
+  if (customMode) {
+    return (
+      <label className="block">
+        <span className="flex items-center justify-between text-xs text-ink-500 mb-1">
+          <span>
+            {label}{' '}
+            <span className="text-amber-400">(직접입력)</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setCustomMode(false)
+              // 직접입력 모드 해제 시 값 비워서 select 로 돌아감
+              onChange('')
+            }}
+            className="text-xs text-ink-400 hover:text-ink-200 underline"
+          >
+            ↩ 목록에서 선택
+          </button>
+        </span>
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="직접 입력하세요"
+          className="w-full rounded border border-amber-700/50 bg-ink-900 px-2 py-1.5 text-sm text-ink-100 placeholder-ink-500"
+        />
+      </label>
+    )
+  }
 
   return (
     <label className="block">
       <span className="block text-xs text-ink-500 mb-1">{label}</span>
       <select
         value={normalizedValue}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const v = e.target.value
+          if (v === CUSTOM_INPUT_TOKEN) {
+            setCustomMode(true)
+            onChange('') // 빈 값으로 시작 — 사용자가 input 에 타이핑
+          } else {
+            onChange(v)
+          }
+        }}
         className="w-full rounded border border-ink-700 bg-ink-900 px-2 py-1.5 text-sm text-ink-100"
       >
         <option value="">선택해주세요</option>
-        {!hasKnownValue && (
-          <option value={normalizedValue}>기존 값: {normalizedValue}</option>
-        )}
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+        {mergedOptions.map((option) => {
+          const isLegacy = !options.some(
+            (o) => o.replace(/\s+/g, '') === option.replace(/\s+/g, ''),
+          )
+          return (
+            <option key={option} value={option}>
+              {isLegacy ? `(옵션 외) ${option}` : option}
+            </option>
+          )
+        })}
+        <option value={CUSTOM_INPUT_TOKEN}>✏️ 직접입력...</option>
       </select>
     </label>
   )
 }
 
 function toCustomerDraft(c: ConsultationFull): CustomerDraft {
+  // 정규화는 CustomerSelect 내부에서 처리. 여기서는 raw 값을 그대로 보존
+  // (옵션 외 자유 텍스트 데이터도 안전하게 표시되도록)
   return {
     name: c.name ?? '',
     phone: c.phone ?? '',
     store_name: c.store_name ?? '',
-    industry: normalizeConsultationOption(c.industry, INDUSTRY_OPTIONS),
-    region: normalizeConsultationOption(c.region, REGION_OPTIONS),
+    industry: c.industry ?? '',
+    region: c.region ?? '',
     device_type: c.device_type ?? '',
     contract_period: c.contract_period ?? '',
     callable_time: c.callable_time ?? '',

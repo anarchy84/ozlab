@@ -56,6 +56,7 @@ export default async function AdminShellLayout({
         { href: '/admin/users', label: '사용자 관리', desc: '계정 초대·권한 변경' },
         { href: '/admin/settings/permissions', label: '권한 매트릭스', desc: 'role × permission 토글' },
         { href: '/admin/settings/statuses', label: '상태 관리', desc: '상담 상태·자동화 플래그' },
+        { href: '/admin/settings/consultation-options', label: '상담 옵션 관리', desc: '업종·지역·단말기·약정·통화시간 드롭다운' },
         { href: '/admin/settings/cta', label: 'CTA 관리', desc: '홈 버튼·utm 자동' },
         { href: '/admin/settings/products', label: '상품 관리', desc: '카탈로그·카테고리' },
         { href: '/admin/settings/distribution', label: 'DB 정책·분배', desc: '중복 기준·자동 배정' },

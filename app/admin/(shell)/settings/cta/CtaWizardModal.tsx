@@ -19,7 +19,7 @@
 //   />
 // ─────────────────────────────────────────────
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   CTA_PLACEMENTS,
   CTA_STYLES,
@@ -37,7 +37,12 @@ import {
   type CtaDisplayConfig,
   type CtaPosition,
 } from '@/lib/admin/types'
-import { INDUSTRY_OPTIONS, REGION_OPTIONS } from '@/lib/consultation-options'
+import {
+  INDUSTRY_OPTIONS,
+  REGION_OPTIONS,
+  groupOptionsByField,
+  type ConsultationFieldOption,
+} from '@/lib/consultation-options'
 
 // ─── 라벨 사전 ────────────────────────────────
 const TYPE_LABELS: Record<CtaType, string> = {
@@ -173,6 +178,41 @@ export function CtaWizardModal({ mode, initial, onClose, onSaved }: Props) {
   function patch<K extends keyof WizardState>(key: K, value: WizardState[K]) {
     setState((s) => ({ ...s, [key]: value }))
   }
+
+  // 마운트 시 1회 — 상담 옵션 마스터 fetch → industry/region 필드 옵션 자동 동기화
+  // 어드민이 "상담 옵션 관리"에서 추가한 옵션이 위자드 기본 옵션에도 즉시 반영되도록.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/admin/consultation-options', { cache: 'no-store' })
+        if (!res.ok) return
+        const rows = (await res.json()) as ConsultationFieldOption[]
+        if (cancelled || !Array.isArray(rows)) return
+        const grouped = groupOptionsByField(rows)
+        const industry = grouped.industry
+        const region = grouped.region
+        // 기존 form_fields 의 industry/region 옵션만 갱신
+        setState((s) => ({
+          ...s,
+          form_fields: s.form_fields.map((f) => {
+            if (f.id === 'industry' && f.type === 'select' && industry.length > 0) {
+              return { ...f, options: [...industry] }
+            }
+            if (f.id === 'region' && f.type === 'select' && region.length > 0) {
+              return { ...f, options: [...region] }
+            }
+            return f
+          }),
+        }))
+      } catch (e) {
+        console.warn('[CtaWizard consultation-options]', e)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // 폼 필드는 인라인 앵커일 때 의미 없음
   const skipFormStep = state.cta_type === 'inline_anchor'
