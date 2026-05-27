@@ -68,7 +68,57 @@ export default async function PaidMediaDashboardPage({
 
       <PeriodControl />
 
+      {/* DB 매입 (시트 sync 기반 — 공급자 일괄 전달) */}
+      {summary.dbPurchaseTotals.lead_qty > 0 || summary.dbPurchaseByChannel.length > 0 ? (
+        <section className="bg-violet-900/10 border border-violet-700/40 rounded-lg p-4 space-y-3">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <h2 className="text-base font-bold text-violet-200">📦 DB 매입 (시트 sync)</h2>
+              <p className="text-xs text-violet-300/70">
+                공급자가 일괄 전달하는 DB. utm 어트리뷰션 없이 시트 수량이 공식 수치.
+              </p>
+            </div>
+            <Link href="/admin/settings/ad-sync" className="text-xs text-violet-300 hover:text-violet-100 underline">
+              시트 sync →
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <Kpi label="총 매입수량" value={fmtInt(summary.dbPurchaseTotals.lead_qty) + '건'} highlight="blue" />
+            <Kpi label="총 매입비"   value={fmtMoney(summary.dbPurchaseTotals.spend)} highlight="neon" />
+            <Kpi label="평균 단가"   value={fmtCpl(summary.dbPurchaseTotals.avg_unit_cost)} highlight="amber" />
+          </div>
+          {summary.dbPurchaseByChannel.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm bg-ink-900/40 rounded">
+                <thead className="text-xs text-violet-300/70">
+                  <tr>
+                    <th className="text-left px-3 py-2">출처</th>
+                    <th className="text-right px-3 py-2">매입수량</th>
+                    <th className="text-right px-3 py-2">총매입비</th>
+                    <th className="text-right px-3 py-2">평균 단가</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-800">
+                  {summary.dbPurchaseByChannel.map((r) => (
+                    <tr key={r.channel} className="hover:bg-ink-800/30">
+                      <td className="px-3 py-2 text-ink-200">{r.channel}</td>
+                      <td className="px-3 py-2 text-right font-mono text-ink-100">{fmtInt(r.lead_qty)}건</td>
+                      <td className="px-3 py-2 text-right font-mono text-brand-neon">{fmtMoney(r.spend)}</td>
+                      <td className="px-3 py-2 text-right font-mono text-amber-300">{fmtCpl(r.unit_cost)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : null}
+
       {/* 페이드미디어 합계 KPI 9종 */}
+      <div>
+        <h2 className="text-base font-bold text-ink-200 mb-2">📣 페이드 미디어 (네이버/메타/구글 등)</h2>
+        <p className="text-xs text-ink-500 mb-2">utm 자동 어트리뷰션 + ad_metrics 광고비 (source=paid_media)</p>
+      </div>
       <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-2">
         <Kpi label="노출수"   value={fmtInt(summary.totals.impressions)} />
         <Kpi label="클릭수"   value={fmtInt(summary.totals.clicks)} />

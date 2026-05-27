@@ -128,9 +128,24 @@ export interface PaidMediaSummary {
   byChannel: ChannelPerformanceRow[]
   dailySeries: DailySeriesRow[]
   byCampaign: CampaignRow[]
+  // DB 매입 (시트 sync, source='db_purchase')
+  dbPurchaseTotals: {
+    lead_qty: number
+    spend: number
+    avg_unit_cost: number | null
+  }
+  dbPurchaseByChannel: DbPurchaseRow[]
   range: PeriodRange
   // 진단용
   unmappedLeadKeys: string[]  // channel_mapping 에 없는 utm 조합
+}
+
+// DB 매입 — 시트 sync 출처별 집계
+export interface DbPurchaseRow {
+  channel: string         // 시트 '출처' 원본 (예: '토스 스프레드')
+  lead_qty: number        // 매입수량 합
+  spend: number           // 총매입비 합
+  unit_cost: number | null // 평균 단가 (spend / lead_qty)
 }
 
 // ─────────────────────────────────────────────
@@ -162,10 +177,10 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     }
   }
 
-  // 2) ad_metrics — 기간 내 광고비/노출/클릭/전환(광고플랫폼 기준)
+  // 2) ad_metrics — 기간 내 모든 행 (db_purchase + paid_media 둘 다)
   const { data: adRows } = await admin
     .from('ad_metrics')
-    .select('date, channel, impressions, clicks, conversions, spend')
+    .select('date, channel, impressions, clicks, conversions, spend, lead_qty, source')
     .gte('date', range.from)
     .lte('date', range.to)
 
@@ -240,14 +255,29 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     return row
   }
 
-  // ad_metrics → channel_code 기준 (시트가 channel_code 표준으로 채워졌다는 전제)
+  // ad_metrics → 페이드 미디어 (source != 'db_purchase') 만 KPI 합산에 포함
+  // DB 매입은 별도 섹션에서 처리 (utm 어트리뷰션과 매칭 안 됨 — 영업 모델이 다름)
+  const dbPurchaseByCh = new Map<string, DbPurchaseRow>()
   for (const r of adRows ?? []) {
     const code = (r.channel as string) || 'unknown'
-    const row = ensureCode(code)
-    row.impressions += Number(r.impressions ?? 0)
-    row.clicks += Number(r.clicks ?? 0)
-    row.spend += Number(r.spend ?? 0)
-    // ad_metrics.conversions 는 광고플랫폼 기준 전환 — 별도 추적 (우리 분석은 revenue_records 기준이 더 정확)
+    const src = (r.source as string | null) ?? ''
+    if (src === 'db_purchase') {
+      // DB 매입 — 별도 컨테이너
+      let row = dbPurchaseByCh.get(code)
+      if (!row) {
+        row = { channel: code, lead_qty: 0, spend: 0, unit_cost: null }
+        dbPurchaseByCh.set(code, row)
+      }
+      row.lead_qty += Number(r.lead_qty ?? 0)
+      row.spend += Number(r.spend ?? 0)
+    } else {
+      // 페이드 미디어 — 기존 KPI 흐름
+      const row = ensureCode(code)
+      row.impressions += Number(r.impressions ?? 0)
+      row.clicks += Number(r.clicks ?? 0)
+      row.spend += Number(r.spend ?? 0)
+      // ad_metrics.conversions 는 광고플랫폼 기준 전환 — 별도 추적 (우리 분석은 revenue_records 기준이 더 정확)
+    }
   }
 
   // consultations → utm 정규화 → channel_code 카운트
@@ -292,10 +322,11 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     dRow.revenue += Number(r.amount ?? 0)
   }
 
-  // 일별 — 광고비
+  // 일별 — 광고비 (DB 매입 + 페이드 모두 합산하여 일자별 추이 표시)
   for (const r of adRows ?? []) {
     const dRow = ensureDate(r.date as string)
     dRow.spend += Number(r.spend ?? 0)
+    dRow.leads += Number(r.lead_qty ?? 0)  // DB 매입 수량도 일별 리드 추이에 반영
   }
   // 일별 — 리드
   for (const c of consRows ?? []) {
@@ -402,11 +433,29 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     .sort((a, b) => b.leads - a.leads)
     .slice(0, 50)
 
+  // DB 매입 집계
+  const dbPurchaseList = Array.from(dbPurchaseByCh.values())
+    .map((r) => ({
+      ...r,
+      unit_cost: r.lead_qty > 0 ? r.spend / r.lead_qty : null,
+    }))
+    .sort((a, b) => b.spend - a.spend)
+
+  const dbPurchaseTotals = {
+    lead_qty: dbPurchaseList.reduce((s, r) => s + r.lead_qty, 0),
+    spend: dbPurchaseList.reduce((s, r) => s + r.spend, 0),
+    avg_unit_cost: null as number | null,
+  }
+  dbPurchaseTotals.avg_unit_cost =
+    dbPurchaseTotals.lead_qty > 0 ? dbPurchaseTotals.spend / dbPurchaseTotals.lead_qty : null
+
   return {
     totals,
     byChannel,
     dailySeries,
     byCampaign: byCampaignSorted,
+    dbPurchaseTotals,
+    dbPurchaseByChannel: dbPurchaseList,
     range,
     unmappedLeadKeys: Array.from(unmappedSet),
   }
