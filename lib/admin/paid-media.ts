@@ -83,22 +83,26 @@ export interface ChannelPerformanceRow {
   impressions: number
   clicks: number
   spend: number
-  leads: number
-  conversions: number
+  // 리드 — 2개 source 분리
+  ad_leads: number          // 광고 플랫폼 보고 리드 (ad_metrics.conversions, 시트 '전환수')
+  leads: number             // CRM 도착 리드 (consultations utm 매칭)
+  conversions: number       // CRM 개통 (revenue_records 매칭)
   revenue: number
   // 계산 지표
   ctr: number | null        // 클릭/노출 %
   cvr: number | null        // 전환/클릭 % (광고플랫폼 기준)
-  cpl: number | null        // 광고비/리드
-  cpa: number | null        // 광고비/전환
-  roas: number | null       // 매출/광고비 %
-  lead_cvr: number | null   // 전환/리드 % (영업단계 전환율)
+  ad_cpl: number | null     // 광고비 / 광고 리드 (광고 측 기준)
+  cpl: number | null        // 광고비 / CRM 리드 (CRM 측 기준)
+  cpa: number | null        // 광고비 / 개통
+  roas: number | null       // 매출 / 광고비 %
+  lead_cvr: number | null   // 개통 / CRM 리드 % (영업단계 전환율)
 }
 
 export interface DailySeriesRow {
   date: string
   spend: number
-  leads: number
+  ad_leads: number          // 광고 측 리드 (ad_metrics.conversions)
+  leads: number             // CRM 측 리드
   conversions: number
   revenue: number
 }
@@ -107,10 +111,11 @@ export interface CampaignRow {
   channel_code: string
   channel_label: string
   utm_campaign: string
-  leads: number
+  leads: number             // CRM 측 (utm_campaign 기준)
   conversions: number
   revenue: number
 }
+// 캠페인 단위는 utm 기반이므로 ad_leads 분리 적용 안 함 (시트의 캠페인 raw 는 ad_metrics 에 저장 안 됨)
 
 export interface PaidMediaSummary {
   totals: {
@@ -118,8 +123,10 @@ export interface PaidMediaSummary {
     clicks: number
     ctr: number | null
     spend: number
-    leads: number
-    cpl: number | null
+    ad_leads: number         // 광고 측 리드 합계
+    leads: number            // CRM 측 리드 합계
+    ad_cpl: number | null    // 광고비/광고 리드
+    cpl: number | null       // 광고비/CRM 리드
     conversions: number
     cpa: number | null
     revenue: number
@@ -240,11 +247,13 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
         impressions: 0,
         clicks: 0,
         spend: 0,
+        ad_leads: 0,
         leads: 0,
         conversions: 0,
         revenue: 0,
         ctr: null,
         cvr: null,
+        ad_cpl: null,
         cpl: null,
         cpa: null,
         roas: null,
@@ -271,12 +280,14 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
       row.lead_qty += Number(r.lead_qty ?? 0)
       row.spend += Number(r.spend ?? 0)
     } else {
-      // 페이드 미디어 — 기존 KPI 흐름
+      // 페이드 미디어 — KPI 합산
       const row = ensureCode(code)
       row.impressions += Number(r.impressions ?? 0)
       row.clicks += Number(r.clicks ?? 0)
       row.spend += Number(r.spend ?? 0)
-      // ad_metrics.conversions 는 광고플랫폼 기준 전환 — 별도 추적 (우리 분석은 revenue_records 기준이 더 정확)
+      // ad_metrics.conversions = 광고 플랫폼이 보고한 결과 수 = 광고 측 리드
+      // CRM 측 도착 리드는 consultations utm 매칭으로 별도 카운트 (row.leads)
+      row.ad_leads += Number(r.conversions ?? 0)
     }
   }
 
@@ -299,7 +310,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   const ensureDate = (d: string): DailySeriesRow => {
     let row = byDate.get(d)
     if (!row) {
-      row = { date: d, spend: 0, leads: 0, conversions: 0, revenue: 0 }
+      row = { date: d, spend: 0, ad_leads: 0, leads: 0, conversions: 0, revenue: 0 }
       byDate.set(d, row)
     }
     return row
@@ -322,11 +333,16 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     dRow.revenue += Number(r.amount ?? 0)
   }
 
-  // 일별 — 광고비 (DB 매입 + 페이드 모두 합산하여 일자별 추이 표시)
+  // 일별 — 광고비 + 광고측 리드 (페이드미디어 conversions) + DB 매입 수량
   for (const r of adRows ?? []) {
     const dRow = ensureDate(r.date as string)
     dRow.spend += Number(r.spend ?? 0)
-    dRow.leads += Number(r.lead_qty ?? 0)  // DB 매입 수량도 일별 리드 추이에 반영
+    const src = (r.source as string | null) ?? ''
+    if (src === 'db_purchase') {
+      dRow.leads += Number(r.lead_qty ?? 0)  // DB 매입 수량도 일별 리드 추이에 반영
+    } else {
+      dRow.ad_leads += Number(r.conversions ?? 0)  // 광고 측 리드
+    }
   }
   // 일별 — 리드
   for (const c of consRows ?? []) {
@@ -383,6 +399,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   for (const row of byCode.values()) {
     row.ctr      = row.impressions > 0 ? (row.clicks / row.impressions) * 100 : null
     row.cvr      = row.clicks      > 0 ? (row.conversions / row.clicks) * 100 : null
+    row.ad_cpl   = row.ad_leads    > 0 ? row.spend / row.ad_leads : null
     row.cpl      = row.leads       > 0 ? row.spend / row.leads : null
     row.cpa      = row.conversions > 0 ? row.spend / row.conversions : null
     row.roas     = row.spend       > 0 ? (row.revenue / row.spend) * 100 : null
@@ -395,7 +412,9 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     clicks: 0,
     ctr: null as number | null,
     spend: 0,
+    ad_leads: 0,
     leads: 0,
+    ad_cpl: null as number | null,
     cpl: null as number | null,
     conversions: 0,
     cpa: null as number | null,
@@ -408,14 +427,16 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     totals.impressions += row.impressions
     totals.clicks += row.clicks
     totals.spend += row.spend
+    totals.ad_leads += row.ad_leads
     totals.leads += row.leads
     totals.conversions += row.conversions
     totals.revenue += row.revenue
   }
-  totals.ctr  = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : null
-  totals.cpl  = totals.leads > 0 ? totals.spend / totals.leads : null
-  totals.cpa  = totals.conversions > 0 ? totals.spend / totals.conversions : null
-  totals.roas = totals.spend > 0 ? (totals.revenue / totals.spend) * 100 : null
+  totals.ctr    = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : null
+  totals.ad_cpl = totals.ad_leads > 0 ? totals.spend / totals.ad_leads : null
+  totals.cpl    = totals.leads > 0 ? totals.spend / totals.leads : null
+  totals.cpa    = totals.conversions > 0 ? totals.spend / totals.conversions : null
+  totals.roas   = totals.spend > 0 ? (totals.revenue / totals.spend) * 100 : null
 
   // 정렬
   const byChannel = Array.from(byCode.values()).sort((a, b) => {

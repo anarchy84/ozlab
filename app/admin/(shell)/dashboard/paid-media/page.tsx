@@ -119,19 +119,21 @@ export default async function PaidMediaDashboardPage({
         <h2 className="text-base font-bold text-ink-200 mb-2">📣 페이드 미디어 (네이버/메타/구글 등)</h2>
         <p className="text-xs text-ink-500 mb-2">utm 자동 어트리뷰션 + ad_metrics 광고비 (source=paid_media)</p>
       </div>
-      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-2">
-        <Kpi label="노출수"   value={fmtInt(summary.totals.impressions)} />
-        <Kpi label="클릭수"   value={fmtInt(summary.totals.clicks)} />
-        <Kpi label="CTR"      value={fmtPercent(summary.totals.ctr)} />
-        <Kpi label="리드"     value={fmtInt(summary.totals.leads)} highlight="blue" />
-        <Kpi label="CPL"      value={fmtCpl(summary.totals.cpl)} highlight="amber" />
-        <Kpi label="전환"     value={fmtInt(summary.totals.conversions)} />
-        <Kpi label="CPA"      value={fmtCpl(summary.totals.cpa)} highlight="amber" />
-        <Kpi label="광고비"   value={fmtMoney(summary.totals.spend)} highlight="neon" />
-        <Kpi label="ROAS"     value={fmtPercent(summary.totals.roas, 0)} highlight={roasColor(summary.totals.roas)} />
+      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+        <Kpi label="노출수"      value={fmtInt(summary.totals.impressions)} />
+        <Kpi label="클릭수"      value={fmtInt(summary.totals.clicks)} />
+        <Kpi label="CTR"         value={fmtPercent(summary.totals.ctr)} />
+        <Kpi label="광고 리드"   value={fmtInt(summary.totals.ad_leads)} highlight="blue" />
+        <Kpi label="광고 CPL"    value={fmtCpl(summary.totals.ad_cpl)} highlight="amber" />
+        <Kpi label="CRM 리드"    value={fmtInt(summary.totals.leads)} highlight="blue" />
+        <Kpi label="개통"        value={fmtInt(summary.totals.conversions)} />
+        <Kpi label="CPA (개통기준)" value={fmtCpl(summary.totals.cpa)} highlight="amber" />
+        <Kpi label="광고비"      value={fmtMoney(summary.totals.spend)} highlight="neon" />
+        <Kpi label="ROAS"        value={fmtPercent(summary.totals.roas, 0)} highlight={roasColor(summary.totals.roas)} />
       </section>
       <p className="text-[11px] text-ink-500">
-        ※ KPI 카드는 <strong>페이드 미디어 채널만</strong> 합산. 자연유입·자체사이트·리퍼럴 제외. 매체별 표에서 전체 확인 가능.
+        ※ <strong>광고 리드</strong> = 광고 플랫폼이 보고한 결과(시트 전환수). <strong>CRM 리드</strong> = 우리 사이트에 utm 매칭으로 도착한 리드.
+        둘 다 표시하면 광고측 어트리뷰션 갭을 한눈에 볼 수 있음. KPI 합산은 페이드 미디어만 (자연유입·자체사이트 제외).
       </p>
 
       {/* 매체별 종합 표 */}
@@ -145,6 +147,7 @@ export default async function PaidMediaDashboardPage({
             데이터 없음. <Link href="/admin/settings/ad-sync" className="text-brand-blue underline">시트 sync</Link> 또는 광고 트래픽 유입 후 확인.
           </p>
         ) : (
+          <>
           <table className="w-full text-sm">
             <thead className="bg-ink-900 text-ink-400 text-xs">
               <tr>
@@ -153,9 +156,11 @@ export default async function PaidMediaDashboardPage({
                 <th className="text-right px-3 py-2">클릭</th>
                 <th className="text-right px-3 py-2">CTR</th>
                 <th className="text-right px-3 py-2">광고비</th>
-                <th className="text-right px-3 py-2 bg-brand-blue/10">리드</th>
-                <th className="text-right px-3 py-2 bg-brand-blue/10 text-amber-300">CPL</th>
-                <th className="text-right px-3 py-2">전환</th>
+                <th className="text-right px-3 py-2 bg-violet-500/10" title="광고 플랫폼이 보고한 결과수 (시트 전환수)">광고 리드</th>
+                <th className="text-right px-3 py-2 bg-violet-500/10 text-amber-300">광고 CPL</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/10" title="우리 사이트에 utm 매칭으로 도착한 리드">CRM 리드</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/10 text-amber-300">CRM CPL</th>
+                <th className="text-right px-3 py-2">개통</th>
                 <th className="text-right px-3 py-2 text-amber-300">CPA</th>
                 <th className="text-right px-3 py-2">매출</th>
                 <th className="text-right px-3 py-2">ROAS</th>
@@ -175,6 +180,8 @@ export default async function PaidMediaDashboardPage({
                   <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtInt(r.clicks)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtPercent(r.ctr)}</td>
                   <td className="px-3 py-2 text-right font-mono text-brand-blue">{fmtMoney(r.spend)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.ad_leads)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-amber-300 bg-violet-500/5">{fmtCpl(r.ad_cpl)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtInt(r.leads)}</td>
                   <td className="px-3 py-2 text-right font-mono text-amber-300 bg-brand-blue/5">{fmtCpl(r.cpl)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtInt(r.conversions)}</td>
@@ -188,6 +195,12 @@ export default async function PaidMediaDashboardPage({
               ))}
             </tbody>
           </table>
+          <p className="text-[11px] text-ink-500 px-5 py-2">
+            <span className="text-violet-300">■ 보라 컬럼</span> = 광고 플랫폼 보고 기준 (시트 sync, ad_metrics.conversions) ·
+            <span className="text-brand-blue ml-2">■ 블루 컬럼</span> = CRM 도착 기준 (consultations utm 매칭) ·
+            <span className="ml-2">개통/CPA/매출/ROAS</span> = revenue_records 매칭
+          </p>
+          </>
         )}
       </section>
 
@@ -196,7 +209,7 @@ export default async function PaidMediaDashboardPage({
         <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
           <div className="px-5 pt-4 pb-2">
             <h2 className="text-lg font-bold text-ink-100">일별 추이</h2>
-            <p className="text-xs text-ink-500">광고비 / 리드 / 전환 / 매출 시간순</p>
+            <p className="text-xs text-ink-500">광고비 / 광고 리드 / CRM 리드 / 개통 / 매출 시간순</p>
           </div>
           <DailySeriesTable rows={summary.dailySeries} />
         </section>
@@ -206,16 +219,16 @@ export default async function PaidMediaDashboardPage({
       {summary.byCampaign.length > 0 && (
         <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
           <div className="px-5 pt-4 pb-2">
-            <h2 className="text-lg font-bold text-ink-100">캠페인별 성과</h2>
-            <p className="text-xs text-ink-500">utm_campaign 기준 · 상위 50개</p>
+            <h2 className="text-lg font-bold text-ink-100">캠페인별 성과 <span className="text-xs font-normal text-ink-500">(CRM 기준)</span></h2>
+            <p className="text-xs text-ink-500">utm_campaign 매칭 기준 · 상위 50개. 광고 플랫폼 캠페인 raw 는 ad_metrics 에 저장 안 됨 — 시트의 캠페인 단위 분석은 시트에서 직접.</p>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-ink-900 text-ink-400 text-xs">
               <tr>
                 <th className="text-left px-3 py-2">매체</th>
-                <th className="text-left px-3 py-2">캠페인</th>
-                <th className="text-right px-3 py-2">리드</th>
-                <th className="text-right px-3 py-2">전환</th>
+                <th className="text-left px-3 py-2">캠페인 (utm_campaign)</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/10">CRM 리드</th>
+                <th className="text-right px-3 py-2">개통</th>
                 <th className="text-right px-3 py-2">매출</th>
                 <th className="text-right px-3 py-2">개통률</th>
               </tr>
@@ -311,10 +324,11 @@ function roasTextClass(roas: number | null): string {
 function DailySeriesTable({
   rows,
 }: {
-  rows: { date: string; spend: number; leads: number; conversions: number; revenue: number }[]
+  rows: { date: string; spend: number; ad_leads: number; leads: number; conversions: number; revenue: number }[]
 }) {
-  const maxSpend = Math.max(1, ...rows.map((r) => r.spend))
-  const maxLeads = Math.max(1, ...rows.map((r) => r.leads))
+  const maxSpend   = Math.max(1, ...rows.map((r) => r.spend))
+  const maxAdLeads = Math.max(1, ...rows.map((r) => r.ad_leads))
+  const maxLeads   = Math.max(1, ...rows.map((r) => r.leads))
 
   return (
     <table className="w-full text-sm">
@@ -322,19 +336,22 @@ function DailySeriesTable({
         <tr>
           <th className="text-left px-3 py-2">일자</th>
           <th className="text-right px-3 py-2">광고비</th>
-          <th className="text-left px-3 py-2 w-32">광고비 추이</th>
-          <th className="text-right px-3 py-2">리드</th>
-          <th className="text-left px-3 py-2 w-32">리드 추이</th>
-          <th className="text-right px-3 py-2">전환</th>
+          <th className="text-left px-3 py-2 w-28">광고비 추이</th>
+          <th className="text-right px-3 py-2 bg-violet-500/10">광고 리드</th>
+          <th className="text-left px-3 py-2 w-28 bg-violet-500/10">광고 리드 추이</th>
+          <th className="text-right px-3 py-2 bg-brand-blue/10">CRM 리드</th>
+          <th className="text-left px-3 py-2 w-28 bg-brand-blue/10">CRM 리드 추이</th>
+          <th className="text-right px-3 py-2">개통</th>
           <th className="text-right px-3 py-2">매출</th>
-          <th className="text-right px-3 py-2">CPL</th>
+          <th className="text-right px-3 py-2">광고 CPL</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-ink-800">
         {rows.map((r) => {
-          const cpl = r.leads > 0 ? r.spend / r.leads : null
-          const spendBar = (r.spend / maxSpend) * 100
-          const leadBar = (r.leads / maxLeads) * 100
+          const adCpl = r.ad_leads > 0 ? r.spend / r.ad_leads : null
+          const spendBar   = (r.spend    / maxSpend)   * 100
+          const adLeadBar  = (r.ad_leads / maxAdLeads) * 100
+          const leadBar    = (r.leads    / maxLeads)   * 100
           return (
             <tr key={r.date} className="hover:bg-ink-800/30">
               <td className="px-3 py-2 text-ink-300 font-mono text-xs">{r.date}</td>
@@ -342,13 +359,17 @@ function DailySeriesTable({
               <td className="px-3 py-2">
                 <Bar pct={spendBar} color="bg-brand-blue/60" />
               </td>
-              <td className="px-3 py-2 text-right font-mono text-ink-100">{fmtInt(r.leads)}</td>
-              <td className="px-3 py-2">
+              <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.ad_leads)}</td>
+              <td className="px-3 py-2 bg-violet-500/5">
+                <Bar pct={adLeadBar} color="bg-violet-400/60" />
+              </td>
+              <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtInt(r.leads)}</td>
+              <td className="px-3 py-2 bg-brand-blue/5">
                 <Bar pct={leadBar} color="bg-emerald-500/60" />
               </td>
               <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtInt(r.conversions)}</td>
               <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtMoney(r.revenue)}</td>
-              <td className="px-3 py-2 text-right font-mono text-amber-300">{fmtCpl(cpl)}</td>
+              <td className="px-3 py-2 text-right font-mono text-amber-300">{fmtCpl(adCpl)}</td>
             </tr>
           )
         })}
