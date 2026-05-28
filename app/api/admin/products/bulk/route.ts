@@ -147,7 +147,9 @@ const KO_CATEGORY: Record<string, string> = {
   '광랜': 'internet',
   '500M': 'internet',
   '1기가': 'internet',
-  // 인터넷 옵션 (셋탑/WIFI/유심결합 등)
+  // 인터넷 옵션 (셋탑/WIFI/유심결합 등) — 시트 사용자 직관성 위해 한글 그대로 인식
+  '인터넷-옵션': 'internet_option',
+  '인터넷옵션': 'internet_option',
   '추가셋탑': 'internet_option',
   '셋탑': 'internet_option',
   '스탠다드': 'internet_option',
@@ -157,6 +159,8 @@ const KO_CATEGORY: Record<string, string> = {
   '애플셋탑': 'internet_option',
   'OSS인센': 'internet_option',
   // 인터넷 유심 결합 (별도 카테고리 — 인센티브 큼)
+  '인터넷-유심결합': 'internet_usim',
+  '인터넷유심결합': 'internet_usim',
   '유심정책': 'internet_usim',
   '유심결합': 'internet_usim',
   '유심정책\n[부가세포함 정책]': 'internet_usim',
