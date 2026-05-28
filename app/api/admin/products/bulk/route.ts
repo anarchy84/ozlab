@@ -36,34 +36,71 @@ interface InputRow {
   default_monthly?: string | number | null
   sort_order?: string | number | null
   note?: string | null
-  // 한글 헤더 (담당자가 채우는 양식)
+  // 한글 헤더 (담당자가 채우는 표준 양식 + 공급사별 변형)
+  // === 상품 이름 ===
   '상품 이름'?: string
   '상품이름'?: string
   '이름'?: string
+  '상품명'?: string
+  '품목명'?: string         // NIT 양식
+  '상품구성'?: string        // 네이버 렌탈표
+  // === 분류 / 카테고리 ===
   '분류'?: string
   '카테고리'?: string
+  '품목군'?: string          // NIT 양식
+  '구성'?: string            // 네이버 렌탈표
+  // === 공급사 ===
   '공급 회사'?: string
   '공급회사'?: string
+  '공급사'?: string          // NIT 양식
   '본사'?: string
   '회사'?: string
+  '제조사'?: string
+  // === 고객 판매 가격 ===
   '고객 가격'?: string | number
   '고객가격'?: string | number
   '가격'?: string | number
+  '판매가'?: string | number
+  '판매가격'?: string | number
+  '일시불'?: string | number  // 네이버 렌탈표 (단발 결제)
+  // === 우리 수당 (마진) ===
   '우리 수당'?: string | number
   '우리수당'?: string | number
   '수당'?: string | number
+  '마진'?: string | number
+  // === 원가 (부가세 포함, 우리가 사오는 가격) ===
   '기기 값'?: string | number
   '기기값'?: string | number
   '기기 매입가'?: string | number
+  '원가'?: string | number
+  '단가'?: string | number       // 네이버 렌탈표 (원가, 부가세 포함)
+  '렌탈가'?: string | number     // 네이버 렌탈표 (원가, 부가세 포함)
+  '매입가'?: string | number
+  '판매가\n(기본)'?: string | number  // NIT 양식 (개행 포함)
+  '판매가(기본)'?: string | number
+  // === 약정 ===
   '약정 기간'?: string
   '약정기간'?: string
   '약정'?: string
+  '계약 기간'?: string
+  // === 월 정기 결제 ===
   '월 정기 결제'?: string
   '월정기결제'?: string
   '월결제'?: string
+  '정기결제'?: string
+  '월 결제 금액'?: string | number
+  '월결제금액'?: string | number
+  // === 메모 / 비고 ===
   '메모'?: string
   '비고'?: string
   '특이사항'?: string
+  '제품설명'?: string         // NIT 양식 — note 흡수
+  '설명'?: string
+  // === 무시할 컬럼 (인증, 일자 등 — 데이터 보관 X) ===
+  '여신협회인증여부'?: string  // NIT 양식 (무시)
+  '인증일'?: string             // NIT 양식 (무시)
+  '인증만료일'?: string         // NIT 양식 (무시)
+  'NO'?: string | number        // NIT 양식 (행 번호, 무시)
   // 단말기 + 원가 7단계
   '단말기 종류'?: string
   '단말기종류'?: string
@@ -98,15 +135,57 @@ interface InputRow {
 }
 
 // 한글 분류값 → 영문 category code 매핑
+// 오즈랩의 4종 핵심 상품 (인터넷 / POS단말기 / CCTV / 테이블오더-키오스크) +
+// 각 상품 옵션·부속 + 공급사별 표현을 통일된 카테고리로 변환
 const KO_CATEGORY: Record<string, string> = {
+  // === 1. 인터넷 (메인) ===
   '인터넷': 'internet',
+  '인터넷가입': 'internet',
+  'SKT인터넷': 'internet',
+  'KT인터넷': 'internet',
+  'LG인터넷': 'internet',
+  '광랜': 'internet',
+  '500M': 'internet',
+  '1기가': 'internet',
+  // 인터넷 옵션 (셋탑/WIFI/유심결합 등)
+  '추가셋탑': 'internet_option',
+  '셋탑': 'internet_option',
+  '스탠다드': 'internet_option',
+  'ALL': 'internet_option',
+  'WIFI 7': 'internet_option',
+  'WIFI': 'internet_option',
+  '애플셋탑': 'internet_option',
+  'OSS인센': 'internet_option',
+  // 인터넷 유심 결합 (별도 카테고리 — 인센티브 큼)
+  '유심정책': 'internet_usim',
+  '유심결합': 'internet_usim',
+  '유심정책\n[부가세포함 정책]': 'internet_usim',
+  // === 2. POS 단말기 (메인) ===
+  '단말기': 'pos',
+  '포스기': 'pos',
+  '단말기(범용)': 'pos',
+  '단말기(특수)': 'pos',
+  'POS': 'pos',
+  // POS 부속/부가장비
+  'POS부가장비': 'pos_accessory',
+  '멀티패드': 'pos_accessory',
+  '매출전표': 'pos_accessory',
+  '케이블': 'pos_accessory',
+  '부수기자재': 'pos_accessory',
+  '서명패드': 'pos_accessory',
+  '커넥트': 'pos_accessory',
+  '태블릿': 'pos_accessory',
+  '주방용': 'pos_accessory',
+  // === 3. CCTV (메인) ===
   'cctv': 'cctv',
   'CCTV': 'cctv',
+  // === 4. 테이블오더 / 키오스크 (메인) ===
   '키오스크': 'kiosk',
   '테이블오더': 'tableorder',
   '테오': 'tableorder',
-  '단말기': 'pos',
-  'POS': 'pos',
+  // === 기타 ===
+  '추가상품': 'addon',
+  '추가\n상품': 'addon',
   '기타': 'etc',
 }
 
@@ -231,14 +310,20 @@ export async function POST(req: NextRequest) {
 
   rows.forEach((r, i) => {
     const idx = i + 1
-    // 영문/한글 동의어 모두 인식
-    const label = cleanStr(pick(r, 'label', '상품 이름', '상품이름', '이름'), 200)
+    // 영문/한글 동의어 모두 인식 — 표준 양식 + NIT + 네이버 렌탈표 헤더
+    const label = cleanStr(
+      pick(r, 'label', '상품 이름', '상품이름', '이름', '상품명', '품목명', '상품구성'),
+      200,
+    )
     let code = cleanStr(pick(r, 'code'), 60)
     // code 비어있으면 label 에서 자동 생성
     if (!code && label) code = makeCodeFromLabel(label)
 
     // category — 한글이면 영문 코드로 변환
-    const categoryRaw = cleanStr(pick(r, 'category', '분류', '카테고리'), 60)
+    const categoryRaw = cleanStr(
+      pick(r, 'category', '분류', '카테고리', '품목군', '구성'),
+      60,
+    )
     const category = KO_CATEGORY[categoryRaw] ?? categoryRaw.toLowerCase()
 
     // 검증
@@ -284,22 +369,48 @@ export async function POST(req: NextRequest) {
     // 액션 결정
     const action: 'insert' | 'update' = existingCodes.has(code) ? 'update' : 'insert'
 
-    const vendorVal       = cleanStr(pick(r, 'vendor', '공급 회사', '공급회사', '본사', '회사'), 40) || null
+    const vendorVal       = cleanStr(
+      pick(r, 'vendor', '공급 회사', '공급회사', '공급사', '본사', '회사', '제조사'),
+      40,
+    ) || null
     const deviceTypeVal   = cleanStr(pick(r, 'device_type', '단말기 종류', '단말기종류'), 40) || null
-    const customerPriceVal = toNumber(pick(r, 'customer_price', '고객 가격', '고객가격', '가격'))
-    const commissionVal    = toNumber(pick(r, 'default_commission', '우리 수당', '우리수당', '수당'))
-    // 원가 1대 (= device_cost, 의미 재정의)
-    const deviceCostVal    = toNumber(pick(r, 'device_cost', '원가 1대', '원가(1대)', '원가 (1대)', '기기 값', '기기값', '기기 매입가'))
-    const cost5            = toNumber(pick(r, 'cost_5plus',   '원가 5대+',  '원가(5대+)',  '원가 (5대+)'))
-    const cost10           = toNumber(pick(r, 'cost_10plus',  '원가 10대+', '원가(10대+)', '원가 (10대+)'))
-    const cost20           = toNumber(pick(r, 'cost_20plus',  '원가 20대+', '원가(20대+)', '원가 (20대+)'))
-    const cost30           = toNumber(pick(r, 'cost_30plus',  '원가 30대+', '원가(30대+)', '원가 (30대+)'))
-    const cost50           = toNumber(pick(r, 'cost_50plus',  '원가 50대+', '원가(50대+)', '원가 (50대+)'))
-    const cost100          = toNumber(pick(r, 'cost_100plus', '원가 100대+', '원가(100대+)', '원가 (100대+)'))
-    const noteVal          = cleanStr(pick(r, 'note', '메모', '비고', '특이사항'), 500) || null
-    const isSubVal         = toBool(pick(r, 'is_subscription', '월 정기 결제', '월정기결제', '월결제'))
-    const defaultMonthly   = toNumber(pick(r, 'default_monthly'))
+    // 고객 판매 가격 — '일시불' 도 동일 의미 (네이버 렌탈표)
+    const customerPriceVal = toNumber(
+      pick(r, 'customer_price', '고객 가격', '고객가격', '가격', '판매가', '판매가격', '일시불'),
+    )
+    const commissionVal    = toNumber(
+      pick(r, 'default_commission', '우리 수당', '우리수당', '수당', '마진'),
+    )
+    // 원가 1대 (= device_cost) — 네이버 렌탈표의 '단가/렌탈가' = 부가세 포함 원가
+    //                           NIT 양식의 '판매가(기본)' = 1대 단가
+    const deviceCostVal    = toNumber(
+      pick(
+        r,
+        'device_cost', '원가 1대', '원가(1대)', '원가 (1대)',
+        '기기 값', '기기값', '기기 매입가',
+        '원가', '단가', '렌탈가', '매입가',
+        '판매가\n(기본)', '판매가(기본)',
+      ),
+    )
+    const cost5            = toNumber(pick(r, 'cost_5plus',   '원가 5대+',  '원가(5대+)',  '원가 (5대+)',  '판매가\n(5대이상)',  '판매가(5대이상)'))
+    const cost10           = toNumber(pick(r, 'cost_10plus',  '원가 10대+', '원가(10대+)', '원가 (10대+)', '판매가\n(10대이상)', '판매가(10대이상)'))
+    const cost20           = toNumber(pick(r, 'cost_20plus',  '원가 20대+', '원가(20대+)', '원가 (20대+)', '판매가\n(20대이상)', '판매가(20대이상)'))
+    const cost30           = toNumber(pick(r, 'cost_30plus',  '원가 30대+', '원가(30대+)', '원가 (30대+)', '판매가\n(30대이상)', '판매가(30대이상)'))
+    const cost50           = toNumber(pick(r, 'cost_50plus',  '원가 50대+', '원가(50대+)', '원가 (50대+)', '판매가\n(50대이상)', '판매가(50대이상)'))
+    const cost100          = toNumber(pick(r, 'cost_100plus', '원가 100대+', '원가(100대+)', '원가 (100대+)', '판매가\n(100대이상)', '판매가(100대이상)'))
+    // 메모 — 비고/특이사항/제품설명/설명 모두 흡수
+    const noteVal          = cleanStr(
+      pick(r, 'note', '메모', '비고', '특이사항', '제품설명', '설명'),
+      500,
+    ) || null
+    const isSubVal         = toBool(
+      pick(r, 'is_subscription', '월 정기 결제', '월정기결제', '월결제', '정기결제'),
+    )
+    const defaultMonthly   = toNumber(
+      pick(r, 'default_monthly', '월 결제 금액', '월결제금액'),
+    )
     const finalMonthly     = defaultMonthly ?? (isSubVal ? customerPriceVal : null)
+    // 인증 정보 (여신협회/인증일/만료일) + NO 컬럼은 의도적으로 무시 (사용자 결정)
 
     const payload: Record<string, unknown> = {
       code,

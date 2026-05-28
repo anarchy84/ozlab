@@ -59,6 +59,7 @@ export default async function AdminShellLayout({
         { href: '/admin/settings/consultation-options', label: '상담 옵션 관리', desc: '업종·지역·단말기·약정·통화시간 드롭다운' },
         { href: '/admin/settings/cta', label: 'CTA 관리', desc: '홈 버튼·utm 자동' },
         { href: '/admin/settings/products', label: '상품 관리', desc: '카탈로그·카테고리' },
+        { href: '/admin/settings/product-sync', label: '상품 시트 sync', desc: '구글 시트 → products. 표준 한글 양식' },
         { href: '/admin/settings/distribution', label: 'DB 정책·분배', desc: '중복 기준·자동 배정' },
         { href: '/admin/settings/blacklist', label: '블랙리스트 관리', desc: '차단 연락처·IP 해제' },
         { href: '/admin/settings/ad-sync', label: '광고 sync', desc: '시트 → ad_metrics' },
