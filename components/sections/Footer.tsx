@@ -36,7 +36,7 @@ export function Footer({ blocks, ctas }: Props) {
   const supportLinks = [
     { key: 'home.footer.support.v2.phone', label: '1588-0000 (평일 9–18시)', href: 'tel:1588-0000' },
     { key: 'home.footer.support.v2.faq', label: '자주 묻는 질문', href: '/#faq' },
-    { key: 'home.footer.support.v2.privacy', label: '이용약관 · 개인정보처리방침', href: '#' },
+    { key: 'home.footer.support.v2.privacy', label: '개인정보처리방침', href: '/legal/privacy-policy.pdf' },
   ]
 
   return (
@@ -140,7 +140,7 @@ export function Footer({ blocks, ctas }: Props) {
               <EditableLink
                 key={l.key}
                 blockKey={l.key}
-                fallback={{ label: l.label, href: l.href, target: '_self' }}
+                fallback={{ label: l.label, href: l.href, target: l.href.endsWith('.pdf') ? '_blank' : '_self' }}
                 value={pickLinkOrUndef(blocks, l.key)}
                 pagePath="/"
                 className="text-sm text-ink-300 hover:text-white transition-colors"
