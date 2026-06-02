@@ -1,4 +1,5 @@
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
+import { SITE_PHONE_HREF } from '@/lib/contact'
 
 export type ServiceCard = {
   title: string
@@ -278,7 +279,7 @@ export const servicePages = {
     },
     primaryCta: '요금 비교 상담',
     secondaryCta: '전화 상담',
-    secondaryHref: 'tel:1588-0000',
+    secondaryHref: SITE_PHONE_HREF,
     stats: [
       { value: '3사', label: '통신사 비교' },
       { value: '고정 IP', label: '원격 접속 안내' },
@@ -384,7 +385,7 @@ export const servicePages = {
     },
     primaryCta: '도입 상담',
     secondaryCta: '전화 상담',
-    secondaryHref: 'tel:1588-0000',
+    secondaryHref: SITE_PHONE_HREF,
     stats: [
       { value: '30%', label: '인건비 절감 기대' },
       { value: '25%', label: '객단가 상승 기대' },
@@ -497,7 +498,7 @@ export const servicePages = {
     },
     primaryCta: 'CCTV 구성 상담',
     secondaryCta: '전화 상담',
-    secondaryHref: 'tel:1588-0000',
+    secondaryHref: SITE_PHONE_HREF,
     stats: [
       { value: '4ch', label: '소형 매장 기본' },
       { value: '8ch', label: '중형 매장 추천' },

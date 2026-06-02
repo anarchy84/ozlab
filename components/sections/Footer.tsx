@@ -12,6 +12,7 @@ import {
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import { SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
@@ -34,7 +35,7 @@ export function Footer({ blocks, ctas }: Props) {
 
   // supportLinks 의 "상담 신청"은 DynamicCTA 로 별도 처리 (어트리뷰션 추적)
   const supportLinks = [
-    { key: 'home.footer.support.v2.phone', label: '1588-0000 (평일 9–18시)', href: 'tel:1588-0000' },
+    { key: 'home.footer.support.v2.phone', label: `${SITE_PHONE} (평일 9–18시)`, href: SITE_PHONE_HREF },
     { key: 'home.footer.support.v2.faq', label: '자주 묻는 질문', href: '/#faq' },
     { key: 'home.footer.support.v2.privacy', label: '개인정보처리방침', href: '/legal/privacy-policy.pdf' },
   ]

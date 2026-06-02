@@ -10,6 +10,7 @@ import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { useBlocks } from '@/components/editable/BlocksProvider'
 import { pickTextOrUndef } from '@/lib/content-blocks'
+import { SITE_PHONE_HREF } from '@/lib/contact'
 import { marketingSupportFaqsForBlocks } from '@/lib/marketing-support-faqs'
 import { LandingSlot } from '@/components/landing/LandingSlot'
 import type { LandingSlotsByKey } from '@/lib/landing-sections'
@@ -372,7 +373,7 @@ export function MarketingSupportLanding({ landingSlots = {} }: { landingSlots?: 
                   />
                   <Icon.Arrow s={18} />
                 </Link>
-                <Link href="tel:1588-0000" className="btn btn-ghost lg">
+                <Link href={SITE_PHONE_HREF} className="btn btn-ghost lg">
                   <EditableText
                     as="span"
                     blockKey={k('cta.secondary')}

@@ -301,26 +301,35 @@ export function ApplyForm({ blocks }: Props) {
         <div className="form-card">
           {sent ? (
             // 제출 성공 화면
-            <div className="text-center py-10 px-5 text-ink-900">
+            <div className="text-center px-4 py-9 text-ink-900 sm:px-5 sm:py-10">
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft text-4xl">
                 ✅
               </div>
-              <h3 className="text-h2 text-ink-900">신청이 접수되었습니다</h3>
-              <p className="mx-auto mt-4 max-w-sm text-base leading-relaxed text-ink-700 break-keep">
+              <h3 className="break-keep text-[22px] font-extrabold leading-tight text-ink-900 sm:text-[26px] lg:text-h2">
+                신청이 접수되었습니다
+              </h3>
+              <p className="mx-auto mt-4 max-w-sm break-keep text-sm leading-relaxed text-ink-700 sm:text-base">
                 담당자가 영업일 24시간 내에 연락드릴게요. 급한 문의는 대표번호나 카톡으로 바로 연결할 수 있습니다.
               </p>
-              <div className="mt-7 grid gap-2 sm:grid-cols-3">
-                <a href="/" className="btn btn-ghost w-full text-ink-800">
+              <div className="mt-7 grid gap-2 lg:grid-cols-3">
+                <a
+                  href="/"
+                  className="btn btn-ghost min-h-[52px] w-full whitespace-nowrap px-4 text-sm leading-tight text-ink-800 sm:text-[15px]"
+                >
                   홈으로 돌아가기
                 </a>
-                <a href={SITE_PHONE_HREF} className="btn btn-primary w-full">
+                <a
+                  href={SITE_PHONE_HREF}
+                  className="btn btn-primary min-h-[52px] w-full whitespace-nowrap px-4 text-sm leading-tight sm:text-[15px]"
+                  aria-label={`${SITE_PHONE} 전화하기`}
+                >
                   {SITE_PHONE} 전화하기
                 </a>
                 <a
                   href={KAKAO_CHAT_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn w-full border border-[#FEE500] bg-[#FEE500] text-[#111] hover:brightness-95"
+                  className="btn min-h-[52px] w-full whitespace-nowrap border border-[#FEE500] bg-[#FEE500] px-4 text-sm leading-tight text-[#111] hover:brightness-95 sm:text-[15px]"
                 >
                   카톡 문의하기
                 </a>

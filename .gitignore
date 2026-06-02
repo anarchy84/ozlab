@@ -44,3 +44,7 @@ coverage/
 # Supabase 로컬
 supabase/.branches/
 supabase/.temp/
+
+# 디자인 참고용 / 사용 안 함
+_design_reference/
+public/templates/products_template_ko_v0.2.xlsx

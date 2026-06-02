@@ -14,6 +14,7 @@ import {
   pickLinkOrUndef,
   type ContentBlock,
 } from '@/lib/content-blocks'
+import { SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import type { CtaButton } from '@/lib/admin/types'
 
 interface Props {
@@ -81,14 +82,14 @@ export function Nav({ blocks, ctas }: Props) {
         <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
           {/* 전화 CTA — 넓은 데스크톱에서만 노출 */}
           <a
-            href="tel:1588-0000"
+            href={SITE_PHONE_HREF}
             className="btn btn-ghost sm hidden whitespace-nowrap xl:inline-flex"
           >
             <Icon.Phone s={16} />
             <EditableText
               as="span"
               blockKey="home.nav.phone"
-              fallback="1588-0000"
+              fallback={SITE_PHONE}
               value={pickTextOrUndef(blocks, 'home.nav.phone')}
               pagePath="/"
             />

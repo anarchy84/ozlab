@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { listPublishedPosts } from '@/lib/posts'
+import { SITE_PHONE } from '@/lib/contact'
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL, postCanonicalPath } from '@/lib/seo'
 
 export const revalidate = 600
@@ -34,7 +35,7 @@ export async function GET() {
     ...posts.slice(0, 20).map((post) => `- ${post.title}: ${absoluteUrl(postCanonicalPath(post))}`),
     '',
     '## Contact',
-    '- Phone: 1588-0000',
+    `- Phone: ${SITE_PHONE}`,
     `- Canonical site: ${SITE_URL}`,
   ]
 

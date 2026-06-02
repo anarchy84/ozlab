@@ -211,24 +211,27 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
       style={{ background: inline ? undefined : (dc.bg_color ?? '#0f1115') }}
     >
       {sent ? (
-        <div className="text-center py-8 px-4">
+        <div className="px-4 py-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue/15 text-4xl">
             ✅
           </div>
-          <h3 className="text-2xl font-extrabold text-white">신청이 접수되었습니다</h3>
-          <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-white/78 break-keep">
+          <h3 className="break-keep text-[21px] font-extrabold leading-tight text-white sm:text-2xl">
+            신청이 접수되었습니다
+          </h3>
+          <p className="mx-auto mt-3 max-w-xs break-keep text-sm leading-relaxed text-white/78">
             담당자가 영업일 24시간 내에 연락드릴게요. 급한 문의는 바로 연결해 주세요.
           </p>
           <div className="mt-6 grid gap-2">
             <a
               href="/"
-              className="rounded-full border border-white/20 px-4 py-2.5 text-sm font-bold text-white hover:bg-white/10"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/20 px-4 py-2.5 text-sm font-bold leading-tight text-white hover:bg-white/10"
             >
               홈으로 돌아가기
             </a>
             <a
               href={SITE_PHONE_HREF}
-              className="rounded-full bg-brand-blue px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-dark"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-brand-blue px-4 py-2.5 text-sm font-bold leading-tight text-white hover:bg-brand-dark"
+              aria-label={`${SITE_PHONE} 전화하기`}
             >
               {SITE_PHONE} 전화하기
             </a>
@@ -236,7 +239,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
               href={KAKAO_CHAT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full bg-[#FEE500] px-4 py-2.5 text-sm font-bold text-[#111] hover:brightness-95"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#FEE500] px-4 py-2.5 text-sm font-bold leading-tight text-[#111] hover:brightness-95"
             >
               카톡 문의하기
             </a>

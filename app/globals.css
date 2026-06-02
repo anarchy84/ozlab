@@ -379,6 +379,8 @@
    data-admin-shell 아래의 표면/글자/테두리를 밝은 토큰으로 치환한다. */
 html.light [data-admin-shell] {
   color-scheme: light;
+  background-color: #f3f4f6;
+  color: #111827;
 }
 [data-admin-shell] {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -491,13 +493,23 @@ html.light [data-admin-shell] .text-ink-300 {
 }
 html.light [data-admin-shell].text-ink-400,
 html.light [data-admin-shell] .text-ink-400 {
-  color: #4b5563 !important;
+  color: #475569 !important;
 }
 html.light [data-admin-shell].text-ink-500,
+html.light [data-admin-shell] .text-ink-500 {
+  color: #64748b !important;
+}
 html.light [data-admin-shell].text-ink-600,
-html.light [data-admin-shell] .text-ink-500,
 html.light [data-admin-shell] .text-ink-600 {
-  color: #6b7280 !important;
+  color: #475569 !important;
+}
+html.light [data-admin-shell].text-ink-700,
+html.light [data-admin-shell].text-ink-800,
+html.light [data-admin-shell].text-ink-900,
+html.light [data-admin-shell] .text-ink-700,
+html.light [data-admin-shell] .text-ink-800,
+html.light [data-admin-shell] .text-ink-900 {
+  color: #111827 !important;
 }
 html.light [data-admin-shell] .text-brand-neon {
   color: #1F4DBD !important;
@@ -528,6 +540,175 @@ html.light [data-admin-shell] .bg-blue-600.text-white {
 }
 html.light [data-admin-shell] .bg-brand-neon.text-ink-900 {
   color: #0a0a0a !important;
+}
+html.light [data-admin-shell] header.bg-ink-900,
+html.light [data-admin-shell] table thead.bg-ink-900 {
+  background-color: #f8fafc !important;
+}
+html.light [data-admin-shell] table thead,
+html.light [data-admin-shell] table th {
+  color: #334155 !important;
+}
+html.light [data-admin-shell] table tbody {
+  color: #111827;
+}
+html.light [data-admin-shell] table td {
+  color: inherit;
+}
+html.light [data-admin-shell] [class~="hover:bg-ink-800/40"]:hover,
+html.light [data-admin-shell] [class~="hover:bg-ink-800/30"]:hover,
+html.light [data-admin-shell] tr.hover\:bg-ink-800\/40:hover,
+html.light [data-admin-shell] tr.hover\:bg-ink-800\/30:hover {
+  background-color: #f8fafc !important;
+}
+html.light [data-admin-shell] [class~="bg-brand-blue/5"] {
+  background-color: #eff6ff !important;
+}
+html.light [data-admin-shell] [class~="bg-brand-blue/10"] {
+  background-color: #dbeafe !important;
+}
+html.light [data-admin-shell] [class~="bg-brand-blue/15"],
+html.light [data-admin-shell] [class~="bg-brand-blue/20"] {
+  background-color: #dbeafe !important;
+}
+html.light [data-admin-shell] [class~="border-brand-blue/40"] {
+  border-color: #93c5fd !important;
+}
+html.light [data-admin-shell] .text-blue-200,
+html.light [data-admin-shell] .text-blue-300,
+html.light [data-admin-shell] .text-blue-400 {
+  color: #1d4ed8 !important;
+}
+html.light [data-admin-shell] .text-violet-200,
+html.light [data-admin-shell] .text-violet-300,
+html.light [data-admin-shell] .text-violet-400 {
+  color: #6d28d9 !important;
+}
+html.light [data-admin-shell] .text-emerald-200,
+html.light [data-admin-shell] .text-emerald-300,
+html.light [data-admin-shell] .text-emerald-400,
+html.light [data-admin-shell] .text-green-700,
+html.light [data-admin-shell] .text-green-800 {
+  color: #047857 !important;
+}
+html.light [data-admin-shell] .text-amber-100,
+html.light [data-admin-shell] .text-amber-200,
+html.light [data-admin-shell] .text-amber-300,
+html.light [data-admin-shell] .text-amber-400,
+html.light [data-admin-shell] .text-yellow-200,
+html.light [data-admin-shell] .text-yellow-300 {
+  color: #b45309 !important;
+}
+html.light [data-admin-shell] .text-orange-200,
+html.light [data-admin-shell] .text-orange-300 {
+  color: #c2410c !important;
+}
+html.light [data-admin-shell] .text-pink-200,
+html.light [data-admin-shell] .text-pink-300 {
+  color: #be185d !important;
+}
+html.light [data-admin-shell] .text-red-300,
+html.light [data-admin-shell] .text-red-400 {
+  color: #b91c1c !important;
+}
+html.light [data-admin-shell] .text-purple-800 {
+  color: #6d28d9 !important;
+}
+html.light [data-admin-shell] .text-slate-700,
+html.light [data-admin-shell] .text-gray-300,
+html.light [data-admin-shell] .text-gray-400,
+html.light [data-admin-shell] .text-gray-500,
+html.light [data-admin-shell] .text-gray-600,
+html.light [data-admin-shell] .text-gray-700 {
+  color: #475569 !important;
+}
+html.light [data-admin-shell] [class~="bg-blue-500/5"],
+html.light [data-admin-shell] [class~="bg-blue-500/10"],
+html.light [data-admin-shell] [class~="bg-blue-500/15"],
+html.light [data-admin-shell] [class~="bg-blue-500/20"],
+html.light [data-admin-shell] [class~="bg-blue-600/30"],
+html.light [data-admin-shell] [class~="bg-blue-900/10"],
+html.light [data-admin-shell] [class~="bg-blue-900/40"] {
+  background-color: #dbeafe !important;
+}
+html.light [data-admin-shell] [class~="bg-violet-500/5"],
+html.light [data-admin-shell] [class~="bg-violet-500/10"],
+html.light [data-admin-shell] [class~="bg-violet-500/15"],
+html.light [data-admin-shell] [class~="bg-violet-500/20"],
+html.light [data-admin-shell] [class~="bg-violet-900/10"],
+html.light [data-admin-shell] [class~="bg-violet-900/40"] {
+  background-color: #ede9fe !important;
+}
+html.light [data-admin-shell] [class~="bg-emerald-500/10"],
+html.light [data-admin-shell] [class~="bg-emerald-500/20"],
+html.light [data-admin-shell] [class~="bg-green-100"] {
+  background-color: #d1fae5 !important;
+}
+html.light [data-admin-shell] [class~="bg-amber-500/5"],
+html.light [data-admin-shell] [class~="bg-amber-500/10"],
+html.light [data-admin-shell] [class~="bg-amber-500/15"],
+html.light [data-admin-shell] [class~="bg-amber-500/20"],
+html.light [data-admin-shell] [class~="bg-amber-600/20"],
+html.light [data-admin-shell] [class~="bg-amber-900/20"],
+html.light [data-admin-shell] [class~="bg-yellow-500/20"],
+html.light [data-admin-shell] [class~="bg-amber-100"] {
+  background-color: #fef3c7 !important;
+}
+html.light [data-admin-shell] [class~="bg-orange-500/20"] {
+  background-color: #ffedd5 !important;
+}
+html.light [data-admin-shell] [class~="bg-pink-500/20"] {
+  background-color: #fce7f3 !important;
+}
+html.light [data-admin-shell] [class~="bg-red-500/10"],
+html.light [data-admin-shell] [class~="bg-red-500/15"],
+html.light [data-admin-shell] [class~="bg-red-500/20"],
+html.light [data-admin-shell] [class~="bg-red-900/20"] {
+  background-color: #fee2e2 !important;
+}
+html.light [data-admin-shell] [class~="bg-purple-100"] {
+  background-color: #ede9fe !important;
+}
+html.light [data-admin-shell] [class~="bg-slate-100"] {
+  background-color: #f1f5f9 !important;
+}
+html.light [data-admin-shell] [class~="border-blue-500/40"],
+html.light [data-admin-shell] [class~="border-blue-700/40"] {
+  border-color: #93c5fd !important;
+}
+html.light [data-admin-shell] [class~="border-violet-500/40"],
+html.light [data-admin-shell] [class~="border-violet-700/40"] {
+  border-color: #c4b5fd !important;
+}
+html.light [data-admin-shell] [class~="border-emerald-500/30"],
+html.light [data-admin-shell] [class~="border-emerald-500/40"] {
+  border-color: #86efac !important;
+}
+html.light [data-admin-shell] [class~="border-amber-500/30"],
+html.light [data-admin-shell] [class~="border-amber-500/40"],
+html.light [data-admin-shell] [class~="border-amber-700/40"],
+html.light [data-admin-shell] .border-amber-200 {
+  border-color: #fcd34d !important;
+}
+html.light [data-admin-shell] [class~="border-pink-500"] {
+  border-color: #f9a8d4 !important;
+}
+html.light [data-admin-shell] [class~="border-red-500"],
+html.light [data-admin-shell] [class~="border-red-500/20"],
+html.light [data-admin-shell] [class~="border-red-500/30"],
+html.light [data-admin-shell] [class~="border-red-500/40"],
+html.light [data-admin-shell] [class~="border-red-800/50"] {
+  border-color: #fca5a5 !important;
+}
+html.light [data-admin-shell] .bg-gray-950,
+html.light [data-admin-shell] .bg-gray-900,
+html.light [data-admin-shell] .bg-gray-800,
+html.light [data-admin-shell] .bg-gray-700 {
+  background-color: #ffffff !important;
+}
+html.light [data-admin-shell] .border-gray-800,
+html.light [data-admin-shell] .border-gray-700 {
+  border-color: #d1d5db !important;
 }
 html.light [data-admin-shell] input,
 html.light [data-admin-shell] textarea,
