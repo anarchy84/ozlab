@@ -28,6 +28,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { assignNextCounselorIfNeeded } from '@/lib/admin/assignment'
 import { normalizePhone } from '@/lib/consultation-policy'
 import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
+import { sendCrmProLead } from '@/lib/integrations/crmpro'
 import { sendMetaLead } from '@/lib/tracking/meta-capi'
 import { broadcastNewLead } from '@/lib/slack'
 import { NextRequest, NextResponse } from 'next/server'
@@ -255,7 +256,11 @@ export async function POST(req: NextRequest) {
       meta_fbp: clean(body.meta_fbp, 200),
       meta_fbc: clean(body.meta_fbc, 200),
     })
-    .select('id, name, phone, store_name, industry, region, message, inferred_channel, counselor_id, utm_campaign')
+    .select(
+      `id, created_at, name, phone, store_name, industry, region, message,
+       inferred_channel, counselor_id, utm_source, utm_medium, utm_campaign,
+       landing_page_path`,
+    )
     .single()
 
   if (error || !data) {
@@ -272,7 +277,25 @@ export async function POST(req: NextRequest) {
     data.counselor_id,
   )
 
-  // 5) 슬랙 알림 — 채널 broadcast + 담당자 DM (자동배정 트리거가 채운 counselor_id 활용)
+  // 5) CRMPro 외부 DB 연동 — fire-and-forget
+  //    로컬 저장을 source of truth 로 두고, CRMPro 실패가 고객 접수를 막지 않게 한다.
+  void sendCrmProLead({
+    name: data.name,
+    phone: data.phone,
+    storeName: data.store_name,
+    industry: data.industry,
+    region: data.region,
+    message: data.message,
+    createdAt: data.created_at,
+    clientIp: ip,
+    landingPagePath: data.landing_page_path,
+    utmSource: data.utm_source,
+    utmMedium: data.utm_medium,
+    utmCampaign: data.utm_campaign,
+    customFields,
+  })
+
+  // 6) 슬랙 알림 — 채널 broadcast + 담당자 DM (자동배정 트리거가 채운 counselor_id 활용)
   //    DB slack_channels.code = 'leads_main' 으로 broadcast
   //    counselor_id 가 있으면 admin_users.slack_user_id 조회해서 DM
   //    fire-and-forget (await 안 함) — 폼 응답 지연 방지
@@ -311,7 +334,7 @@ export async function POST(req: NextRequest) {
     }
   })()
 
-  // 6) Meta CAPI Lead — 서버 측 이벤트 (브라우저 픽셀 Lead 와 event_id 로 dedupe)
+  // 7) Meta CAPI Lead — 서버 측 이벤트 (브라우저 픽셀 Lead 와 event_id 로 dedupe)
   //    · event_id = consultations.id (GTM 픽셀 Lead 태그 도 같은 값 박아야 dedupe 됨 — 가이드 참고)
   //    · user_data: phone(해시) + fbp/fbc + IP + UA → Meta 매칭률 ↑
   //    · LEAD_DEFAULT_VALUE 환경변수 (없으면 30000) 를 추정값으로 같이 전송
