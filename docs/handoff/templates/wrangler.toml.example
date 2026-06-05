@@ -1,0 +1,101 @@
+# ─────────────────────────────────────────────────────────────
+# wrangler.toml — 오즈랩페이 Cloudflare Workers 설정 (예시)
+#
+# 사용:
+#   1. 이 파일을 프로젝트 루트로 복사 → wrangler.toml
+#   2. <PLACEHOLDER> 값을 실제 값으로 교체
+#   3. wrangler deploy
+# ─────────────────────────────────────────────────────────────
+
+name = "ozlab"
+main = ".open-next/worker.js"           # OpenNext 빌드 output
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"] # Node.js API 사용
+
+# ─────────────────────────────────────────────
+# 빌드 결과 정적 자산
+# ─────────────────────────────────────────────
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+not_found_handling = "single-page-application"  # SPA fallback (필요 시)
+
+# ─────────────────────────────────────────────
+# 환경변수 (public — 클라이언트 노출 OK)
+# ─────────────────────────────────────────────
+# Secret 은 별도: wrangler secret put <NAME>
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://vbdoyambycopigfajcgk.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "<PASTE_FROM_VERCEL>"
+NEXT_PUBLIC_GTM_ID = "GTM-N3HSNZPJ"
+NEXT_PUBLIC_LEAD_DEFAULT_VALUE = "30000"
+
+# ─────────────────────────────────────────────
+# R2 버킷 (ISR / 인크리멘털 캐시용)
+# ─────────────────────────────────────────────
+# 사전 생성: wrangler r2 bucket create ozlab-next-cache
+[[r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "ozlab-next-cache"
+preview_bucket_name = "ozlab-next-cache-preview"
+
+# ─────────────────────────────────────────────
+# Workers KV (선택 — 분배 룰 / utm 매핑 등 빠른 캐시용)
+# ─────────────────────────────────────────────
+# [[kv_namespaces]]
+# binding = "OZLAB_CACHE"
+# id = "<CREATE_VIA_wrangler kv namespace create OZLAB_CACHE>"
+
+# ─────────────────────────────────────────────
+# Cron Triggers (Vercel Cron 대체)
+# ─────────────────────────────────────────────
+[triggers]
+crons = [
+  # 광고 시트 sync — 매일 03:00 KST = 18:00 UTC
+  "0 18 * * *",
+  # 상품 시트 sync — 매일 04:00 KST = 19:00 UTC
+  "0 19 * * *",
+  # alert_rules 평가 — 15분마다
+  "*/15 * * * *",
+]
+
+# ─────────────────────────────────────────────
+# 환경별 설정 (Production / Preview)
+# ─────────────────────────────────────────────
+[env.production]
+name = "ozlab"
+vars = { NEXT_PUBLIC_ENV = "production" }
+route = "www.ozlabpay.kr/*"
+
+[[env.production.routes]]
+pattern = "ozlabpay.kr/*"
+zone_name = "ozlabpay.kr"
+custom_domain = true
+
+[[env.production.routes]]
+pattern = "www.ozlabpay.kr/*"
+zone_name = "ozlabpay.kr"
+custom_domain = true
+
+[env.preview]
+name = "ozlab-preview"
+vars = { NEXT_PUBLIC_ENV = "preview" }
+
+# ─────────────────────────────────────────────
+# Observability (옵션)
+# ─────────────────────────────────────────────
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1.0  # 100% 로그 (트래픽 늘면 0.1 권장)
+
+# ─────────────────────────────────────────────
+# 한계 / 제한
+# ─────────────────────────────────────────────
+# - Workers Free Plan: 10만 요청/일, 10ms CPU/요청
+# - Workers Paid Plan ($5/mo): 1천만 요청 포함, 50ms CPU
+# - 응답 본문 크기: 100MB (Pro/Free 동일)
+# - 환경변수 크기: 5KB
+# - Secret 크기: 1KB

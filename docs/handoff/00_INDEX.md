@@ -24,8 +24,14 @@
 | **9** | `08_OPEN_ISSUES.md` | 알려진 이슈 + 데이터 품질 | 15분 |
 | **10** | `09_NEXT_STEPS.md` | 다음 작업 로드맵 (Phase F~H) | 20분 |
 | **11** | `11_DECISIONS.md` | 주요 의사결정 + 이유 (왜 이렇게 만들어졌나) | 20분 |
+| **12** | `12_CLOUDFLARE_MIGRATION.md` ★ | **Vercel → Cloudflare 전면 이전 마스터 플랜** | 30분 |
 
-**총 약 4시간** 이면 시스템 전체 그림 파악 가능.
+**총 약 4.5시간** 이면 시스템 전체 그림 + Cloudflare 이전 계획까지 파악 가능.
+
+> 12번은 Cloudflare 이전 작업 시작 전 필독. 템플릿 파일 3종은 `docs/handoff/templates/` 폴더:
+> - `wrangler.toml.example`
+> - `open-next.config.ts.example`
+> - `api-route-patch-examples.md`
 
 ## 2. 자주 묻는 질문 — 어디 봐야 하나?
 
@@ -55,7 +61,7 @@
 
 ### 인프라
 - **Supabase 프로젝트**: `woori-nconnect` (project_id: `vbdoyambycopigfajcgk`, region: `ap-northeast-2`)
-- **Vercel 프로젝트**: `ozlab` (team: `anarchy84s-projects`)
+- **Vercel 프로젝트**: `ozlab` (team: `anarchy84s-projects`) — **Cloudflare 이전 예정** (12번 문서 참조)
 - **도메인**: `www.ozlabpay.kr`
 - **GitHub**: `github.com/anarchy84/ozlab`
 

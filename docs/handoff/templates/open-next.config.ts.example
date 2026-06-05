@@ -1,0 +1,48 @@
+// ─────────────────────────────────────────────────────────────
+// open-next.config.ts — OpenNext for Cloudflare 설정 (예시)
+//
+// 사용:
+//   1. 이 파일을 프로젝트 루트로 복사 → open-next.config.ts
+//   2. npm install -D @opennextjs/cloudflare
+//   3. npm run build:cf  (또는 opennextjs-cloudflare build)
+// ─────────────────────────────────────────────────────────────
+
+import { defineCloudflareConfig } from '@opennextjs/cloudflare'
+
+// ISR 캐시 (R2)
+import r2IncrementalCache from '@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache'
+
+// (선택) 캐시 무효화 — Tag-based revalidation
+import shardedTagCache from '@opennextjs/cloudflare/overrides/tag-cache/d1-tag-cache'
+
+// (선택) 큐 — Queue-based cache invalidation
+import cloudflareQueue from '@opennextjs/cloudflare/overrides/queue/cloudflare-queue'
+
+export default defineCloudflareConfig({
+  // ─────────────────────────────────────────────
+  // ISR 캐시 (Static + Dynamic 렌더링 결과 캐시)
+  // ─────────────────────────────────────────────
+  incrementalCache: r2IncrementalCache,
+
+  // ─────────────────────────────────────────────
+  // (선택) 태그 기반 캐시 — revalidateTag() 동작용
+  // ─────────────────────────────────────────────
+  // tagCache: shardedTagCache,
+
+  // ─────────────────────────────────────────────
+  // (선택) 큐 — revalidate 백그라운드 처리
+  // ─────────────────────────────────────────────
+  // queue: cloudflareQueue,
+
+  // ─────────────────────────────────────────────
+  // 외부 패키지 처리
+  // ─────────────────────────────────────────────
+  // - Supabase 등은 자동 처리
+  // - 특정 패키지 번들 제외:
+  //   external: ['some-native-only-pkg'],
+
+  // ─────────────────────────────────────────────
+  // 미들웨어 (선택)
+  // ─────────────────────────────────────────────
+  // middleware: { external: true },  // 별도 Worker 로 미들웨어 분리
+})
