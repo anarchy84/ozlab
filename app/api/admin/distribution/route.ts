@@ -7,6 +7,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
+import { AUTO_DISTRIBUTION_ROLES } from '@/lib/admin/assignment'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
@@ -15,7 +16,7 @@ export async function GET() {
 
   const admin = createAdminClient()
   const [
-    { data: rule, error },
+    { data: ruleData, error },
     { data: members, error: membersError },
     { data: statuses, error: statusesError },
   ] = await Promise.all([
@@ -23,7 +24,7 @@ export async function GET() {
       .from('distribution_rules')
       .select('*')
       .eq('id', 1)
-      .single(),
+      .maybeSingle(),
     admin
       .from('admin_users')
       .select(
@@ -50,6 +51,26 @@ export async function GET() {
     return NextResponse.json({ error: statusesError.message }, { status: 500 })
   }
 
+  let rule = ruleData
+  if (!rule) {
+    const { data: createdRule, error: createError } = await admin
+      .from('distribution_rules')
+      .upsert(
+        {
+          id: 1,
+          is_enabled: false,
+          mode: 'round_robin',
+          eligible_roles: [...AUTO_DISTRIBUTION_ROLES],
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' },
+      )
+      .select()
+      .single()
+    if (createError) return NextResponse.json({ error: createError.message }, { status: 500 })
+    rule = createdRule
+  }
+
   return NextResponse.json({ rule, members: members ?? [], statuses: statuses ?? [] })
 }
 
@@ -69,14 +90,13 @@ export async function PATCH(request: NextRequest) {
     const roles = Array.isArray(body.eligible_roles)
       ? body.eligible_roles.filter((role: unknown) => role === 'counselor' || role === 'tm_lead')
       : []
-    update.eligible_roles = roles.length ? roles : ['counselor', 'tm_lead']
+    update.eligible_roles = roles.length ? roles : [...AUTO_DISTRIBUTION_ROLES]
   }
 
   const admin = createAdminClient()
   const { data: rule, error } = await admin
     .from('distribution_rules')
-    .update(update)
-    .eq('id', 1)
+    .upsert({ id: 1, ...update }, { onConflict: 'id' })
     .select()
     .single()
 

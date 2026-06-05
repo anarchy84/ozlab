@@ -25,6 +25,7 @@
 // ─────────────────────────────────────────────
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { assignNextCounselorIfNeeded } from '@/lib/admin/assignment'
 import { normalizePhone } from '@/lib/consultation-policy'
 import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
 import { sendMetaLead } from '@/lib/tracking/meta-capi'
@@ -265,6 +266,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const assignedCounselorId = await assignNextCounselorIfNeeded(
+    supabase,
+    data.id,
+    data.counselor_id,
+  )
+
   // 5) 슬랙 알림 — 채널 broadcast + 담당자 DM (자동배정 트리거가 채운 counselor_id 활용)
   //    DB slack_channels.code = 'leads_main' 으로 broadcast
   //    counselor_id 가 있으면 admin_users.slack_user_id 조회해서 DM
@@ -273,11 +280,11 @@ export async function POST(req: NextRequest) {
     try {
       let counselorSlackUserId: string | null = null
       let counselorName: string | null = null
-      if (data.counselor_id) {
+      if (assignedCounselorId) {
         const { data: counselor } = await supabase
           .from('admin_users')
           .select('display_name, slack_user_id, slack_dm_enabled')
-          .eq('user_id', data.counselor_id)
+          .eq('user_id', assignedCounselorId)
           .maybeSingle()
         if (counselor) {
           counselorName = counselor.display_name ?? null

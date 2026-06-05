@@ -10,6 +10,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
+import { validateAssignableCounselor } from '@/lib/admin/assignment'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -78,6 +79,10 @@ export async function POST(req: NextRequest) {
     const counselorId = body.counselor_id
     if (!counselorId) {
       return NextResponse.json({ error: 'counselor_id 누락' }, { status: 400 })
+    }
+    const validation = await validateAssignableCounselor(admin, counselorId)
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
     const { error, count } = await admin
       .from('consultations')

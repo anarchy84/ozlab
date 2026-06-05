@@ -17,7 +17,8 @@
 //   - status='done'      로 바꿀 때 done_at      기록 (BC)
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { validateAssignableCounselor } from '@/lib/admin/assignment'
 import { guardApi } from '@/lib/admin/auth-helpers'
 
 export const dynamic = 'force-dynamic'
@@ -64,7 +65,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 })
   }
 
-  const supabase = createClient()
+  const supabase = createAdminClient()
 
   // ----- 업데이트 필드 조립 -----
   const update: Record<string, unknown> = {}
@@ -127,6 +128,12 @@ export async function PATCH(
   if (body.internal_memo !== undefined) update.internal_memo = body.internal_memo
   if (body.assignee_note !== undefined) update.assignee_note = body.assignee_note
   if (body.counselor_id !== undefined) {
+    if (body.counselor_id) {
+      const validation = await validateAssignableCounselor(supabase, body.counselor_id)
+      if (!validation.ok) {
+        return NextResponse.json({ error: validation.error }, { status: 400 })
+      }
+    }
     update.counselor_id = body.counselor_id
     update.assigned_at = body.counselor_id ? new Date().toISOString() : null
   }

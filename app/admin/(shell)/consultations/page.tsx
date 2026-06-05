@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
 import type { DbStatus } from '@/lib/admin/types'
+import { fetchAssignableCounselors, fetchCounselorsByIds } from '@/lib/admin/assignment'
 import { ConsultationsListClient, type ConsultationRow } from './ConsultationsListClient'
 
 export const dynamic = 'force-dynamic'
@@ -70,7 +71,7 @@ export default async function ConsultationsListPage({
   const to = from + PAGE_SIZE - 1
 
   // 상태 마스터 + 매체 옵션 + 상담사 목록 (필터/모달용)
-  const [{ data: statusesData }, { data: channelsData }, { data: counselorsData }] =
+  const [{ data: statusesData }, { data: channelsData }, counselorsData] =
     await Promise.all([
       supabase.from('db_statuses').select('*').order('sort_order'),
       supabase
@@ -78,11 +79,7 @@ export default async function ConsultationsListPage({
         .select('utm_source')
         .not('utm_source', 'is', null)
         .limit(500),
-      supabase
-        .from('admin_users')
-        .select('user_id, display_name')
-        .eq('is_active', true)
-        .in('role', ['super_admin', 'admin', 'counselor']),
+      fetchAssignableCounselors(supabase),
     ])
   const statuses = (statusesData as DbStatus[] | null) ?? []
   const channels = Array.from(
@@ -107,7 +104,7 @@ export default async function ConsultationsListPage({
        gclid, fbclid, referer, landing_page_path,
        inferred_channel, inferred_keyword, inferred_creative, inferred_landing_title, referer_domain,
        db_group_label, counselor_id, callable_time, device_type, contract_period,
-       is_favorite, is_blacklisted, ip_address, last_contacted_at`,
+       is_favorite, is_blacklisted, ip_address, last_contacted_at, assigned_at`,
       { count: 'exact' },
     )
     .order('created_at', { ascending: false })
@@ -128,9 +125,13 @@ export default async function ConsultationsListPage({
   const total = count ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  // counselor display_name 매핑
+  // counselor display_name 매핑 — 목록에 이미 배정된 담당자가 비활성/레거시 role 이더라도 이름 표시
+  const missingCounselorIds = items
+    .map((item) => item.counselor_id)
+    .filter((id): id is string => Boolean(id) && !counselors.some((c) => c.user_id === id))
+  const extraCounselors = await fetchCounselorsByIds(supabase, missingCounselorIds)
   const counselorMap: Record<string, string> = {}
-  for (const c of counselors) {
+  for (const c of [...counselors, ...extraCounselors]) {
     counselorMap[c.user_id] = c.display_name ?? c.user_id.slice(0, 8)
   }
 
