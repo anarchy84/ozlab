@@ -277,9 +277,10 @@ export async function POST(req: NextRequest) {
     data.counselor_id,
   )
 
-  // 5) CRMPro 외부 DB 연동 — fire-and-forget
+  // 5) CRMPro 외부 DB 연동
+  //    운영 서버리스에서는 응답 후 백그라운드 Promise 가 끊길 수 있어 응답 전에 시도한다.
   //    로컬 저장을 source of truth 로 두고, CRMPro 실패가 고객 접수를 막지 않게 한다.
-  void sendCrmProLead({
+  await sendCrmProLead({
     name: data.name,
     phone: data.phone,
     storeName: data.store_name,

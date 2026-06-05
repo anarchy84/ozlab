@@ -93,10 +93,16 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
 
 export async function sendCrmProLead(p: CrmProLeadPayload): Promise<void> {
   const apiKey = process.env.CRM_PRO_API_KEY
-  if (!apiKey) return
+  if (!apiKey) {
+    console.warn('[CRMPro] skipped: CRM_PRO_API_KEY is not configured')
+    return
+  }
 
   const body = buildCrmProSubmitBody(p)
-  if (!body) return
+  if (!body) {
+    console.warn('[CRMPro] skipped: invalid CRM_PRO_GROUP_NO or lead payload')
+    return
+  }
 
   const baseUrl = (process.env.CRM_PRO_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/$/, '')
   const headers: Record<string, string> = {
@@ -105,16 +111,16 @@ export async function sendCrmProLead(p: CrmProLeadPayload): Promise<void> {
   }
   if (p.clientIp) headers['X-Forwarded-For'] = p.clientIp
 
+  let timer: ReturnType<typeof setTimeout> | null = null
   try {
     const ctrl = new AbortController()
-    const timer = setTimeout(() => ctrl.abort(), 8000)
+    timer = setTimeout(() => ctrl.abort(), 8000)
     const res = await fetch(`${baseUrl}/db/submit`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
       signal: ctrl.signal,
     })
-    clearTimeout(timer)
 
     if (!res.ok) {
       const text = await res.text().catch(() => '')
@@ -128,6 +134,8 @@ export async function sendCrmProLead(p: CrmProLeadPayload): Promise<void> {
     }
   } catch (err) {
     console.warn('[CRMPro] fetch error', err instanceof Error ? err.message : err)
+  } finally {
+    if (timer) clearTimeout(timer)
   }
 }
 
