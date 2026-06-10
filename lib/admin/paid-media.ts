@@ -295,8 +295,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   for (const c of consRows ?? []) {
     const src = ((c.utm_source as string | null) ?? '').trim()
     const med = ((c.utm_medium as string | null) ?? '').trim()
-    const key = makeKey(src, med)
-    const matched = mappingByKey.get(key) ?? mappingByKey.get(makeKey(src, ''))
+    const matched = resolveMappedChannel(mappingByKey, src, med)
     const code = matched?.channel_code ?? 'unmapped'
     if (!matched) {
       unmappedSet.add(`${src || '(none)'}/${med || '(none)'}`)
@@ -320,8 +319,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     const cons = revUtmByConsId.get(r.consultation_id as string)
     const src = (cons?.utm_source ?? '').trim()
     const med = (cons?.utm_medium ?? '').trim()
-    const key = makeKey(src, med)
-    const matched = mappingByKey.get(key) ?? mappingByKey.get(makeKey(src, ''))
+    const matched = resolveMappedChannel(mappingByKey, src, med)
     const code = matched?.channel_code ?? 'unmapped'
     const row = ensureCode(code)
     row.conversions += 1
@@ -357,8 +355,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     const src = ((c.utm_source as string | null) ?? '').trim()
     const med = ((c.utm_medium as string | null) ?? '').trim()
     const camp = ((c.utm_campaign as string | null) ?? '').trim() || '(no campaign)'
-    const key = makeKey(src, med)
-    const matched = mappingByKey.get(key) ?? mappingByKey.get(makeKey(src, ''))
+    const matched = resolveMappedChannel(mappingByKey, src, med)
     const code = matched?.channel_code ?? 'unmapped'
     const label = matched?.channel_label ?? code
     const campKey = `${code}|${camp}`
@@ -382,8 +379,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     const src = (cons?.utm_source ?? '').trim()
     const med = (cons?.utm_medium ?? '').trim()
     const camp = (cons?.utm_campaign ?? '').trim() || '(no campaign)'
-    const key = makeKey(src, med)
-    const matched = mappingByKey.get(key) ?? mappingByKey.get(makeKey(src, ''))
+    const matched = resolveMappedChannel(mappingByKey, src, med)
     const code = matched?.channel_code ?? 'unmapped'
     const campKey = `${code}|${camp}`
     const row = byCampaign.get(campKey)
@@ -484,6 +480,21 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
 
 function makeKey(source: string, medium: string): string {
   return `${(source ?? '').toLowerCase().trim()}|${(medium ?? '').toLowerCase().trim()}`
+}
+
+function resolveMappedChannel(
+  mappingByKey: Map<string, ChannelMappingRow>,
+  source: string,
+  medium: string,
+): ChannelMappingRow | undefined {
+  const src = (source ?? '').trim()
+  const med = (medium ?? '').trim()
+
+  // UTM 이 둘 다 비어 있으면 실제 의미는 직접 유입이다.
+  // channel_mapping 에는 빈 source 를 저장할 수 없으므로 direct seed 로 치환한다.
+  if (!src && !med) return mappingByKey.get(makeKey('direct', ''))
+
+  return mappingByKey.get(makeKey(src, med)) ?? mappingByKey.get(makeKey(src, ''))
 }
 
 // ─────────────────────────────────────────────
