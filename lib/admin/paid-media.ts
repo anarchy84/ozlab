@@ -100,7 +100,9 @@ export interface ChannelPerformanceRow {
 
 export interface DailySeriesRow {
   date: string
-  spend: number
+  spend: number                // 페이드미디어 광고비 only
+  db_purchase_spend: number    // DB 매입비
+  db_purchase_leads: number    // DB 매입수량
   ad_leads: number          // 광고 측 리드 (ad_metrics.conversions)
   leads: number             // CRM 측 리드
   conversions: number
@@ -309,7 +311,16 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   const ensureDate = (d: string): DailySeriesRow => {
     let row = byDate.get(d)
     if (!row) {
-      row = { date: d, spend: 0, ad_leads: 0, leads: 0, conversions: 0, revenue: 0 }
+      row = {
+        date: d,
+        spend: 0,
+        db_purchase_spend: 0,
+        db_purchase_leads: 0,
+        ad_leads: 0,
+        leads: 0,
+        conversions: 0,
+        revenue: 0,
+      }
       byDate.set(d, row)
     }
     return row
@@ -331,18 +342,19 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     dRow.revenue += Number(r.amount ?? 0)
   }
 
-  // 일별 — 광고비 + 광고측 리드 (페이드미디어 conversions) + DB 매입 수량
+  // 일별 — 페이드 광고비/광고측 리드와 DB 매입비/매입수량은 분리한다.
   for (const r of adRows ?? []) {
     const dRow = ensureDate(r.date as string)
-    dRow.spend += Number(r.spend ?? 0)
     const src = (r.source as string | null) ?? ''
     if (src === 'db_purchase') {
-      dRow.leads += Number(r.lead_qty ?? 0)  // DB 매입 수량도 일별 리드 추이에 반영
+      dRow.db_purchase_spend += Number(r.spend ?? 0)
+      dRow.db_purchase_leads += Number(r.lead_qty ?? 0)
     } else {
-      dRow.ad_leads += Number(r.conversions ?? 0)  // 광고 측 리드
+      dRow.spend += Number(r.spend ?? 0)
+      dRow.ad_leads += Number(r.conversions ?? 0)
     }
   }
-  // 일별 — 리드
+  // 일별 — CRM 도착 리드
   for (const c of consRows ?? []) {
     const d = (c.created_at as string).slice(0, 10)
     const dRow = ensureDate(d)

@@ -209,7 +209,7 @@ export default async function PaidMediaDashboardPage({
         <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
           <div className="px-5 pt-4 pb-2">
             <h2 className="text-lg font-bold text-ink-100">일별 추이</h2>
-            <p className="text-xs text-ink-500">광고비 / 광고 리드 / CRM 리드 / 개통 / 매출 시간순</p>
+            <p className="text-xs text-ink-500">페이드 광고비 / DB 매입비 / 광고 리드 / CRM 리드 / 개통 / 매출 시간순</p>
           </div>
           <DailySeriesTable rows={summary.dailySeries} />
         </section>
@@ -324,19 +324,32 @@ function roasTextClass(roas: number | null): string {
 function DailySeriesTable({
   rows,
 }: {
-  rows: { date: string; spend: number; ad_leads: number; leads: number; conversions: number; revenue: number }[]
+  rows: {
+    date: string
+    spend: number
+    db_purchase_spend: number
+    db_purchase_leads: number
+    ad_leads: number
+    leads: number
+    conversions: number
+    revenue: number
+  }[]
 }) {
-  const maxSpend   = Math.max(1, ...rows.map((r) => r.spend))
-  const maxAdLeads = Math.max(1, ...rows.map((r) => r.ad_leads))
-  const maxLeads   = Math.max(1, ...rows.map((r) => r.leads))
+  const maxSpend           = Math.max(1, ...rows.map((r) => r.spend))
+  const maxDbPurchaseSpend = Math.max(1, ...rows.map((r) => r.db_purchase_spend))
+  const maxAdLeads         = Math.max(1, ...rows.map((r) => r.ad_leads))
+  const maxLeads           = Math.max(1, ...rows.map((r) => r.leads))
 
   return (
     <table className="w-full text-sm">
       <thead className="bg-ink-900 text-ink-400 text-xs">
         <tr>
           <th className="text-left px-3 py-2">일자</th>
-          <th className="text-right px-3 py-2">광고비</th>
-          <th className="text-left px-3 py-2 w-28">광고비 추이</th>
+          <th className="text-right px-3 py-2">페이드 광고비</th>
+          <th className="text-left px-3 py-2 w-28">페이드 광고비 추이</th>
+          <th className="text-right px-3 py-2 bg-violet-500/5">DB 매입비</th>
+          <th className="text-left px-3 py-2 w-28 bg-violet-500/5">DB 매입비 추이</th>
+          <th className="text-right px-3 py-2 bg-violet-500/5">DB 매입수</th>
           <th className="text-right px-3 py-2 bg-violet-500/10">광고 리드</th>
           <th className="text-left px-3 py-2 w-28 bg-violet-500/10">광고 리드 추이</th>
           <th className="text-right px-3 py-2 bg-brand-blue/10">CRM 리드</th>
@@ -349,9 +362,10 @@ function DailySeriesTable({
       <tbody className="divide-y divide-ink-800">
         {rows.map((r) => {
           const adCpl = r.ad_leads > 0 ? r.spend / r.ad_leads : null
-          const spendBar   = (r.spend    / maxSpend)   * 100
-          const adLeadBar  = (r.ad_leads / maxAdLeads) * 100
-          const leadBar    = (r.leads    / maxLeads)   * 100
+          const spendBar           = (r.spend / maxSpend) * 100
+          const dbPurchaseSpendBar = (r.db_purchase_spend / maxDbPurchaseSpend) * 100
+          const adLeadBar          = (r.ad_leads / maxAdLeads) * 100
+          const leadBar            = (r.leads / maxLeads) * 100
           return (
             <tr key={r.date} className="hover:bg-ink-800/30">
               <td className="px-3 py-2 text-ink-300 font-mono text-xs">{r.date}</td>
@@ -359,6 +373,11 @@ function DailySeriesTable({
               <td className="px-3 py-2">
                 <Bar pct={spendBar} color="bg-brand-blue/60" />
               </td>
+              <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtMoney(r.db_purchase_spend)}</td>
+              <td className="px-3 py-2 bg-violet-500/5">
+                <Bar pct={dbPurchaseSpendBar} color="bg-violet-400/60" />
+              </td>
+              <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.db_purchase_leads)}</td>
               <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.ad_leads)}</td>
               <td className="px-3 py-2 bg-violet-500/5">
                 <Bar pct={adLeadBar} color="bg-violet-400/60" />
