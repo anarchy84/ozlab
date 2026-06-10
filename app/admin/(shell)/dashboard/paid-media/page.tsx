@@ -44,6 +44,49 @@ export default async function PaidMediaDashboardPage({
 
   const preset = (searchParams?.preset ?? 'week') as PeriodPreset
   const summary = await loadPaidMediaSummary(preset)
+  const mediaPerformanceRows = [
+    ...summary.dbPurchaseByChannel.map((r) => ({
+      key: `db_purchase:${r.channel}`,
+      sourceType: 'db_purchase' as const,
+      channelLabel: r.channel,
+      isPaid: true,
+      impressions: null,
+      clicks: null,
+      ctr: null,
+      spend: r.spend,
+      adLeads: r.lead_qty,
+      adCpl: r.unit_cost,
+      leads: null,
+      cpl: null,
+      conversions: null,
+      cpa: null,
+      revenue: null,
+      roas: null,
+      leadCvr: null,
+    })),
+    ...summary.byChannel.map((r) => ({
+      key: `channel:${r.channel_code}`,
+      sourceType: 'paid_media' as const,
+      channelLabel: r.channel_label,
+      isPaid: r.is_paid,
+      impressions: r.impressions,
+      clicks: r.clicks,
+      ctr: r.ctr,
+      spend: r.spend,
+      adLeads: r.ad_leads,
+      adCpl: r.ad_cpl,
+      leads: r.leads,
+      cpl: r.cpl,
+      conversions: r.conversions,
+      cpa: r.cpa,
+      revenue: r.revenue,
+      roas: r.roas,
+      leadCvr: r.lead_cvr,
+    })),
+  ].sort((a, b) => {
+    if (a.isPaid !== b.isPaid) return a.isPaid ? -1 : 1
+    return b.spend - a.spend
+  })
 
   return (
     <div className="space-y-5">
@@ -140,9 +183,9 @@ export default async function PaidMediaDashboardPage({
       <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
         <div className="px-5 pt-4 pb-2 flex items-baseline justify-between">
           <h2 className="text-lg font-bold text-ink-100">매체별 성과</h2>
-          <span className="text-xs text-ink-500">광고비 내림차순 · 페이드 우선</span>
+          <span className="text-xs text-ink-500">광고비 내림차순 · 페이드/DB 매입 통합</span>
         </div>
-        {summary.byChannel.length === 0 ? (
+        {mediaPerformanceRows.length === 0 ? (
           <p className="px-5 pb-5 text-sm text-ink-500">
             데이터 없음. <Link href="/admin/settings/ad-sync" className="text-brand-blue underline">시트 sync</Link> 또는 광고 트래픽 유입 후 확인.
           </p>
@@ -168,29 +211,34 @@ export default async function PaidMediaDashboardPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-800">
-              {summary.byChannel.map((r) => (
-                <tr key={r.channel_code} className={`hover:bg-ink-800/30 ${!r.is_paid ? 'opacity-60' : ''}`}>
+              {mediaPerformanceRows.map((r) => (
+                <tr key={r.key} className={`hover:bg-ink-800/30 ${!r.isPaid ? 'opacity-60' : ''}`}>
                   <td className="px-3 py-2 text-ink-200">
-                    {r.channel_label}
-                    {!r.is_paid && (
+                    {r.channelLabel}
+                    {r.sourceType === 'db_purchase' && (
+                      <span className="ml-1 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-violet-200">
+                        DB 매입
+                      </span>
+                    )}
+                    {!r.isPaid && (
                       <span className="ml-1 text-[10px] text-ink-500">(비유료)</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtInt(r.impressions)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtInt(r.clicks)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtOptionalInt(r.impressions)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtOptionalInt(r.clicks)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtPercent(r.ctr)}</td>
                   <td className="px-3 py-2 text-right font-mono text-brand-blue">{fmtMoney(r.spend)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.ad_leads)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-amber-300 bg-violet-500/5">{fmtCpl(r.ad_cpl)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtInt(r.leads)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtOptionalInt(r.adLeads)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-amber-300 bg-violet-500/5">{fmtCpl(r.adCpl)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtOptionalInt(r.leads)}</td>
                   <td className="px-3 py-2 text-right font-mono text-amber-300 bg-brand-blue/5">{fmtCpl(r.cpl)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtInt(r.conversions)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtOptionalInt(r.conversions)}</td>
                   <td className="px-3 py-2 text-right font-mono text-amber-300">{fmtCpl(r.cpa)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtMoney(r.revenue)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtOptionalMoney(r.revenue)}</td>
                   <td className={`px-3 py-2 text-right font-mono font-bold ${roasTextClass(r.roas)}`}>
                     {fmtPercent(r.roas, 0)}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-ink-500">{fmtPercent(r.lead_cvr, 0)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-500">{fmtPercent(r.leadCvr, 0)}</td>
                 </tr>
               ))}
             </tbody>
@@ -198,7 +246,7 @@ export default async function PaidMediaDashboardPage({
           <p className="text-[11px] text-ink-500 px-5 py-2">
             <span className="text-violet-300">■ 보라 컬럼</span> = 광고 플랫폼 보고 기준 (시트 sync, ad_metrics.conversions) ·
             <span className="text-brand-blue ml-2">■ 블루 컬럼</span> = CRM 도착 기준 (consultations utm 매칭) ·
-            <span className="ml-2">개통/CPA/매출/ROAS</span> = revenue_records 매칭
+            <span className="ml-2">DB 매입 행</span> = source=db_purchase 시트 비용/수량을 같은 표에 표시
           </p>
           </>
         )}
@@ -316,6 +364,16 @@ function roasTextClass(roas: number | null): string {
   if (roas >= 200) return 'text-emerald-300'
   if (roas >= 100) return 'text-amber-300'
   return 'text-red-400'
+}
+
+function fmtOptionalInt(n: number | null): string {
+  if (n === null) return '-'
+  return fmtInt(n)
+}
+
+function fmtOptionalMoney(n: number | null): string {
+  if (n === null) return '-'
+  return fmtMoney(n)
 }
 
 // ─────────────────────────────────────────────
