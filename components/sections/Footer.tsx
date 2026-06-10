@@ -129,12 +129,16 @@ export function Footer({ blocks, ctas }: Props) {
               pagePath="/"
               className="text-sm text-ink-300 hover:text-white transition-colors"
             />
-            {/* 상담 신청 — DynamicCTA (어트리뷰션 추적) */}
+            {/* 상담 신청 — DynamicCTA (어트리뷰션 추적)
+                disableStyleClass: 다크 푸터에서 btn-ghost 의 hover:bg-ink-50 가
+                흰 배경을 만들어 hover:text-white 와 충돌해 텍스트가 사라지는 문제 방지.
+                다른 푸터 링크들과 동일한 텍스트 링크 톤으로 표시. */}
             <DynamicCTA
               placement="footer"
               ctas={ctas}
               fallback={{ label: '상담 신청', href: '#apply' }}
               className="text-sm text-ink-300 hover:text-white transition-colors text-left"
+              disableStyleClass
             />
             {/* FAQ + 약관 (3-4번 링크) */}
             {supportLinks.slice(1).map((l) => (

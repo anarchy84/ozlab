@@ -36,6 +36,13 @@ interface Props {
   children?: React.ReactNode
   /** index 지정 시 ctas[index] 사용 (한 placement 에 여러 CTA 있을 때) */
   index?: number
+  /**
+   * DB style → btn-* 클래스 매핑을 건너뛴다.
+   * 푸터·텍스트 인라인 링크 등 className 만으로 스타일을 통제할 때 사용.
+   * (e.g. 다크 배경 위의 텍스트 링크에서 btn-ghost 의 hover:bg-ink-50 가
+   *  덮어쓰면서 텍스트가 흰 배경에 묻혀 사라지는 문제 회피)
+   */
+  disableStyleClass?: boolean
 }
 
 const STYLE_CLASS: Record<string, string> = {
@@ -53,6 +60,7 @@ export function DynamicCTA({
   className,
   children,
   index = 0,
+  disableStyleClass = false,
 }: Props) {
   const cta = ctas && ctas.length > index ? ctas[index] : null
   const [modalOpen, setModalOpen] = useState(false)
@@ -63,7 +71,8 @@ export function DynamicCTA({
   const blank = cta?.target_blank ?? fallback?.target === '_blank'
 
   // 스타일 — DB style 우선, 없으면 className 그대로
-  const styleClass = cta ? STYLE_CLASS[cta.style] ?? '' : ''
+  // disableStyleClass=true 면 btn-* 매핑 건너뛰고 className 만 사용
+  const styleClass = cta && !disableStyleClass ? STYLE_CLASS[cta.style] ?? '' : ''
   const finalClass = [styleClass, className].filter(Boolean).join(' ')
 
   // Phase 2B: 모달 트리거 타입 — 클릭 시 모달 띄우고 anchor 동작 차단

@@ -78,6 +78,11 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: '/',
       languages: { 'ko-KR': '/' },
+      types: {
+        'application/rss+xml': [
+          { url: '/rss', title: 'OZ labPay — 블로그 · 가이드 RSS' },
+        ],
+      },
     },
     openGraph: {
       type: 'website',
