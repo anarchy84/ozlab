@@ -24,6 +24,11 @@ import {
   type ConsultationFieldOption,
 } from '@/lib/consultation-options'
 import RevenueModal, { type RevenueDraft } from './RevenueModal'
+import {
+  channelLabel,
+  channelBadgeClass,
+  type ChannelDict,
+} from '@/lib/admin/channel-ui'
 
 export interface ConsultationFull {
   id: string
@@ -126,6 +131,8 @@ interface Props {
   counselors: CounselorOption[]
   /** 같은 페이지 내 모든 row id (페이지네이션용) */
   allIds: string[]
+  /** channel_mapping 기반 channel_code → 라벨 사전 (서버에서 로드) */
+  channelDict?: ChannelDict
   onClose: () => void
   /** 다른 row id 로 이동 */
   onNavigate: (id: string) => void
@@ -138,6 +145,7 @@ export function ConsultationDetailModal({
   statuses,
   counselors,
   allIds,
+  channelDict,
   onClose,
   onNavigate,
   onUpdated,
@@ -504,7 +512,7 @@ export function ConsultationDetailModal({
 
         {/* 유입 출처 — 풀 너비 카드 (모달 본문 최상단) */}
         <div className="px-6 pt-6">
-          <AttributionCard c={c} />
+          <AttributionCard c={c} channelDict={channelDict} />
         </div>
 
         {/* 본문 — 3컬럼 */}
@@ -1080,50 +1088,17 @@ function nullableText(value: string): string | null {
 // ─────────────────────────────────────────────
 // 유입 출처 카드 — 분류된 매체/캠페인/키워드/소재/랜딩 + 원본 디버그
 // ─────────────────────────────────────────────
-const CHANNEL_BG: Record<string, string> = {
-  'naver-ads':       'bg-violet-500/20 text-violet-200 border-violet-500/40',
-  'google-ads':      'bg-violet-500/20 text-violet-200 border-violet-500/40',
-  'meta-ads':        'bg-violet-500/20 text-violet-200 border-violet-500/40',
-  'kakao-ads':       'bg-violet-500/20 text-violet-200 border-violet-500/40',
-  'daangn-ads':      'bg-violet-500/20 text-violet-200 border-violet-500/40',
-  'youtube-ads':     'bg-violet-500/20 text-violet-200 border-violet-500/40',
-  'naver-search':    'bg-blue-500/20 text-blue-200 border-blue-500/40',
-  'google-search':   'bg-blue-500/20 text-blue-200 border-blue-500/40',
-  'daum-search':     'bg-blue-500/20 text-blue-200 border-blue-500/40',
-  'bing-search':     'bg-blue-500/20 text-blue-200 border-blue-500/40',
-  'referral-blog':   'bg-orange-500/20 text-orange-200 border-orange-500/40',
-  'internal-blog':   'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
-  'internal':        'bg-emerald-500/10 text-emerald-200 border-emerald-500/30',
-  'social-organic':  'bg-pink-500/20 text-pink-200 border-pink-500/40',
-  'kakao':           'bg-yellow-500/20 text-yellow-200 border-yellow-500/40',
-  'referral-other':  'bg-amber-500/15 text-amber-200 border-amber-500/30',
-  'direct':          'bg-ink-700 text-ink-300 border-ink-600',
-}
-
-const CHANNEL_LABEL: Record<string, string> = {
-  'naver-ads': '네이버 광고',
-  'google-ads': '구글 광고',
-  'meta-ads': '메타 광고',
-  'kakao-ads': '카카오 광고',
-  'daangn-ads': '당근 광고',
-  'youtube-ads': '유튜브 광고',
-  'naver-search': '네이버 검색',
-  'google-search': '구글 검색',
-  'daum-search': '다음 검색',
-  'bing-search': '빙 검색',
-  'referral-blog': '외부 블로그',
-  'internal-blog': '자체 블로그',
-  'internal': '자체 사이트',
-  'social-organic': 'SNS',
-  'kakao': '카카오톡',
-  'referral-other': '외부 사이트',
-  'direct': '직접 진입',
-}
-
-function AttributionCard({ c }: { c: ConsultationFull }) {
+// 라벨/색상은 lib/admin/channel-ui.ts 공용 헬퍼 사용 (channel_mapping 사전 기반)
+function AttributionCard({
+  c,
+  channelDict,
+}: {
+  c: ConsultationFull
+  channelDict?: ChannelDict
+}) {
   const ch = c.inferred_channel ?? 'direct'
-  const cls = CHANNEL_BG[ch] ?? 'bg-ink-700 text-ink-300 border-ink-600'
-  const label = CHANNEL_LABEL[ch] ?? ch
+  const cls = channelBadgeClass(ch, channelDict)
+  const label = channelLabel(ch, channelDict)
 
   return (
     <div className="bg-surface-darkSoft border border-ink-700 rounded-lg p-4">

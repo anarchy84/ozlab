@@ -26,6 +26,11 @@ import {
   maskPhone,
   extractAbsenceCount,
 } from '@/lib/admin/format-helpers'
+import {
+  channelLabel,
+  channelChipClass,
+  type ChannelDict,
+} from '@/lib/admin/channel-ui'
 
 export interface ConsultationRow extends ConsultationFull {
   last_contacted_at?: string | null
@@ -42,58 +47,13 @@ interface Props {
   counselors: CounselorOption[]
   counselorMap: Record<string, string>
   myRole: AdminRole
+  /** channel_mapping 기반 channel_code → 라벨 사전 (서버에서 로드) */
+  channelDict?: ChannelDict
 }
 
 const EXPAND_KEY = 'ozlab_consultations_attribution_expanded'
 
-const CHANNEL_COLORS: Record<string, string> = {
-  'naver-ads':       'bg-violet-500/20 text-violet-300',
-  'google-ads':      'bg-violet-500/20 text-violet-300',
-  'meta-ads':        'bg-violet-500/20 text-violet-300',
-  'kakao-ads':       'bg-violet-500/20 text-violet-300',
-  'daangn-ads':      'bg-violet-500/20 text-violet-300',
-  'youtube-ads':     'bg-violet-500/20 text-violet-300',
-  'naver-search':    'bg-blue-500/20 text-blue-300',
-  'google-search':   'bg-blue-500/20 text-blue-300',
-  'daum-search':     'bg-blue-500/20 text-blue-300',
-  'bing-search':     'bg-blue-500/20 text-blue-300',
-  'referral-blog':   'bg-orange-500/20 text-orange-300',
-  'internal-blog':   'bg-emerald-500/20 text-emerald-300',
-  'internal':        'bg-emerald-500/10 text-emerald-200',
-  'social-organic':  'bg-pink-500/20 text-pink-300',
-  'kakao':           'bg-yellow-500/20 text-yellow-300',
-  'referral-other':  'bg-amber-500/15 text-amber-200',
-  'direct':          'bg-ink-700 text-ink-300',
-}
-
-const CHANNEL_LABELS: Record<string, string> = {
-  'naver-ads': '네이버 광고',
-  'google-ads': '구글 광고',
-  'meta-ads': '메타 광고',
-  'kakao-ads': '카카오 광고',
-  'daangn-ads': '당근 광고',
-  'youtube-ads': '유튜브 광고',
-  'naver-search': '네이버 검색',
-  'google-search': '구글 검색',
-  'daum-search': '다음 검색',
-  'bing-search': '빙 검색',
-  'referral-blog': '외부 블로그',
-  'internal-blog': '자체 블로그',
-  'internal': '자체 사이트',
-  'social-organic': 'SNS',
-  'kakao': '카카오톡',
-  'referral-other': '외부 사이트',
-  'direct': '직접 진입',
-}
-
-function channelClass(ch: string | null): string {
-  if (!ch) return CHANNEL_COLORS.direct
-  return CHANNEL_COLORS[ch] ?? 'bg-ink-700 text-ink-300'
-}
-function channelLabel(ch: string | null): string {
-  if (!ch) return '미분류'
-  return CHANNEL_LABELS[ch] ?? ch
-}
+// 라벨/색상은 lib/admin/channel-ui.ts 공용 헬퍼 사용 (channel_mapping 사전 기반)
 
 export function ConsultationsListClient({
   items,
@@ -101,6 +61,7 @@ export function ConsultationsListClient({
   counselors,
   counselorMap,
   myRole,
+  channelDict,
 }: Props) {
   const router = useRouter()
   const [openId, setOpenId] = useState<string | null>(null)
@@ -285,9 +246,9 @@ export function ConsultationsListClient({
                     className="px-3 py-3 align-top text-xs cursor-pointer"
                   >
                     <span
-                      className={`inline-block px-2 py-0.5 rounded font-medium whitespace-nowrap ${channelClass(c.inferred_channel)}`}
+                      className={`inline-block px-2 py-0.5 rounded font-medium whitespace-nowrap ${channelChipClass(c.inferred_channel, channelDict)}`}
                     >
-                      {channelLabel(c.inferred_channel)}
+                      {channelLabel(c.inferred_channel, channelDict)}
                     </span>
                     {c.db_group_label && (
                       <div className="text-[10px] text-ink-400 mt-1">
@@ -489,6 +450,7 @@ export function ConsultationsListClient({
           statuses={statuses}
           counselors={counselors}
           allIds={allIds}
+          channelDict={channelDict}
           onClose={() => setOpenId(null)}
           onNavigate={(id) => setOpenId(id)}
           onUpdated={() => router.refresh()}

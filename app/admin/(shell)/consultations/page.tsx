@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
 import type { DbStatus } from '@/lib/admin/types'
 import { fetchAssignableCounselors, fetchCounselorsByIds } from '@/lib/admin/assignment'
+import { loadChannelDictionary } from '@/lib/admin/channel-dictionary'
 import { ConsultationsListClient, type ConsultationRow } from './ConsultationsListClient'
 
 export const dynamic = 'force-dynamic'
@@ -70,8 +71,8 @@ export default async function ConsultationsListPage({
   const from = (page - 1) * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
-  // 상태 마스터 + 매체 옵션 + 상담사 목록 (필터/모달용)
-  const [{ data: statusesData }, { data: channelsData }, counselorsData] =
+  // 상태 마스터 + 매체 옵션 + 상담사 목록 + 채널 라벨 사전 (필터/모달용)
+  const [{ data: statusesData }, { data: channelsData }, counselorsData, channelDict] =
     await Promise.all([
       supabase.from('db_statuses').select('*').order('sort_order'),
       supabase
@@ -80,6 +81,7 @@ export default async function ConsultationsListPage({
         .not('utm_source', 'is', null)
         .limit(500),
       fetchAssignableCounselors(supabase),
+      loadChannelDictionary(),
     ])
   const statuses = (statusesData as DbStatus[] | null) ?? []
   const channels = Array.from(
@@ -287,6 +289,7 @@ export default async function ConsultationsListPage({
         counselors={counselors}
         counselorMap={counselorMap}
         myRole={profile.role}
+        channelDict={channelDict}
       />
 
       {totalPages > 1 && (
