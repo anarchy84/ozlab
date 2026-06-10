@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────
-// /admin/dashboard/paid-media — 광고 퍼포먼스 (페이드미디어 분석)
+// /admin/dashboard/paid-media — 트래픽·광고 퍼포먼스
 //
-// 데이터 소스 3개 조인 :
-//   - ad_metrics (광고비, 시트 sync 입력)
+// 데이터 소스 4개 조인 :
+//   - site_visits (실제 방문, first-party tracking)
+//   - ad_metrics (광고비, 페이드 미디어 시트 sync 입력)
 //   - consultations (리드, utm 자동 캡쳐)
 //   - revenue_records (개통/매출)
 //
@@ -12,7 +13,7 @@
 //
 // 지표 :
 //   - 매체별 : 노출/클릭/CTR/리드/CPL/전환/CPA/광고비/매출/ROAS/lead→개통률
-//   - 일별 시계열 (광고비/리드/전환/매출)
+//   - 일별 시계열 (방문/광고비/리드/전환/매출)
 //   - 캠페인별 드릴다운 (utm_campaign)
 // ─────────────────────────────────────────────
 
@@ -45,56 +46,42 @@ export default async function PaidMediaDashboardPage({
   const preset = (searchParams?.preset ?? 'week') as PeriodPreset
   const summary = await loadPaidMediaSummary(preset)
   const mediaPerformanceRows = [
-    ...summary.dbPurchaseByChannel.map((r) => ({
-      key: `db_purchase:${r.channel}`,
-      sourceType: 'db_purchase' as const,
-      channelLabel: r.channel,
-      isPaid: true,
-      impressions: null,
-      clicks: null,
-      ctr: null,
-      spend: r.spend,
-      adLeads: r.lead_qty,
-      adCpl: r.unit_cost,
-      leads: null,
-      cpl: null,
-      conversions: null,
-      cpa: null,
-      revenue: null,
-      roas: null,
-      leadCvr: null,
-    })),
     ...summary.byChannel.map((r) => ({
       key: `channel:${r.channel_code}`,
-      sourceType: 'paid_media' as const,
       channelLabel: r.channel_label,
       isPaid: r.is_paid,
       impressions: r.impressions,
       clicks: r.clicks,
       ctr: r.ctr,
+      pageviews: r.pageviews,
+      visits: r.visits,
+      visitors: r.visitors,
+      clickToVisitRate: r.click_to_visit_rate,
       spend: r.spend,
       adLeads: r.ad_leads,
       adCpl: r.ad_cpl,
       leads: r.leads,
+      visitToLeadRate: r.visit_to_lead_rate,
       cpl: r.cpl,
       conversions: r.conversions,
       cpa: r.cpa,
       revenue: r.revenue,
       roas: r.roas,
       leadCvr: r.lead_cvr,
+      trafficGroup: r.traffic_group,
     })),
   ].sort((a, b) => {
     if (a.isPaid !== b.isPaid) return a.isPaid ? -1 : 1
-    return b.spend - a.spend
+    return b.spend - a.spend || b.visits - a.visits
   })
 
   return (
     <div className="space-y-5">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-ink-100">광고 퍼포먼스</h1>
+          <h1 className="text-2xl font-bold text-ink-100">트래픽·광고 퍼포먼스</h1>
           <p className="text-sm text-ink-400 mt-1">
-            ad_metrics(광고비) × consultations(리드) × revenue(매출) 3개 데이터 조인 분석.
+            site_visits(방문) × ad_metrics(광고비) × consultations(리드) × revenue(매출) 통합 분석.
             기간 <strong className="text-brand-blue">{summary.range.label}</strong>{' '}
             <span className="text-ink-500">({summary.range.from} ~ {summary.range.to})</span>
           </p>
@@ -111,64 +98,46 @@ export default async function PaidMediaDashboardPage({
 
       <PeriodControl />
 
-      {/* DB 매입 (시트 sync 기반 — 공급자 일괄 전달) */}
-      {summary.dbPurchaseTotals.lead_qty > 0 || summary.dbPurchaseByChannel.length > 0 ? (
-        <section className="bg-violet-900/10 border border-violet-700/40 rounded-lg p-4 space-y-3">
-          <div className="flex items-baseline justify-between">
-            <div>
-              <h2 className="text-base font-bold text-violet-200">📦 DB 매입 (시트 sync)</h2>
-              <p className="text-xs text-violet-300/70">
-                공급자가 일괄 전달하는 DB. utm 어트리뷰션 없이 시트 수량이 공식 수치.
-              </p>
-            </div>
-            <Link href="/admin/settings/ad-sync" className="text-xs text-violet-300 hover:text-violet-100 underline">
-              시트 sync →
-            </Link>
+      {/* 트래픽 합계 KPI */}
+      <section className="bg-surface-darkSoft border border-ink-700 rounded-lg p-4">
+        <div className="flex items-baseline justify-between gap-3 mb-3">
+          <div>
+            <h2 className="text-lg font-bold text-ink-100">방문자 유입 요약</h2>
+            <p className="text-xs text-ink-500 mt-0.5">
+              사이트 자체 방문 로그 기준. 광고관리자 수치가 아니라 실제 웹사이트 도착 기준입니다.
+            </p>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <Kpi label="총 매입수량" value={fmtInt(summary.dbPurchaseTotals.lead_qty) + '건'} highlight="blue" />
-            <Kpi label="총 매입비"   value={fmtMoney(summary.dbPurchaseTotals.spend)} highlight="neon" />
-            <Kpi label="평균 단가"   value={fmtCpl(summary.dbPurchaseTotals.avg_unit_cost)} highlight="amber" />
-          </div>
-          {summary.dbPurchaseByChannel.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm bg-ink-900/40 rounded">
-                <thead className="text-xs text-violet-300/70">
-                  <tr>
-                    <th className="text-left px-3 py-2">출처</th>
-                    <th className="text-right px-3 py-2">매입수량</th>
-                    <th className="text-right px-3 py-2">총매입비</th>
-                    <th className="text-right px-3 py-2">평균 단가</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-ink-800">
-                  {summary.dbPurchaseByChannel.map((r) => (
-                    <tr key={r.channel} className="hover:bg-ink-800/30">
-                      <td className="px-3 py-2 text-ink-200">{r.channel}</td>
-                      <td className="px-3 py-2 text-right font-mono text-ink-100">{fmtInt(r.lead_qty)}건</td>
-                      <td className="px-3 py-2 text-right font-mono text-brand-neon">{fmtMoney(r.spend)}</td>
-                      <td className="px-3 py-2 text-right font-mono text-amber-300">{fmtCpl(r.unit_cost)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      ) : null}
+          <span className="text-xs text-ink-500">오가닉·페이드·직접유입 분리</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+          <Kpi label="전체 방문" value={fmtInt(summary.trafficTotals.visits)} highlight="blue" />
+          <Kpi label="전체 방문자" value={fmtInt(summary.trafficTotals.visitors)} />
+          <Kpi label="오가닉 방문" value={fmtInt(summary.trafficTotals.organic.visits)} highlight="good" />
+          <Kpi label="페이드 방문" value={fmtInt(summary.trafficTotals.paid.visits)} highlight="blue" />
+          <Kpi label="직접 유입" value={fmtInt(summary.trafficTotals.direct.visits)} />
+          <Kpi
+            label="추천/자체 유입"
+            value={fmtInt(summary.trafficTotals.referral.visits + summary.trafficTotals.site.visits)}
+          />
+        </div>
+      </section>
 
-      {/* 페이드미디어 합계 KPI 9종 */}
+      {/* 페이드미디어 합계 KPI */}
       <div>
-        <h2 className="text-base font-bold text-ink-200 mb-2">📣 페이드 미디어 (네이버/메타/구글 등)</h2>
-        <p className="text-xs text-ink-500 mb-2">utm 자동 어트리뷰션 + ad_metrics 광고비 (source=paid_media)</p>
+        <h2 className="text-base font-bold text-ink-200 mb-2">페이드 미디어 성과</h2>
+        <p className="text-xs text-ink-500 mb-2">네이버/메타/구글 등 광고비가 들어간 유입만 별도로 합산합니다.</p>
       </div>
       <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         <Kpi label="노출수"      value={fmtInt(summary.totals.impressions)} />
         <Kpi label="클릭수"      value={fmtInt(summary.totals.clicks)} />
         <Kpi label="CTR"         value={fmtPercent(summary.totals.ctr)} />
+        <Kpi label="실제 방문"   value={fmtInt(summary.totals.visits)} highlight="blue" />
+        <Kpi label="고유 방문자" value={fmtInt(summary.totals.visitors)} />
+        <Kpi label="도착률"      value={fmtPercent(summary.totals.click_to_visit_rate)} highlight="good" />
         <Kpi label="광고 리드"   value={fmtInt(summary.totals.ad_leads)} highlight="blue" />
         <Kpi label="광고 CPL"    value={fmtCpl(summary.totals.ad_cpl)} highlight="amber" />
         <Kpi label="CRM 리드"    value={fmtInt(summary.totals.leads)} highlight="blue" />
+        <Kpi label="방문→신청률" value={fmtPercent(summary.totals.visit_to_lead_rate)} highlight="good" />
         <Kpi label="개통"        value={fmtInt(summary.totals.conversions)} />
         <Kpi label="CPA (개통기준)" value={fmtCpl(summary.totals.cpa)} highlight="amber" />
         <Kpi label="광고비"      value={fmtMoney(summary.totals.spend)} highlight="neon" />
@@ -176,14 +145,15 @@ export default async function PaidMediaDashboardPage({
       </section>
       <p className="text-[11px] text-ink-500">
         ※ <strong>광고 리드</strong> = 광고 플랫폼이 보고한 결과(시트 전환수). <strong>CRM 리드</strong> = 우리 사이트에 utm 매칭으로 도착한 리드.
-        둘 다 표시하면 광고측 어트리뷰션 갭을 한눈에 볼 수 있음. KPI 합산은 페이드 미디어만 (자연유입·자체사이트 제외).
+        <strong>실제 방문</strong> = 오즈랩페이 first-party 방문 세션. 둘 다 표시하면 광고측 클릭과 사이트 도착 갭을 한눈에 볼 수 있음.
+        KPI 합산은 페이드 미디어만 집계하며, 오가닉·직접·자체사이트 유입은 위 방문자 유입 요약과 매체별 성과에서 별도 확인합니다.
       </p>
 
       {/* 매체별 종합 표 */}
       <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
         <div className="px-5 pt-4 pb-2 flex items-baseline justify-between">
           <h2 className="text-lg font-bold text-ink-100">매체별 성과</h2>
-          <span className="text-xs text-ink-500">광고비 내림차순 · 페이드/DB 매입 통합</span>
+          <span className="text-xs text-ink-500">오가닉 + 페이드 미디어 통합 · 광고비/방문 내림차순</span>
         </div>
         {mediaPerformanceRows.length === 0 ? (
           <p className="px-5 pb-5 text-sm text-ink-500">
@@ -195,13 +165,18 @@ export default async function PaidMediaDashboardPage({
             <thead className="bg-ink-900 text-ink-400 text-xs">
               <tr>
                 <th className="text-left px-3 py-2">매체</th>
+                <th className="text-left px-3 py-2">유입 유형</th>
                 <th className="text-right px-3 py-2">노출</th>
                 <th className="text-right px-3 py-2">클릭</th>
                 <th className="text-right px-3 py-2">CTR</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/5">실제 방문</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/5">고유 방문자</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/5">도착률</th>
                 <th className="text-right px-3 py-2">광고비</th>
                 <th className="text-right px-3 py-2 bg-violet-500/10" title="광고 플랫폼이 보고한 결과수 (시트 전환수)">광고 리드</th>
                 <th className="text-right px-3 py-2 bg-violet-500/10 text-amber-300">광고 CPL</th>
                 <th className="text-right px-3 py-2 bg-brand-blue/10" title="우리 사이트에 utm 매칭으로 도착한 리드">CRM 리드</th>
+                <th className="text-right px-3 py-2 bg-brand-blue/10">방문→신청</th>
                 <th className="text-right px-3 py-2 bg-brand-blue/10 text-amber-300">CRM CPL</th>
                 <th className="text-right px-3 py-2">개통</th>
                 <th className="text-right px-3 py-2 text-amber-300">CPA</th>
@@ -215,22 +190,24 @@ export default async function PaidMediaDashboardPage({
                 <tr key={r.key} className={`hover:bg-ink-800/30 ${!r.isPaid ? 'opacity-60' : ''}`}>
                   <td className="px-3 py-2 text-ink-200">
                     {r.channelLabel}
-                    {r.sourceType === 'db_purchase' && (
-                      <span className="ml-1 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-violet-200">
-                        DB 매입
-                      </span>
-                    )}
                     {!r.isPaid && (
                       <span className="ml-1 text-[10px] text-ink-500">(비유료)</span>
                     )}
                   </td>
+                  <td className="px-3 py-2">
+                    <TrafficBadge group={r.trafficGroup} />
+                  </td>
                   <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtOptionalInt(r.impressions)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtOptionalInt(r.clicks)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-400">{fmtPercent(r.ctr)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtOptionalInt(r.visits)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-ink-200 bg-brand-blue/5">{fmtOptionalInt(r.visitors)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-brand-blue bg-brand-blue/5">{fmtPercent(r.clickToVisitRate)}</td>
                   <td className="px-3 py-2 text-right font-mono text-brand-blue">{fmtMoney(r.spend)}</td>
                   <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtOptionalInt(r.adLeads)}</td>
                   <td className="px-3 py-2 text-right font-mono text-amber-300 bg-violet-500/5">{fmtCpl(r.adCpl)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtOptionalInt(r.leads)}</td>
+                  <td className="px-3 py-2 text-right font-mono text-brand-neon bg-brand-blue/5">{fmtPercent(r.visitToLeadRate)}</td>
                   <td className="px-3 py-2 text-right font-mono text-amber-300 bg-brand-blue/5">{fmtCpl(r.cpl)}</td>
                   <td className="px-3 py-2 text-right font-mono text-ink-200">{fmtOptionalInt(r.conversions)}</td>
                   <td className="px-3 py-2 text-right font-mono text-amber-300">{fmtCpl(r.cpa)}</td>
@@ -245,8 +222,8 @@ export default async function PaidMediaDashboardPage({
           </table>
           <p className="text-[11px] text-ink-500 px-5 py-2">
             <span className="text-violet-300">■ 보라 컬럼</span> = 광고 플랫폼 보고 기준 (시트 sync, ad_metrics.conversions) ·
-            <span className="text-brand-blue ml-2">■ 블루 컬럼</span> = CRM 도착 기준 (consultations utm 매칭) ·
-            <span className="ml-2">DB 매입 행</span> = source=db_purchase 시트 비용/수량을 같은 표에 표시
+            <span className="text-brand-blue ml-2">■ 블루 컬럼</span> = 실제 방문(site_visits) + CRM 도착 기준 (consultations utm 매칭) ·
+            유입 유형은 UTM과 referrer 기반으로 paid / organic / direct / referral / site 로 구분
           </p>
           </>
         )}
@@ -257,7 +234,7 @@ export default async function PaidMediaDashboardPage({
         <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
           <div className="px-5 pt-4 pb-2">
             <h2 className="text-lg font-bold text-ink-100">일별 추이</h2>
-            <p className="text-xs text-ink-500">페이드 광고비 / DB 매입비 / 광고 리드 / CRM 리드 / 개통 / 매출 시간순</p>
+            <p className="text-xs text-ink-500">페이드 광고비 / 실제 방문 / 광고 리드 / CRM 리드 / 개통 / 매출 시간순</p>
           </div>
           <DailySeriesTable rows={summary.dailySeries} />
         </section>
@@ -327,6 +304,33 @@ export default async function PaidMediaDashboardPage({
 // ─────────────────────────────────────────────
 // 작은 컴포넌트들
 // ─────────────────────────────────────────────
+type TrafficGroup = 'paid' | 'organic' | 'direct' | 'referral' | 'site' | 'other'
+
+function TrafficBadge({ group }: { group: TrafficGroup }) {
+  const styles = {
+    paid: 'bg-brand-blue/15 text-brand-blue border-brand-blue/30',
+    organic: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+    direct: 'bg-ink-700 text-ink-200 border-ink-600',
+    referral: 'bg-violet-500/10 text-violet-200 border-violet-500/30',
+    site: 'bg-cyan-500/10 text-cyan-200 border-cyan-500/30',
+    other: 'bg-amber-500/10 text-amber-200 border-amber-500/30',
+  } satisfies Record<TrafficGroup, string>
+  const labels = {
+    paid: '페이드',
+    organic: '오가닉',
+    direct: '직접',
+    referral: '추천',
+    site: '자체',
+    other: '기타',
+  } satisfies Record<TrafficGroup, string>
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${styles[group]}`}>
+      {labels[group]}
+    </span>
+  )
+}
+
 function Kpi({
   label,
   value,
@@ -385,8 +389,9 @@ function DailySeriesTable({
   rows: {
     date: string
     spend: number
-    db_purchase_spend: number
-    db_purchase_leads: number
+    pageviews: number
+    visits: number
+    visitors: number
     ad_leads: number
     leads: number
     conversions: number
@@ -394,7 +399,6 @@ function DailySeriesTable({
   }[]
 }) {
   const maxSpend           = Math.max(1, ...rows.map((r) => r.spend))
-  const maxDbPurchaseSpend = Math.max(1, ...rows.map((r) => r.db_purchase_spend))
   const maxAdLeads         = Math.max(1, ...rows.map((r) => r.ad_leads))
   const maxLeads           = Math.max(1, ...rows.map((r) => r.leads))
 
@@ -405,9 +409,9 @@ function DailySeriesTable({
           <th className="text-left px-3 py-2">일자</th>
           <th className="text-right px-3 py-2">페이드 광고비</th>
           <th className="text-left px-3 py-2 w-28">페이드 광고비 추이</th>
-          <th className="text-right px-3 py-2 bg-violet-500/5">DB 매입비</th>
-          <th className="text-left px-3 py-2 w-28 bg-violet-500/5">DB 매입비 추이</th>
-          <th className="text-right px-3 py-2 bg-violet-500/5">DB 매입수</th>
+          <th className="text-right px-3 py-2 bg-brand-blue/5">실제 방문</th>
+          <th className="text-right px-3 py-2 bg-brand-blue/5">고유 방문자</th>
+          <th className="text-right px-3 py-2 bg-brand-blue/5">페이지뷰</th>
           <th className="text-right px-3 py-2 bg-violet-500/10">광고 리드</th>
           <th className="text-left px-3 py-2 w-28 bg-violet-500/10">광고 리드 추이</th>
           <th className="text-right px-3 py-2 bg-brand-blue/10">CRM 리드</th>
@@ -421,7 +425,6 @@ function DailySeriesTable({
         {rows.map((r) => {
           const adCpl = r.ad_leads > 0 ? r.spend / r.ad_leads : null
           const spendBar           = (r.spend / maxSpend) * 100
-          const dbPurchaseSpendBar = (r.db_purchase_spend / maxDbPurchaseSpend) * 100
           const adLeadBar          = (r.ad_leads / maxAdLeads) * 100
           const leadBar            = (r.leads / maxLeads) * 100
           return (
@@ -431,11 +434,9 @@ function DailySeriesTable({
               <td className="px-3 py-2">
                 <Bar pct={spendBar} color="bg-brand-blue/60" />
               </td>
-              <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtMoney(r.db_purchase_spend)}</td>
-              <td className="px-3 py-2 bg-violet-500/5">
-                <Bar pct={dbPurchaseSpendBar} color="bg-violet-400/60" />
-              </td>
-              <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.db_purchase_leads)}</td>
+              <td className="px-3 py-2 text-right font-mono text-ink-100 bg-brand-blue/5">{fmtInt(r.visits)}</td>
+              <td className="px-3 py-2 text-right font-mono text-ink-200 bg-brand-blue/5">{fmtInt(r.visitors)}</td>
+              <td className="px-3 py-2 text-right font-mono text-ink-300 bg-brand-blue/5">{fmtInt(r.pageviews)}</td>
               <td className="px-3 py-2 text-right font-mono text-violet-200 bg-violet-500/5">{fmtInt(r.ad_leads)}</td>
               <td className="px-3 py-2 bg-violet-500/5">
                 <Bar pct={adLeadBar} color="bg-violet-400/60" />

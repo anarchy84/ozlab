@@ -8,6 +8,7 @@ import { AdminGuardProvider } from '@/components/editable/AdminGuardProvider'
 import { AttributionTracker } from '@/components/AttributionTracker'
 import { GlobalClickTracker } from '@/components/tracking/GlobalClickTracker'
 import { ScrollDepthTracker } from '@/components/tracking/ScrollDepthTracker'
+import { SiteVisitTracker } from '@/components/tracking/SiteVisitTracker'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { GoogleTagManager } from '@/components/seo/GoogleTagManager'
 import { CustomHeadInjector } from '@/components/seo/CustomHeadInjector'
@@ -168,6 +169,8 @@ export default async function RootLayout({
             <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
             {/* 사이트 첫 진입 시 First-touch 어트리뷰션 30일 보존 */}
             <AttributionTracker />
+            {/* first-party 실제 방문 세션/UTM/지역/디바이스 기록 */}
+            <SiteVisitTracker />
             {/*
               GTM dataLayer 트래커 2종 — /admin/* 경로에선 GTM 자체가 차단되므로
               push 해도 무동작 (의도). 퍼블릭 페이지에서만 실제 GA4 까지 흐름.

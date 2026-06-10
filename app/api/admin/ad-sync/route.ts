@@ -1,8 +1,7 @@
 // ─────────────────────────────────────────────
-// /api/admin/ad-sync — 광고 시트 sync 설정 + 수동 sync 트리거
+// /api/admin/ad-sync — 페이드 미디어 시트 sync 설정 + 수동 sync 트리거
 //
-// 2 소스 :
-//   - db_purchase : 시트 헤더 (날짜·출처·매입수량·단가·총매입비)
+// 현재 운영 소스 :
 //   - paid_media  : 시트 헤더 (날짜·매체·캠페인·키워드·광고비·노출수·클릭수·전환수·서비스)
 //                   * 우리편 시트 _서비스분류 탭 호환
 //                   * 같은 (date, channel, service) 행이 여러 캠페인으로 흩어져 있어도
@@ -16,11 +15,11 @@
 //   ad_sync_config.site 로 결정 (default 'ozlab', 우리편 데이터는 'wooripen').
 //   ad_metrics.site 컬럼에 그대로 저장. upsert 키 (site, date, channel, service).
 //
-// GET   : 현재 두 URL + 마지막 sync 상태 + 최근 50건
+// GET   : 현재 paid_media URL + 마지막 sync 상태 + 최근 50건
 // PATCH : URL 저장 (body: { sheet_csv_url? / sheet_csv_url_paid? / site? })
 // POST  : sync 실행
-//          body: { type: 'db_purchase' | 'paid_media' }  → 해당 시트만
-//          body: {}                                       → 등록된 시트 모두
+//          body: { type: 'paid_media' }  → paid media 시트
+//          body: {}                       → paid media 시트
 //
 // 결과 :
 //   { success, results: [{ type, rows, status, message?, unmappedChannels? }], normalizedUrls? }
@@ -34,7 +33,7 @@ import { guardApi } from '@/lib/admin/auth-helpers'
 import { sendToSlackChannel } from '@/lib/slack'
 import { NextRequest, NextResponse } from 'next/server'
 
-type SourceType = 'db_purchase' | 'paid_media'
+type SourceType = 'paid_media'
 
 export async function GET() {
   const guard = await guardApi()
@@ -46,6 +45,7 @@ export async function GET() {
     admin
       .from('ad_metrics')
       .select('site, date, channel, service, impressions, clicks, conversions, spend, lead_qty, source, synced_at')
+      .neq('source', 'db_purchase')
       .order('date', { ascending: false })
       .limit(50),
   ])
@@ -62,9 +62,6 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json()
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
-  if (body.sheet_csv_url !== undefined) {
-    update.sheet_csv_url = body.sheet_csv_url || null
-  }
   if (body.sheet_csv_url_paid !== undefined) {
     update.sheet_csv_url_paid = body.sheet_csv_url_paid || null
   }
@@ -157,8 +154,6 @@ function normalizeRow(r: Record<string, string>): {
   clicks: number
   conversions: number
   spend: number
-  lead_qty: number
-  has_lead_qty: boolean
 } {
   const get = (...keys: string[]): string => {
     for (const k of keys) {
@@ -166,12 +161,6 @@ function normalizeRow(r: Record<string, string>): {
       if (v != null && v !== '') return v
     }
     return ''
-  }
-  const has = (...keys: string[]): boolean => {
-    for (const k of keys) {
-      if (k.toLowerCase() in r) return true
-    }
-    return false
   }
   const parseNum = (s: string): number => {
     const cleaned = s.replace(/[,₩원\s"]/g, '')
@@ -185,9 +174,7 @@ function normalizeRow(r: Record<string, string>): {
     impressions: parseNum(get('impressions', '노출수', '노출')),
     clicks: parseNum(get('clicks', '클릭수', '클릭')),
     conversions: parseNum(get('conversions', '전환수', '전환')),
-    spend: parseNum(get('spend', '광고비', '비용', '총매입비')),
-    lead_qty: parseNum(get('lead_qty', '매입수량', '인입수량', 'db수량')),
-    has_lead_qty: has('lead_qty', '매입수량', '인입수량', 'db수량'),
+    spend: parseNum(get('spend', '광고비', '비용')),
   }
 }
 
@@ -210,7 +197,7 @@ function normalizeDate(raw: string): string | null {
 //   1) CSV fetch + 파싱 (RFC 4180)
 //   2) 행 정규화 (헤더 한글/영문 alias 인식)
 //   3) 매체값 정규화 (sheet_channel_alias) — 매핑 없으면 시트값 그대로 + unmapped 리스트에 추가
-//   4) (date, channel, service) 사전 집계 — SUM (광고비/노출/클릭/전환/매입수량)
+//   4) (date, channel, service) 사전 집계 — SUM (광고비/노출/클릭/전환)
 //   5) ad_metrics UPSERT — onConflict (site, date, channel, service)
 // ─────────────────────────────────────────────
 async function syncOneSheet(
@@ -279,7 +266,6 @@ async function syncOneSheet(
         clicks: r.clicks,
         conversions: r.conversions,
         spend: r.spend,
-        lead_qty: r.lead_qty,
       }
     })
 
@@ -305,7 +291,6 @@ async function syncOneSheet(
       existing.clicks += r.clicks
       existing.conversions += r.conversions
       existing.spend += r.spend
-      existing.lead_qty += r.lead_qty
     } else {
       aggMap.set(key, { ...r })
     }
@@ -321,7 +306,7 @@ async function syncOneSheet(
     clicks: r.clicks,
     conversions: r.conversions,
     spend: r.spend,
-    lead_qty: r.lead_qty,
+    lead_qty: 0,
     source: type,
     synced_at: syncedAt,
   }))
@@ -361,22 +346,15 @@ async function syncOneSheet(
 // sync 결과를 ad_sync_config 에 기록
 // ─────────────────────────────────────────────
 async function recordSyncResult(
-  type: SourceType,
+  _type: SourceType,
   result: { status: 'success' | 'error'; rows: number; message: string },
 ): Promise<void> {
   const admin = createAdminClient()
-  const fields =
-    type === 'db_purchase'
-      ? {
-          last_synced_at: new Date().toISOString(),
-          last_status: result.status,
-          last_message: result.message,
-        }
-      : {
-          last_synced_at_paid: new Date().toISOString(),
-          last_status_paid: result.status,
-          last_message_paid: result.message,
-        }
+  const fields = {
+    last_synced_at_paid: new Date().toISOString(),
+    last_status_paid: result.status,
+    last_message_paid: result.message,
+  }
   await admin.from('ad_sync_config').update(fields).eq('id', 1)
 }
 
@@ -396,8 +374,7 @@ function notifySlack(
   const lines: string[] = [`📊 *광고 시트 sync 결과 — site: \`${site}\`*`]
   for (const r of results) {
     const emoji = r.status === 'success' ? '✅' : '❌'
-    const label = r.type === 'db_purchase' ? 'DB 매입' : '페이드 미디어'
-    lines.push(`${emoji} ${label}: ${r.message}`)
+    lines.push(`${emoji} 페이드 미디어: ${r.message}`)
     if (r.unmappedChannels && r.unmappedChannels.length > 0) {
       lines.push(`   ↳ 매핑 필요한 매체값 (sheet_channel_alias 추가): ${r.unmappedChannels.join(', ')}`)
     }
@@ -416,26 +393,25 @@ export async function POST(request: NextRequest) {
   if (!guard.ok) return guard.response
 
   const body = await request.json().catch(() => ({}))
-  const requestedType = (body?.type ?? null) as SourceType | null
+  const requestedType = (body?.type ?? 'paid_media') as string
+
+  if (requestedType !== 'paid_media') {
+    return NextResponse.json({ error: '페이드 미디어 sync만 지원합니다.' }, { status: 400 })
+  }
 
   const admin = createAdminClient()
   const { data: cfg } = await admin
     .from('ad_sync_config')
-    .select('sheet_csv_url, sheet_csv_url_paid, site')
+    .select('sheet_csv_url_paid, site')
     .eq('id', 1)
     .single()
 
   // body.site 우선, 없으면 ad_sync_config.site, 그래도 없으면 'ozlab'
   const site = ((body?.site as string | undefined) ?? cfg?.site ?? 'ozlab').trim() || 'ozlab'
 
-  // 처리할 시트 목록 결정
-  const targets: { type: SourceType; url: string | null }[] = []
-  if (!requestedType || requestedType === 'db_purchase') {
-    targets.push({ type: 'db_purchase', url: cfg?.sheet_csv_url ?? null })
-  }
-  if (!requestedType || requestedType === 'paid_media') {
-    targets.push({ type: 'paid_media', url: cfg?.sheet_csv_url_paid ?? null })
-  }
+  const targets: { type: SourceType; url: string | null }[] = [
+    { type: 'paid_media', url: cfg?.sheet_csv_url_paid ?? null },
+  ]
 
   const usableTargets = targets.filter((t) => t.url)
   if (usableTargets.length === 0) {

@@ -1,16 +1,18 @@
 // ─────────────────────────────────────────────
-// 광고 퍼포먼스 대시보드 — 데이터 헬퍼 (서버 전용)
+// 트래픽·광고 퍼포먼스 대시보드 — 데이터 헬퍼 (서버 전용)
 //
 // 핵심 :
-//   - ad_metrics (광고비) + consultations (리드) + revenue_records (전환매출)
-//     3개를 channel_mapping 으로 정규화 후 JS 에서 조인
+//   - site_visits (방문) + ad_metrics (광고비) + consultations (리드) +
+//     revenue_records (전환매출)을 channel_mapping 으로 정규화 후 JS 에서 조인
 //
 // 정규화 규칙 :
 //   - consultations.utm_source + utm_medium → channel_mapping 매핑 → channel_code
 //   - ad_metrics.channel → 이미 channel_code 형식 (시트에서 표준 코드로 넣는다는 전제)
+//   - 중단된 외부 매입형 소스는 이 리포트 모델에서 제외
 // ─────────────────────────────────────────────
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { loadSiteTrafficSummary } from '@/lib/admin/site-traffic'
 
 // ─────────────────────────────────────────────
 // 기간 preset → from/to (KST 기준)
@@ -76,12 +78,27 @@ export interface ChannelMappingRow {
   is_paid: boolean
 }
 
+export type TrafficGroup = 'paid' | 'organic' | 'direct' | 'referral' | 'site' | 'other'
+
+export interface TrafficTotalBucket {
+  pageviews: number
+  visits: number
+  visitors: number
+  leads: number
+  conversions: number
+  revenue: number
+}
+
 export interface ChannelPerformanceRow {
   channel_code: string
   channel_label: string
   is_paid: boolean
+  traffic_group: TrafficGroup
   impressions: number
   clicks: number
+  pageviews: number
+  visits: number
+  visitors: number
   spend: number
   // 리드 — 2개 source 분리
   ad_leads: number          // 광고 플랫폼 보고 리드 (ad_metrics.conversions, 시트 '전환수')
@@ -91,6 +108,8 @@ export interface ChannelPerformanceRow {
   // 계산 지표
   ctr: number | null        // 클릭/노출 %
   cvr: number | null        // 전환/클릭 % (광고플랫폼 기준)
+  click_to_visit_rate: number | null // 실제 방문 세션 / 광고 클릭 %
+  visit_to_lead_rate: number | null  // CRM 리드 / 실제 방문 세션 %
   ad_cpl: number | null     // 광고비 / 광고 리드 (광고 측 기준)
   cpl: number | null        // 광고비 / CRM 리드 (CRM 측 기준)
   cpa: number | null        // 광고비 / 개통
@@ -101,8 +120,9 @@ export interface ChannelPerformanceRow {
 export interface DailySeriesRow {
   date: string
   spend: number                // 페이드미디어 광고비 only
-  db_purchase_spend: number    // DB 매입비
-  db_purchase_leads: number    // DB 매입수량
+  pageviews: number            // 실제 페이지뷰
+  visits: number               // 실제 방문 세션
+  visitors: number             // 고유 방문자
   ad_leads: number          // 광고 측 리드 (ad_metrics.conversions)
   leads: number             // CRM 측 리드
   conversions: number
@@ -120,10 +140,23 @@ export interface CampaignRow {
 // 캠페인 단위는 utm 기반이므로 ad_leads 분리 적용 안 함 (시트의 캠페인 raw 는 ad_metrics 에 저장 안 됨)
 
 export interface PaidMediaSummary {
+  trafficTotals: TrafficTotalBucket & {
+    paid: TrafficTotalBucket
+    organic: TrafficTotalBucket
+    direct: TrafficTotalBucket
+    referral: TrafficTotalBucket
+    site: TrafficTotalBucket
+    other: TrafficTotalBucket
+  }
   totals: {
     impressions: number
     clicks: number
+    pageviews: number
+    visits: number
+    visitors: number
     ctr: number | null
+    click_to_visit_rate: number | null
+    visit_to_lead_rate: number | null
     spend: number
     ad_leads: number         // 광고 측 리드 합계
     leads: number            // CRM 측 리드 합계
@@ -137,24 +170,9 @@ export interface PaidMediaSummary {
   byChannel: ChannelPerformanceRow[]
   dailySeries: DailySeriesRow[]
   byCampaign: CampaignRow[]
-  // DB 매입 (시트 sync, source='db_purchase')
-  dbPurchaseTotals: {
-    lead_qty: number
-    spend: number
-    avg_unit_cost: number | null
-  }
-  dbPurchaseByChannel: DbPurchaseRow[]
   range: PeriodRange
   // 진단용
   unmappedLeadKeys: string[]  // channel_mapping 에 없는 utm 조합
-}
-
-// DB 매입 — 시트 sync 출처별 집계
-export interface DbPurchaseRow {
-  channel: string         // 시트 '출처' 원본 (예: '토스 스프레드')
-  lead_qty: number        // 매입수량 합
-  spend: number           // 총매입비 합
-  unit_cost: number | null // 평균 단가 (spend / lead_qty)
 }
 
 // ─────────────────────────────────────────────
@@ -163,6 +181,7 @@ export interface DbPurchaseRow {
 export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMediaSummary> {
   const range = resolvePeriod(preset)
   const admin = createAdminClient()
+  const trafficSummaryPromise = loadSiteTrafficSummary(range)
 
   // 1) channel_mapping 전체 (utm 정규화용 lookup)
   const { data: mappingRows } = await admin
@@ -186,7 +205,8 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     }
   }
 
-  // 2) ad_metrics — 기간 내 모든 행 (db_purchase + paid_media 둘 다)
+  // 2) ad_metrics — 기간 내 페이드 미디어 행.
+  // source='db_purchase' 로 남아 있는 과거 행은 운영 중단으로 집계에서 제외한다.
   const { data: adRows } = await admin
     .from('ad_metrics')
     .select('date, channel, impressions, clicks, conversions, spend, lead_qty, source')
@@ -235,6 +255,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
 
   // 미매핑 utm 조합 추적 (진단용)
   const unmappedSet = new Set<string>()
+  const trafficSummary = await trafficSummaryPromise
 
   // channel_code 기준 집계 컨테이너
   const byCode = new Map<string, ChannelPerformanceRow>()
@@ -245,9 +266,13 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
       row = {
         channel_code: code,
         channel_label: info?.label ?? code,
-        is_paid: info?.is_paid ?? true,
+        is_paid: info?.is_paid ?? false,
+        traffic_group: trafficGroupFor(code, info?.is_paid ?? false),
         impressions: 0,
         clicks: 0,
+        pageviews: 0,
+        visits: 0,
+        visitors: 0,
         spend: 0,
         ad_leads: 0,
         leads: 0,
@@ -255,6 +280,8 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
         revenue: 0,
         ctr: null,
         cvr: null,
+        click_to_visit_rate: null,
+        visit_to_lead_rate: null,
         ad_cpl: null,
         cpl: null,
         cpa: null,
@@ -266,31 +293,23 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     return row
   }
 
-  // ad_metrics → 페이드 미디어 (source != 'db_purchase') 만 KPI 합산에 포함
-  // DB 매입은 별도 섹션에서 처리 (utm 어트리뷰션과 매칭 안 됨 — 영업 모델이 다름)
-  const dbPurchaseByCh = new Map<string, DbPurchaseRow>()
+  // ad_metrics → 페이드 미디어 광고비/광고 측 리드만 합산
   for (const r of adRows ?? []) {
     const code = (r.channel as string) || 'unknown'
     const src = (r.source as string | null) ?? ''
     if (src === 'db_purchase') {
-      // DB 매입 — 별도 컨테이너
-      let row = dbPurchaseByCh.get(code)
-      if (!row) {
-        row = { channel: code, lead_qty: 0, spend: 0, unit_cost: null }
-        dbPurchaseByCh.set(code, row)
-      }
-      row.lead_qty += Number(r.lead_qty ?? 0)
-      row.spend += Number(r.spend ?? 0)
-    } else {
-      // 페이드 미디어 — KPI 합산
-      const row = ensureCode(code)
-      row.impressions += Number(r.impressions ?? 0)
-      row.clicks += Number(r.clicks ?? 0)
-      row.spend += Number(r.spend ?? 0)
-      // ad_metrics.conversions = 광고 플랫폼이 보고한 결과 수 = 광고 측 리드
-      // CRM 측 도착 리드는 consultations utm 매칭으로 별도 카운트 (row.leads)
-      row.ad_leads += Number(r.conversions ?? 0)
+      continue
     }
+
+    const row = ensureCode(code)
+    row.is_paid = true
+    row.traffic_group = 'paid'
+    row.impressions += Number(r.impressions ?? 0)
+    row.clicks += Number(r.clicks ?? 0)
+    row.spend += Number(r.spend ?? 0)
+    // ad_metrics.conversions = 광고 플랫폼이 보고한 결과 수 = 광고 측 리드
+    // CRM 측 도착 리드는 consultations utm 매칭으로 별도 카운트 (row.leads)
+    row.ad_leads += Number(r.conversions ?? 0)
   }
 
   // consultations → utm 정규화 → channel_code 카운트
@@ -306,6 +325,17 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     row.leads += 1
   }
 
+  // site_visits → 실제 도착 방문자/세션/페이지뷰
+  for (const t of trafficSummary.byChannel) {
+    const row = ensureCode(t.channel_code)
+    row.channel_label = t.channel_label
+    row.is_paid = t.is_paid
+    row.traffic_group = trafficGroupFor(t.channel_code, t.is_paid)
+    row.pageviews += t.pageviews
+    row.visits += t.visits
+    row.visitors += t.visitors
+  }
+
   // revenue → utm 정규화 → channel_code 매출/전환 카운트
   const byDate = new Map<string, DailySeriesRow>()
   const ensureDate = (d: string): DailySeriesRow => {
@@ -314,8 +344,9 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
       row = {
         date: d,
         spend: 0,
-        db_purchase_spend: 0,
-        db_purchase_leads: 0,
+        pageviews: 0,
+        visits: 0,
+        visitors: 0,
         ad_leads: 0,
         leads: 0,
         conversions: 0,
@@ -342,23 +373,28 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     dRow.revenue += Number(r.amount ?? 0)
   }
 
-  // 일별 — 페이드 광고비/광고측 리드와 DB 매입비/매입수량은 분리한다.
+  // 일별 — 페이드 광고비/광고측 리드
   for (const r of adRows ?? []) {
     const dRow = ensureDate(r.date as string)
     const src = (r.source as string | null) ?? ''
     if (src === 'db_purchase') {
-      dRow.db_purchase_spend += Number(r.spend ?? 0)
-      dRow.db_purchase_leads += Number(r.lead_qty ?? 0)
-    } else {
-      dRow.spend += Number(r.spend ?? 0)
-      dRow.ad_leads += Number(r.conversions ?? 0)
+      continue
     }
+    dRow.spend += Number(r.spend ?? 0)
+    dRow.ad_leads += Number(r.conversions ?? 0)
   }
   // 일별 — CRM 도착 리드
   for (const c of consRows ?? []) {
     const d = (c.created_at as string).slice(0, 10)
     const dRow = ensureDate(d)
     dRow.leads += 1
+  }
+  // 일별 — 실제 방문
+  for (const t of trafficSummary.dailySeries) {
+    const dRow = ensureDate(t.date)
+    dRow.pageviews += t.pageviews
+    dRow.visits += t.visits
+    dRow.visitors += t.visitors
   }
 
   // 캠페인 드릴다운
@@ -407,6 +443,8 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   for (const row of byCode.values()) {
     row.ctr      = row.impressions > 0 ? (row.clicks / row.impressions) * 100 : null
     row.cvr      = row.clicks      > 0 ? (row.conversions / row.clicks) * 100 : null
+    row.click_to_visit_rate = row.clicks > 0 ? (row.visits / row.clicks) * 100 : null
+    row.visit_to_lead_rate  = row.visits > 0 ? (row.leads / row.visits) * 100 : null
     row.ad_cpl   = row.ad_leads    > 0 ? row.spend / row.ad_leads : null
     row.cpl      = row.leads       > 0 ? row.spend / row.leads : null
     row.cpa      = row.conversions > 0 ? row.spend / row.conversions : null
@@ -414,11 +452,22 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     row.lead_cvr = row.leads       > 0 ? (row.conversions / row.leads) * 100 : null
   }
 
-  // 총합
+  // 트래픽 총합 — 오가닉/페이드/직접/추천/자체사이트 기준
+  const trafficTotals = createTrafficTotals()
+  for (const row of byCode.values()) {
+    addTrafficBucket(trafficTotals, row)
+  }
+
+  // 페이드 미디어 총합
   const totals = {
     impressions: 0,
     clicks: 0,
+    pageviews: 0,
+    visits: 0,
+    visitors: 0,
     ctr: null as number | null,
+    click_to_visit_rate: null as number | null,
+    visit_to_lead_rate: null as number | null,
     spend: 0,
     ad_leads: 0,
     leads: 0,
@@ -429,11 +478,14 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     revenue: 0,
     roas: null as number | null,
   }
-  // 총합은 페이드 미디어 채널만 (organic/direct/site 제외) — 진짜 광고 성과만 측정
+  // totals 는 페이드 미디어 채널만 (organic/direct/site 제외) — 진짜 광고 성과만 측정
   for (const row of byCode.values()) {
     if (!row.is_paid) continue
     totals.impressions += row.impressions
     totals.clicks += row.clicks
+    totals.pageviews += row.pageviews
+    totals.visits += row.visits
+    totals.visitors += row.visitors
     totals.spend += row.spend
     totals.ad_leads += row.ad_leads
     totals.leads += row.leads
@@ -441,6 +493,8 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     totals.revenue += row.revenue
   }
   totals.ctr    = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : null
+  totals.click_to_visit_rate = totals.clicks > 0 ? (totals.visits / totals.clicks) * 100 : null
+  totals.visit_to_lead_rate  = totals.visits > 0 ? (totals.leads / totals.visits) * 100 : null
   totals.ad_cpl = totals.ad_leads > 0 ? totals.spend / totals.ad_leads : null
   totals.cpl    = totals.leads > 0 ? totals.spend / totals.leads : null
   totals.cpa    = totals.conversions > 0 ? totals.spend / totals.conversions : null
@@ -448,9 +502,9 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
 
   // 정렬
   const byChannel = Array.from(byCode.values()).sort((a, b) => {
-    // 페이드 우선 + 광고비 내림차순
+    // 페이드 우선 + 방문/광고비 내림차순
     if (a.is_paid !== b.is_paid) return a.is_paid ? -1 : 1
-    return b.spend - a.spend
+    return b.spend - a.spend || b.visits - a.visits
   })
 
   const dailySeries = Array.from(byDate.values()).sort((a, b) =>
@@ -462,32 +516,74 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     .sort((a, b) => b.leads - a.leads)
     .slice(0, 50)
 
-  // DB 매입 집계
-  const dbPurchaseList = Array.from(dbPurchaseByCh.values())
-    .map((r) => ({
-      ...r,
-      unit_cost: r.lead_qty > 0 ? r.spend / r.lead_qty : null,
-    }))
-    .sort((a, b) => b.spend - a.spend)
-
-  const dbPurchaseTotals = {
-    lead_qty: dbPurchaseList.reduce((s, r) => s + r.lead_qty, 0),
-    spend: dbPurchaseList.reduce((s, r) => s + r.spend, 0),
-    avg_unit_cost: null as number | null,
-  }
-  dbPurchaseTotals.avg_unit_cost =
-    dbPurchaseTotals.lead_qty > 0 ? dbPurchaseTotals.spend / dbPurchaseTotals.lead_qty : null
-
   return {
+    trafficTotals,
     totals,
     byChannel,
     dailySeries,
     byCampaign: byCampaignSorted,
-    dbPurchaseTotals,
-    dbPurchaseByChannel: dbPurchaseList,
     range,
     unmappedLeadKeys: Array.from(unmappedSet),
   }
+}
+
+function emptyTrafficBucket(): TrafficTotalBucket {
+  return {
+    pageviews: 0,
+    visits: 0,
+    visitors: 0,
+    leads: 0,
+    conversions: 0,
+    revenue: 0,
+  }
+}
+
+function createTrafficTotals(): PaidMediaSummary['trafficTotals'] {
+  return {
+    ...emptyTrafficBucket(),
+    paid: emptyTrafficBucket(),
+    organic: emptyTrafficBucket(),
+    direct: emptyTrafficBucket(),
+    referral: emptyTrafficBucket(),
+    site: emptyTrafficBucket(),
+    other: emptyTrafficBucket(),
+  }
+}
+
+function addTrafficBucket(
+  totals: PaidMediaSummary['trafficTotals'],
+  row: ChannelPerformanceRow,
+): void {
+  totals.pageviews += row.pageviews
+  totals.visits += row.visits
+  totals.visitors += row.visitors
+  totals.leads += row.leads
+  totals.conversions += row.conversions
+  totals.revenue += row.revenue
+
+  const bucket = totals[row.traffic_group]
+  bucket.pageviews += row.pageviews
+  bucket.visits += row.visits
+  bucket.visitors += row.visitors
+  bucket.leads += row.leads
+  bucket.conversions += row.conversions
+  bucket.revenue += row.revenue
+}
+
+function trafficGroupFor(code: string, isPaid: boolean): TrafficGroup {
+  const value = code.toLowerCase()
+  if (isPaid) return 'paid'
+  if (value === 'direct') return 'direct'
+  if (value === 'site' || value === 'owned' || value.includes('cta') || value.includes('internal')) {
+    return 'site'
+  }
+  if (value.includes('organic') || value.endsWith('-search') || value.includes('natural')) {
+    return 'organic'
+  }
+  if (value.includes('referral') || value.includes('blog') || value.includes('social')) {
+    return 'referral'
+  }
+  return 'other'
 }
 
 function makeKey(source: string, medium: string): string {

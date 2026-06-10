@@ -1,31 +1,22 @@
 'use client'
 
 // ─────────────────────────────────────────────
-// 광고 시트 sync — 2 소스 (DB 매입 + 페이드 미디어)
+// 광고 시트 sync — 페이드 미디어 전용
 //
-// 2 카드 :
-//   1. DB 매입  (시트: 날짜·출처·매입수량·단가·총매입비)  → source=db_purchase
-//   2. 페이드 미디어 (시트: 날짜·출처·노출·클릭·광고비)   → source=paid_media
-//
-// 각 카드 :
+// 카드 :
 //   · URL 입력 + 저장
-//   · "이 시트만 sync"
+//   · "페이드 미디어 sync"
 //   · 마지막 sync 상태
 //
 // 상단 :
-//   · "둘 다 sync" 버튼 (있는 시트만)
-//   · 최근 50건 미리보기 (source 컬럼으로 구분 표시)
+//   · 최근 50건 미리보기
 // ─────────────────────────────────────────────
 
 import { useEffect, useState, useCallback } from 'react'
 
-type SourceType = 'db_purchase' | 'paid_media'
+type SourceType = 'paid_media'
 
 interface Config {
-  sheet_csv_url: string | null
-  last_synced_at: string | null
-  last_status: string | null
-  last_message: string | null
   sheet_csv_url_paid: string | null
   last_synced_at_paid: string | null
   last_status_paid: string | null
@@ -48,7 +39,6 @@ interface Metric {
 export default function AdSyncManager() {
   const [config, setConfig] = useState<Config | null>(null)
   const [recent, setRecent] = useState<Metric[]>([])
-  const [urlDb, setUrlDb] = useState('')
   const [urlPaid, setUrlPaid] = useState('')
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
@@ -61,7 +51,6 @@ export default function AdSyncManager() {
       const j = await res.json()
       setConfig(j.config)
       setRecent(j.recent ?? [])
-      setUrlDb(j.config?.sheet_csv_url ?? '')
       setUrlPaid(j.config?.sheet_csv_url_paid ?? '')
     }
     setLoading(false)
@@ -74,14 +63,13 @@ export default function AdSyncManager() {
   const saveUrl = async (type: SourceType, url: string) => {
     setWorking(true)
     setMsg('')
-    const field = type === 'db_purchase' ? 'sheet_csv_url' : 'sheet_csv_url_paid'
     const res = await fetch('/api/admin/ad-sync', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [field]: url || null }),
+      body: JSON.stringify({ sheet_csv_url_paid: url || null }),
     })
     if (res.ok) {
-      setMsg(`✅ ${type === 'db_purchase' ? 'DB 매입' : '페이드'} URL 저장 완료`)
+      setMsg('✅ 페이드 미디어 URL 저장 완료')
       void fetchAll()
     } else setMsg('❌ 저장 실패')
     setWorking(false)
@@ -89,18 +77,18 @@ export default function AdSyncManager() {
 
   const runSync = async (type?: SourceType) => {
     setWorking(true)
-    setMsg(type ? `${type === 'db_purchase' ? 'DB 매입' : '페이드'} sync 중…` : '둘 다 sync 중…')
+    setMsg('페이드 미디어 sync 중…')
     const res = await fetch('/api/admin/ad-sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(type ? { type } : {}),
+      body: JSON.stringify({ type: 'paid_media' }),
     })
     const j = await res.json().catch(() => ({}))
     if (res.ok) {
       const parts: string[] = []
       if (j.results) {
         for (const r of j.results) {
-          parts.push(`${r.type === 'db_purchase' ? 'DB매입' : '페이드'} ${r.rows ?? 0}행`)
+          parts.push(`페이드 ${r.rows ?? 0}행`)
         }
       } else if (j.rows !== undefined) {
         parts.push(`${j.rows}행`)
@@ -124,16 +112,16 @@ export default function AdSyncManager() {
         <div>
           <h1 className="text-2xl font-bold text-ink-100">광고 성과 시트 sync</h1>
           <p className="text-sm text-ink-400 mt-1">
-            DB 매입(공급자 일괄 전달) + 페이드 미디어(네이버/메타/구글) 두 시트를 ad_metrics 로 동기화합니다.
+            페이드 미디어(네이버/메타/구글) 성과 시트를 ad_metrics 로 동기화합니다.
           </p>
         </div>
         <button
           type="button"
           onClick={() => runSync()}
-          disabled={working || (!config.sheet_csv_url && !config.sheet_csv_url_paid)}
+          disabled={working || !config.sheet_csv_url_paid}
           className="px-4 py-2 bg-brand-blue text-white text-sm font-bold rounded hover:bg-brand-dark disabled:opacity-50"
         >
-          🔄 둘 다 sync
+          🔄 페이드 미디어 sync
         </button>
       </div>
 
@@ -143,29 +131,7 @@ export default function AdSyncManager() {
         </div>
       )}
 
-      {/* 1. DB 매입 카드 (보라색) */}
-      <SyncCard
-        title="📦 DB 매입 시트"
-        subtitle="토스 등 공급자가 전달하는 DB. utm 없음. 시트 수량이 공식 수치."
-        url={urlDb}
-        setUrl={setUrlDb}
-        onSave={() => saveUrl('db_purchase', urlDb)}
-        onSync={() => runSync('db_purchase')}
-        working={working}
-        lastSyncedAt={config.last_synced_at}
-        lastStatus={config.last_status}
-        lastMessage={config.last_message}
-        headerGuide={[
-          '날짜          : YYYY-MM-DD (또는 YYYY.M.D, YYYY/M/D)',
-          '출처          : 토스 스프레드 / 토스 프리미엄 / ... (한글 OK)',
-          '매입수량      : 받은 DB 수 (필수)',
-          '단가          : (선택) — 미사용. 총매입비/매입수량 자동 계산',
-          '총매입비      : 그 날 그 출처에서 쓴 돈 (필수)',
-        ]}
-        accentClass="bg-violet-900/10 border-violet-700/40"
-      />
-
-      {/* 2. 페이드 미디어 카드 */}
+      {/* 페이드 미디어 카드 */}
       <SyncCard
         title="📣 페이드 미디어 시트"
         subtitle="네이버/메타/구글/카카오 등 광고 플랫폼 일별 성과. utm 어트리뷰션과 매칭."
@@ -210,11 +176,10 @@ export default function AdSyncManager() {
                   <th className="text-left px-3 py-2">날짜</th>
                   <th className="text-left px-3 py-2">소스</th>
                   <th className="text-left px-3 py-2">출처/채널</th>
-                  <th className="text-right px-3 py-2">매입수량</th>
                   <th className="text-right px-3 py-2">노출</th>
                   <th className="text-right px-3 py-2">클릭</th>
                   <th className="text-right px-3 py-2">전환</th>
-                  <th className="text-right px-3 py-2">광고비/매입비</th>
+                  <th className="text-right px-3 py-2">광고비</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-800">
@@ -225,9 +190,6 @@ export default function AdSyncManager() {
                       <SourceBadge source={m.source} />
                     </td>
                     <td className="px-3 py-1.5 text-ink-200">{m.channel}</td>
-                    <td className="px-3 py-1.5 text-right font-mono text-ink-100">
-                      {m.lead_qty ? Number(m.lead_qty).toLocaleString() : '—'}
-                    </td>
                     <td className="px-3 py-1.5 text-right font-mono text-ink-400">
                       {m.impressions ? m.impressions.toLocaleString() : '—'}
                     </td>
@@ -252,7 +214,7 @@ export default function AdSyncManager() {
 }
 
 // ─────────────────────────────────────────────
-// 시트 카드 — DB 매입 / 페이드 미디어 공용
+// 시트 카드 — 페이드 미디어
 // ─────────────────────────────────────────────
 function SyncCard({
   title,
@@ -340,13 +302,6 @@ function SyncCard({
 }
 
 function SourceBadge({ source }: { source: string | null }) {
-  if (source === 'db_purchase') {
-    return (
-      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-violet-900/40 text-violet-200">
-        DB매입
-      </span>
-    )
-  }
   if (source === 'paid_media') {
     return (
       <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-blue-900/40 text-blue-200">

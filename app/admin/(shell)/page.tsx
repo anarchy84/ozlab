@@ -11,6 +11,11 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdminProfile } from '@/lib/admin/auth-helpers'
 import { isSuperAdmin } from '@/lib/admin/permissions'
+import {
+  loadSiteTrafficSummary,
+  type SiteTrafficSummary,
+  type TrafficBucketRow,
+} from '@/lib/admin/site-traffic'
 import type {
   AdminRole,
   ConsultationFunnelRow,
@@ -114,6 +119,7 @@ export default async function AdminDashboardPage({
   const profile = await requireAdminProfile()
   const supabase = createClient()
   const period = resolveDashboardPeriod(searchParams)
+  const trafficSummaryPromise = loadSiteTrafficSummary({ from: period.from, to: period.to })
 
   // 병렬 쿼리 — 대시보드 기본 지표 + 기간별 매출/광고비
   const [
@@ -126,6 +132,7 @@ export default async function AdminDashboardPage({
     previousRevenueRes,
     adSpendRes,
     previousAdSpendRes,
+    trafficSummary,
   ] = await Promise.all([
     supabase.from('v_consultation_funnel').select('*'),
     supabase
@@ -163,6 +170,7 @@ export default async function AdminDashboardPage({
       .select('date, spend')
       .gte('date', period.previousFrom)
       .lte('date', period.previousTo),
+    trafficSummaryPromise,
   ])
 
   const funnel = (funnelRes.data as ConsultationFunnelRow[] | null) ?? []
@@ -301,6 +309,8 @@ export default async function AdminDashboardPage({
         summary={revenueSummary}
         period={period}
       />
+
+      <TrafficOverview summary={trafficSummary} period={period} />
 
       <div className="grid gap-4 xl:grid-cols-2">
         <PerformanceLineChart
@@ -763,6 +773,145 @@ function RevenueSummaryCard({
       )}
       <p className="mt-2 text-xs leading-relaxed text-ink-500 break-keep">{helper}</p>
     </article>
+  )
+}
+
+function TrafficOverview({
+  summary,
+  period,
+}: {
+  summary: SiteTrafficSummary
+  period: DashboardPeriod
+}) {
+  const cards = [
+    {
+      label: '방문 세션',
+      value: summary.totals.visits,
+      helper: '같은 브라우저 탭 세션 기준 실제 도착 방문',
+    },
+    {
+      label: '고유 방문자',
+      value: summary.totals.visitors,
+      helper: '브라우저 localStorage visitor_id 기준',
+    },
+    {
+      label: '페이지뷰',
+      value: summary.totals.pageviews,
+      helper: '세션 내 중복 URL은 1회만 기록',
+    },
+    {
+      label: 'IP 수',
+      value: summary.totals.ips,
+      helper: '원본 IP는 관리자 전용, 화면은 마스킹',
+    },
+  ]
+
+  return (
+    <section className="rounded-2xl border border-ink-200 bg-white p-4 shadow-sm dark:border-ink-700 dark:bg-surface-darkSoft/95 sm:p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-base font-bold text-ink-100">방문자 인사이트</h2>
+          <p className="mt-1 text-sm text-ink-400 break-keep">
+            광고관리자 수치가 아니라 오즈랩페이 사이트에 실제 도착한 first-party 방문 데이터입니다.
+          </p>
+        </div>
+        <span className="w-fit rounded-full border border-brand-blue/30 bg-brand-soft px-3 py-1 text-xs font-semibold text-brand-deep dark:border-brand-blue/40 dark:bg-brand-blue/10 dark:text-brand-blue">
+          {formatYmdLabel(period.from)} ~ {formatYmdLabel(period.to)}
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <article
+            key={card.label}
+            className="rounded-xl border border-ink-200 bg-ink-50 p-4 dark:border-ink-700 dark:bg-ink-900/60"
+          >
+            <p className="text-xs font-semibold text-ink-400">{card.label}</p>
+            <p className="mt-2 font-mono text-2xl font-extrabold text-ink-100">
+              {card.value.toLocaleString()}건
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-ink-500 break-keep">{card.helper}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-3 xl:grid-cols-4">
+        <TrafficMiniTable
+          title="UTM/매체별 방문"
+          rows={summary.byChannel.map((row) => ({
+            key: row.channel_code,
+            label: row.channel_label,
+            pageviews: row.pageviews,
+            visits: row.visits,
+            visitors: row.visitors,
+          }))}
+          emptyText="방문 데이터 없음"
+        />
+        <TrafficMiniTable title="지역 통계" rows={summary.byRegion} emptyText="지역 헤더 수집 대기" />
+        <TrafficMiniTable
+          title="디바이스"
+          rows={summary.byDevice}
+          emptyText="디바이스 데이터 없음"
+        />
+        <TrafficMiniTable title="IP 통계" rows={summary.byIp} emptyText="IP 데이터 없음" />
+      </div>
+
+      <div className="mt-3 grid gap-3 xl:grid-cols-3">
+        <TrafficMiniTable title="브라우저" rows={summary.byBrowser} emptyText="브라우저 데이터 없음" />
+        <TrafficMiniTable title="OS" rows={summary.byOs} emptyText="OS 데이터 없음" />
+        <TrafficMiniTable title="언어" rows={summary.byLanguage} emptyText="언어 데이터 없음" />
+      </div>
+
+      <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
+        연령·성별 같은 인구통계는 웹 방문만으로 정확하게 수집할 수 없습니다. 필요하면 상담폼 선택값,
+        회원 데이터, 또는 광고 플랫폼 리포트 API를 별도 연결해야 합니다.
+      </p>
+    </section>
+  )
+}
+
+function TrafficMiniTable({
+  title,
+  rows,
+  emptyText,
+}: {
+  title: string
+  rows: TrafficBucketRow[]
+  emptyText: string
+}) {
+  const topRows = rows.slice(0, 6)
+  return (
+    <div className="rounded-xl border border-ink-200 bg-white p-3 dark:border-ink-700 dark:bg-ink-900/55">
+      <h3 className="text-sm font-bold text-ink-100">{title}</h3>
+      {topRows.length === 0 ? (
+        <p className="mt-3 rounded-lg border border-dashed border-ink-200 px-3 py-5 text-center text-xs text-ink-500 dark:border-ink-700">
+          {emptyText}
+        </p>
+      ) : (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-ink-500">
+              <tr>
+                <th className="pb-2 text-left font-semibold">구분</th>
+                <th className="pb-2 text-right font-semibold">방문</th>
+                <th className="pb-2 text-right font-semibold">방문자</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ink-100 dark:divide-ink-800">
+              {topRows.map((row) => (
+                <tr key={row.key}>
+                  <td className="max-w-[150px] truncate py-2 pr-2 font-medium text-ink-200" title={row.label}>
+                    {row.label}
+                  </td>
+                  <td className="py-2 text-right font-mono text-ink-100">{row.visits.toLocaleString()}</td>
+                  <td className="py-2 text-right font-mono text-ink-400">{row.visitors.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   )
 }
 
