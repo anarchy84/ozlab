@@ -20,7 +20,7 @@ import { landingFaqsForSlots } from '@/lib/landing-sections'
 import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import HomeClient from './(home)/HomeClient'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { breadcrumbJsonLd, faqJsonLd } from '@/lib/seo'
+import { breadcrumbJsonLd, faqJsonLd, publicMetadata, SITE_DESCRIPTION } from '@/lib/seo'
 import { homeFaqsForBlocks } from '@/lib/home-faqs'
 import { mergePageMetadata } from '@/lib/admin/page-seo'
 
@@ -28,7 +28,23 @@ export const revalidate = 0
 
 // 홈 페이지 — root layout generateMetadata 결과 + page_seo DB 머지
 export async function generateMetadata(): Promise<Metadata> {
-  return mergePageMetadata('/', {})
+  return mergePageMetadata('/', publicMetadata({
+    title: '네이버 카드 단말기 · 네이버 POS기',
+    description: SITE_DESCRIPTION,
+    path: '/',
+    keywords: [
+      '네이버 카드 단말기',
+      '네이버 카드 결제기',
+      '네이버포스기',
+      '네이버포스',
+      '네이버 POS',
+      '포스기',
+      '포스단말기',
+      '결제포스기',
+      '애플페이포스기',
+      '애플페이결제단말기',
+    ],
+  }))
 }
 
 export default async function HomePage() {
