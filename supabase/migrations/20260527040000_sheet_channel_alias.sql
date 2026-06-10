@@ -62,8 +62,6 @@ INSERT INTO public.sheet_channel_alias (sheet_value, channel_code, notes) VALUES
   -- 틱톡
   ('틱톡',               'tiktok-ads',    '틱톡 광고'),
   ('tiktok',             'tiktok-ads',   '영문 표기'),
-  -- 토스 (페이드 미디어 측 — DB 매입과 별개)
-  ('토스 광고',          'toss-ads',      '토스 광고'),
   -- 자연 유입 (광고비 없음)
   ('자체',               'self',          '자체 채널 / 비유료'),
   ('site',               'site',          '사이트 직접 유입')

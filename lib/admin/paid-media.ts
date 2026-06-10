@@ -206,7 +206,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   }
 
   // 2) ad_metrics — 기간 내 페이드 미디어 행.
-  // source='db_purchase' 로 남아 있는 과거 행은 운영 중단으로 집계에서 제외한다.
+  // 중단된 외부 매입형 source 로 남아 있는 과거 행은 집계에서 제외한다.
   const { data: adRows } = await admin
     .from('ad_metrics')
     .select('date, channel, impressions, clicks, conversions, spend, lead_qty, source')
@@ -297,7 +297,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   for (const r of adRows ?? []) {
     const code = (r.channel as string) || 'unknown'
     const src = (r.source as string | null) ?? ''
-    if (src === 'db_purchase') {
+    if (src === 'db_purchase' || src === 'retired_db_purchase') {
       continue
     }
 
@@ -377,7 +377,7 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   for (const r of adRows ?? []) {
     const dRow = ensureDate(r.date as string)
     const src = (r.source as string | null) ?? ''
-    if (src === 'db_purchase') {
+    if (src === 'db_purchase' || src === 'retired_db_purchase') {
       continue
     }
     dRow.spend += Number(r.spend ?? 0)

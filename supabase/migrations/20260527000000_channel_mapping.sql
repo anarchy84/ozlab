@@ -98,7 +98,6 @@ VALUES
   -- 그 외 페이드
   ('daangn',   'cpc',      'daangn-ads',     '당근 광고',       true, 50),
   ('tiktok',   'cpc',      'tiktok-ads',     '틱톡 광고',       true, 51),
-  ('toss',     'cpc',      'toss-ads',       '토스 광고',       true, 52),
 
   -- 자연 유입 (광고비 없음 — paid=false)
   ('naver',    'organic',  'naver-organic',  '네이버 자연유입', false, 100),

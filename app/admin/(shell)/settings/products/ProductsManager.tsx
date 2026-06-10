@@ -602,7 +602,7 @@ function ProductEditor({
             <input
               value={form.vendor}
               onChange={(e) => setForm({ ...form, vendor: e.target.value })}
-              placeholder="KT / LG / SKB / 페이히어 / 토스"
+              placeholder="KT / LG / SKB / 페이히어"
               className="w-full px-3 py-2 bg-ink-900 border border-ink-700 text-ink-100 rounded text-sm"
             />
           </Field>

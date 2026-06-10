@@ -3,10 +3,10 @@
 //
 // 정책 :
 //   1) 제목에 의미 있는 영문/숫자가 3자 이상 있으면 그대로 슬러그화
-//      (예 : "Toss Terminal Guide 2026" → "toss-terminal-guide-2026")
+//      (예 : "Naver POS Guide 2026" → "naver-pos-guide-2026")
 //   2) 한글·이모지·특수문자만 있는 제목은 영문 부분이 짧아 SEO 가치 X
 //      → 'tip-YYYY-MM-DD-xxxx' 형태 timestamp slug 폴백
-//      (예 : "토스 단말기 가이드" → "tip-2026-05-06-a3xb")
+//      (예 : "네이버 POS 가이드" → "tip-2026-05-06-a3xb")
 //
 // 이 헬퍼는 어드민 폼의 자동 slug 생성과
 // /api/admin/media 의 한글 파일명 → ASCII 변환에서 사용된다.

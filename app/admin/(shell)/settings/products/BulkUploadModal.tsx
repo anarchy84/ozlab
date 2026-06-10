@@ -151,7 +151,6 @@ export default function BulkUploadModal({ onClose, onDone }: Props) {
         'KT 인터넷 500M 3년,인터넷,KT,33000,325000,,3년,예,',
         '에스원 CCTV 2회선,CCTV,에스원,30000,250000,,3년,예,',
         '페이히어 키오스크 기본형,키오스크,페이히어,10000,300000,500000,없음,,60개월 할부',
-        '토스단말기,단말기,토스,0,300000,500000,없음,,VAN 수수료는 따로 들어옴',
       ].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)

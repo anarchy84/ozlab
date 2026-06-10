@@ -207,7 +207,7 @@ export default function ProductSyncManager() {
               <ul className="space-y-1 text-xs list-disc pl-5">
                 <li><strong>상품 이름</strong> (필수) — 식별용 이름. 같은 이름은 자동으로 덮어쓰기 (update).</li>
                 <li><strong>분류</strong> (필수) — <span className="text-brand-blue font-semibold">오즈랩 4종</span>: 인터넷 / 포스기(POS) / CCTV / 키오스크 또는 테이블오더. + 옵션: 인터넷-옵션 / 인터넷-유심결합 / POS부가장비.</li>
-                <li><strong>공급사</strong> — 네이버 / 오케이포스 / SKT(해피) / NIT / 토스 등.</li>
+                <li><strong>공급사</strong> — 네이버 / 오케이포스 / SKT(해피) / NIT 등.</li>
                 <li><strong>원가</strong> — 우리가 사오는 가격 (부가세 포함). <strong className="text-amber-300">인터넷은 보통 0</strong> (공급사가 무상 제공).</li>
                 <li><strong>우리 수당</strong> — 우리가 받는 마진/지원금. <strong className="text-amber-300">인터넷은 이게 매출</strong> (지원금 = 우리 수익).</li>
                 <li><strong>고객 가격</strong> — 고객에게 판매하는 최종 가격. <strong className="text-amber-300">인터넷은 보통 0</strong> (고객 무료).</li>

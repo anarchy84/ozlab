@@ -28,7 +28,6 @@ const FALLBACK_LABELS: Record<string, string> = {
   'kakao-bizboard': '카카오 비즈보드',
   'daangn-ads': '당근 광고',
   'tiktok-ads': '틱톡 광고',
-  'toss-ads': '토스 광고',
   // 오가닉 검색
   'naver-organic': '네이버 자연유입',
   'google-organic': '구글 자연유입',

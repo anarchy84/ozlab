@@ -45,7 +45,7 @@ export async function GET() {
     admin
       .from('ad_metrics')
       .select('site, date, channel, service, impressions, clicks, conversions, spend, lead_qty, source, synced_at')
-      .neq('source', 'db_purchase')
+      .not('source', 'in', '("db_purchase","retired_db_purchase")')
       .order('date', { ascending: false })
       .limit(50),
   ])
