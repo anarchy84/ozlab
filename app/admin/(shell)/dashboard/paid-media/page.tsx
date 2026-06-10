@@ -3,7 +3,7 @@
 //
 // 데이터 소스 4개 조인 :
 //   - site_visits (실제 방문, first-party tracking)
-//   - ad_metrics (광고비, 페이드 미디어 시트 sync 입력)
+//   - ad_metrics (광고비, 페이드 미디어 광고비 sync 입력)
 //   - consultations (리드, utm 자동 캡쳐)
 //   - revenue_records (개통/매출)
 //
@@ -91,7 +91,7 @@ export default async function PaidMediaDashboardPage({
             매출 통합 →
           </Link>
           <Link href="/admin/settings/ad-sync" className="text-ink-400 hover:text-ink-100">
-            시트 sync →
+            광고비 sync →
           </Link>
         </div>
       </header>
@@ -157,7 +157,7 @@ export default async function PaidMediaDashboardPage({
         </div>
         {mediaPerformanceRows.length === 0 ? (
           <p className="px-5 pb-5 text-sm text-ink-500">
-            데이터 없음. <Link href="/admin/settings/ad-sync" className="text-brand-blue underline">시트 sync</Link> 또는 광고 트래픽 유입 후 확인.
+            데이터 없음. <Link href="/admin/settings/ad-sync" className="text-brand-blue underline">광고비 sync</Link> 또는 광고 트래픽 유입 후 확인.
           </p>
         ) : (
           <>
@@ -221,7 +221,7 @@ export default async function PaidMediaDashboardPage({
             </tbody>
           </table>
           <p className="text-[11px] text-ink-500 px-5 py-2">
-            <span className="text-violet-300">■ 보라 컬럼</span> = 광고 플랫폼 보고 기준 (시트 sync, ad_metrics.conversions) ·
+            <span className="text-violet-300">■ 보라 컬럼</span> = 광고 플랫폼 보고 기준 (광고비 sync, ad_metrics.conversions) ·
             <span className="text-brand-blue ml-2">■ 블루 컬럼</span> = 실제 방문(site_visits) + CRM 도착 기준 (consultations utm 매칭) ·
             유입 유형은 UTM과 referrer 기반으로 paid / organic / direct / referral / site 로 구분
           </p>
@@ -294,7 +294,7 @@ export default async function PaidMediaDashboardPage({
       )}
 
       <p className="text-[11px] text-ink-500 pt-2">
-        ※ 광고비는 시트 sync, 리드는 자동 어트리뷰션, 매출은 매출 등록 시 자동. 시트 sync는{' '}
+        ※ 광고비는 광고비 sync, 리드는 자동 어트리뷰션, 매출은 매출 등록 시 자동. 광고비 sync는{' '}
         <Link href="/admin/settings/ad-sync" className="text-brand-blue underline">여기</Link> 에서.
       </p>
     </div>
