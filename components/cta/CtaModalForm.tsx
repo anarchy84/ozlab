@@ -16,6 +16,7 @@
 
 import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
+import { OptionalConsents } from '@/components/consent/OptionalConsents'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
@@ -43,7 +44,12 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
   const dc = cta.display_config ?? {}
 
   const [values, setValues] = useState<Record<string, string | boolean>>(() => {
-    const init: Record<string, string | boolean> = { _hp: '', consent_privacy: false }
+    const init: Record<string, string | boolean> = {
+      _hp: '',
+      consent_privacy: false,
+      consent_marketing: false,
+      consent_third_party: false,
+    }
     for (const f of fields) init[f.id] = f.type === 'checkbox' ? false : ''
     return init
   })
@@ -168,6 +174,8 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
           ...standard,
           custom_fields: custom,
           consent_privacy: true,
+          consent_marketing: values.consent_marketing === true,
+          consent_third_party: values.consent_third_party === true,
           _hp: values._hp,
           cta_id: cta.id,
           ...attribution,
@@ -296,6 +304,18 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
             />
             <span>(필수) 개인정보 수집·이용에 동의합니다. 수집된 정보는 상담 목적으로만 활용됩니다.</span>
           </label>
+
+          {/* 선택 동의 — 마케팅 활용 / 제3자 제공 (어드민에서 노출·문구 관리) */}
+          <OptionalConsents
+            theme="dark"
+            values={{
+              consent_marketing: values.consent_marketing === true,
+              consent_third_party: values.consent_third_party === true,
+            }}
+            onToggle={(field, checked) =>
+              setValues((p) => ({ ...p, [field]: checked }))
+            }
+          />
 
           {error && (
             <div role="alert" className="px-3 py-2 rounded bg-red-500/15 text-red-300 text-xs border border-red-500/30">

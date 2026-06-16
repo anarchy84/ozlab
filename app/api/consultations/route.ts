@@ -47,6 +47,9 @@ interface ConsultationInput {
   region?: string
   message?: string
   consent_privacy?: boolean
+  // 선택 동의 (마케팅 활용 / 제3자 제공)
+  consent_marketing?: boolean
+  consent_third_party?: boolean
   _hp?: string
   // 광고 캠페인
   utm_source?: string
@@ -233,6 +236,9 @@ export async function POST(req: NextRequest) {
       name,
       phone,
       consent_privacy: true,
+      // 선택 동의 — 미체크/누락 시 false (기본값)
+      consent_marketing: body.consent_marketing === true,
+      consent_third_party: body.consent_third_party === true,
       store_name: clean(promotedStore, 80),
       industry: clean(promotedIndustry, 40),
       region: clean(promotedRegion, 40),

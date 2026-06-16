@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react'
 import { EditableText } from '@/components/editable/EditableText'
+import { OptionalConsents } from '@/components/consent/OptionalConsents'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
@@ -37,6 +38,8 @@ type FormState = {
   region: string
   message: string
   consent_privacy: boolean
+  consent_marketing: boolean
+  consent_third_party: boolean
   _hp: string // honeypot — 사용자에겐 보이지 않음
 }
 
@@ -48,6 +51,8 @@ const INITIAL: FormState = {
   region: '',
   message: '',
   consent_privacy: false,
+  consent_marketing: false,
+  consent_third_party: false,
   _hp: '',
 }
 
@@ -475,6 +480,18 @@ export function ApplyForm({ blocks }: Props) {
                   활용됩니다.
                 </span>
               </label>
+
+              {/* 선택 동의 — 마케팅 활용 / 제3자 제공 (어드민에서 노출·문구 관리) */}
+              <OptionalConsents
+                theme="light"
+                values={{
+                  consent_marketing: form.consent_marketing,
+                  consent_third_party: form.consent_third_party,
+                }}
+                onToggle={(field, checked) =>
+                  setForm((p) => ({ ...p, [field]: checked }))
+                }
+              />
 
               {/* 에러 메시지 */}
               {error && (
