@@ -139,6 +139,19 @@ export interface CampaignRow {
 }
 // 캠페인 단위는 utm 기반이므로 ad_leads 분리 적용 안 함 (시트의 캠페인 raw 는 ad_metrics 에 저장 안 됨)
 
+export interface DimensionPieRow {
+  label: string
+  value: number
+  pct: number
+}
+
+export interface PaidMediaDimensionBreakdown {
+  visitKeywords: DimensionPieRow[]
+  leadKeywords: DimensionPieRow[]
+  visitCreatives: DimensionPieRow[]
+  leadCreatives: DimensionPieRow[]
+}
+
 export interface PaidMediaSummary {
   trafficTotals: TrafficTotalBucket & {
     paid: TrafficTotalBucket
@@ -170,6 +183,7 @@ export interface PaidMediaSummary {
   byChannel: ChannelPerformanceRow[]
   dailySeries: DailySeriesRow[]
   byCampaign: CampaignRow[]
+  dimensions: PaidMediaDimensionBreakdown
   range: PeriodRange
   // 진단용
   unmappedLeadKeys: string[]  // channel_mapping 에 없는 utm 조합
@@ -216,9 +230,27 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
   // 3) consultations — 기간 내 리드 (utm 정규화 후 channel_code 매핑)
   const { data: consRows } = await admin
     .from('consultations')
-    .select('id, created_at, utm_source, utm_medium, utm_campaign')
+    .select(
+      `id, created_at, utm_source, utm_medium, utm_campaign,
+       utm_term, utm_content, inferred_keyword, inferred_creative`,
+    )
     .gte('created_at', `${range.from}T00:00:00`)
     .lte('created_at', `${range.to}T23:59:59`)
+
+  // 3-1) site_visits — 실제 방문 기준 검색어/소재 분포용.
+  // loadSiteTrafficSummary 와 별도 조회하지만, 여기서는 utm_term/utm_content 만 사용한다.
+  const { data: visitDimensionRows, error: visitDimensionError } = await admin
+    .from('site_visits')
+    .select('session_id, utm_term, utm_content, event_type, is_bot')
+    .gte('occurred_at', `${range.from}T00:00:00`)
+    .lte('occurred_at', `${range.to}T23:59:59`)
+    .eq('event_type', 'page_view')
+    .eq('is_bot', false)
+    .limit(50000)
+
+  if (visitDimensionError) {
+    console.error('[paid_media] visit dimensions load failed', visitDimensionError)
+  }
 
   // 4) revenue_records — 기간 내 매출 + consultation 의 utm 조회
   const { data: revRows } = await admin
@@ -516,12 +548,28 @@ export async function loadPaidMediaSummary(preset: PeriodPreset): Promise<PaidMe
     .sort((a, b) => b.leads - a.leads)
     .slice(0, 50)
 
+  const dimensions: PaidMediaDimensionBreakdown = {
+    visitKeywords: buildDimensionPieRows(
+      visitDimensionRows ?? [],
+      (row) => row.utm_term,
+      (row) => row.session_id,
+    ),
+    leadKeywords: buildDimensionPieRows(consRows ?? [], (row) => row.inferred_keyword ?? row.utm_term),
+    visitCreatives: buildDimensionPieRows(
+      visitDimensionRows ?? [],
+      (row) => row.utm_content,
+      (row) => row.session_id,
+    ),
+    leadCreatives: buildDimensionPieRows(consRows ?? [], (row) => row.inferred_creative ?? row.utm_content),
+  }
+
   return {
     trafficTotals,
     totals,
     byChannel,
     dailySeries,
     byCampaign: byCampaignSorted,
+    dimensions,
     range,
     unmappedLeadKeys: Array.from(unmappedSet),
   }
@@ -603,6 +651,81 @@ function resolveMappedChannel(
   if (!src && !med) return mappingByKey.get(makeKey('direct', ''))
 
   return mappingByKey.get(makeKey(src, med)) ?? mappingByKey.get(makeKey(src, ''))
+}
+
+function buildDimensionPieRows<T>(
+  rows: T[],
+  getValue: (row: T) => string | null | undefined,
+  getUniqueKey?: (row: T) => string | null | undefined,
+  limit = 7,
+): DimensionPieRow[] {
+  const counter = new Map<string, { count: number; keys: Set<string> }>()
+
+  for (const row of rows) {
+    const label = normalizeDimensionLabel(getValue(row))
+    if (!label) continue
+    let bucket = counter.get(label)
+    if (!bucket) {
+      bucket = { count: 0, keys: new Set<string>() }
+      counter.set(label, bucket)
+    }
+
+    const key = getUniqueKey?.(row)
+    if (key) {
+      bucket.keys.add(key)
+    } else {
+      bucket.count += 1
+    }
+  }
+
+  const sorted = Array.from(counter.entries())
+    .map(([label, bucket]) => ({
+      label,
+      value: bucket.keys.size > 0 ? bucket.keys.size : bucket.count,
+    }))
+    .filter((row) => row.value > 0)
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
+
+  if (sorted.length === 0) return []
+
+  const visible = sorted.slice(0, limit)
+  const hidden = sorted.slice(limit)
+  if (hidden.length > 0) {
+    visible.push({
+      label: '기타',
+      value: hidden.reduce((sum, row) => sum + row.value, 0),
+    })
+  }
+
+  const total = visible.reduce((sum, row) => sum + row.value, 0)
+  return visible.map((row) => ({
+    ...row,
+    pct: total > 0 ? (row.value / total) * 100 : 0,
+  }))
+}
+
+function normalizeDimensionLabel(value: string | null | undefined): string | null {
+  const raw = (value ?? '').trim()
+  if (!raw) return null
+
+  const lowered = raw.toLowerCase()
+  if (
+    lowered === '-' ||
+    lowered === '(none)' ||
+    lowered === '(not set)' ||
+    lowered === '(not provided)' ||
+    lowered === 'not provided' ||
+    lowered === 'undefined' ||
+    lowered === 'null'
+  ) {
+    return null
+  }
+
+  try {
+    return decodeURIComponent(raw.replace(/\+/g, ' ')).trim() || null
+  } catch {
+    return raw
+  }
 }
 
 // ─────────────────────────────────────────────

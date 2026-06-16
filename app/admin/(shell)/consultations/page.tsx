@@ -126,6 +126,14 @@ export default async function ConsultationsListPage({
   const items = (data as ConsultationRow[] | null) ?? []
   const total = count ?? 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const exportHref = makeExportHref({
+    q,
+    status_id: statusId,
+    channel,
+    from: dateFrom,
+    to: dateTo,
+    preset,
+  })
 
   // counselor display_name 매핑 — 목록에 이미 배정된 담당자가 비활성/레거시 role 이더라도 이름 표시
   const missingCounselorIds = items
@@ -146,9 +154,17 @@ export default async function ConsultationsListPage({
             총 {total.toLocaleString()}건 · {page} / {totalPages} 페이지 · 행 클릭으로 상세
           </p>
         </div>
-        <Link href="/admin" className="text-sm text-ink-400 hover:text-ink-100">
-          ← 대시보드
-        </Link>
+        <div className="flex items-center gap-2">
+          <a
+            href={exportHref}
+            className="rounded-md bg-brand-blue px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-brand-dark"
+          >
+            DB 다운로드
+          </a>
+          <Link href="/admin" className="text-sm text-ink-400 hover:text-ink-100">
+            ← 대시보드
+          </Link>
+        </div>
       </div>
 
       {/* 빠른 기간 preset */}
@@ -334,6 +350,25 @@ function makeHref(args: {
   if (args.page > 1) sp.set('page', String(args.page))
   const qs = sp.toString()
   return qs ? `/admin/consultations?${qs}` : '/admin/consultations'
+}
+
+function makeExportHref(args: {
+  q: string
+  status_id: string
+  channel: string
+  from: string
+  to: string
+  preset: string
+}): string {
+  const sp = new URLSearchParams()
+  if (args.q) sp.set('q', args.q)
+  if (args.status_id) sp.set('status_id', args.status_id)
+  if (args.channel) sp.set('channel', args.channel)
+  if (args.from) sp.set('from', args.from)
+  if (args.to) sp.set('to', args.to)
+  if (args.preset && !args.from && !args.to) sp.set('preset', args.preset)
+  const qs = sp.toString()
+  return qs ? `/api/admin/consultations/export?${qs}` : '/api/admin/consultations/export'
 }
 
 function PageLink({

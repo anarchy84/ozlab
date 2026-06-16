@@ -26,6 +26,7 @@ import {
   fmtMoney,
   fmtPercent,
   fmtCpl,
+  type DimensionPieRow,
   type PeriodPreset,
 } from '@/lib/admin/paid-media'
 import { PeriodControl } from './PeriodControl'
@@ -148,6 +149,45 @@ export default async function PaidMediaDashboardPage({
         <strong>실제 방문</strong> = 오즈랩페이 first-party 방문 세션. 둘 다 표시하면 광고측 클릭과 사이트 도착 갭을 한눈에 볼 수 있음.
         KPI 합산은 페이드 미디어만 집계하며, 오가닉·직접·자체사이트 유입은 위 방문자 유입 요약과 매체별 성과에서 별도 확인합니다.
       </p>
+
+      {/* 검색어/소재 비율 */}
+      <section className="bg-surface-darkSoft border border-ink-700 rounded-lg p-4">
+        <div className="mb-4 flex items-baseline justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-ink-100">검색어·소재 비율</h2>
+            <p className="mt-0.5 text-xs text-ink-500">
+              방문은 site_visits 세션 기준, 리드는 consultations 접수 기준입니다.
+            </p>
+          </div>
+          <span className="text-xs text-ink-500">상위 항목 + 기타</span>
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <PieChartCard
+            title="방문 검색어"
+            subtitle="가장 많이 유입된 키워드"
+            rows={summary.dimensions.visitKeywords}
+            valueLabel="방문"
+          />
+          <PieChartCard
+            title="리드 검색어"
+            subtitle="가장 리드가 많이 생성된 키워드"
+            rows={summary.dimensions.leadKeywords}
+            valueLabel="리드"
+          />
+          <PieChartCard
+            title="방문 소재"
+            subtitle="가장 많이 유입된 소재"
+            rows={summary.dimensions.visitCreatives}
+            valueLabel="방문"
+          />
+          <PieChartCard
+            title="리드 소재"
+            subtitle="가장 리드가 많이 생성된 소재"
+            rows={summary.dimensions.leadCreatives}
+            valueLabel="리드"
+          />
+        </div>
+      </section>
 
       {/* 매체별 종합 표 */}
       <section className="bg-surface-darkSoft border border-ink-700 rounded-lg overflow-x-auto">
@@ -354,6 +394,94 @@ function Kpi({
       <div className={`text-base font-bold mt-1 font-mono ${color}`}>{value}</div>
     </div>
   )
+}
+
+const PIE_COLORS = [
+  '#4b76ff',
+  '#7c5cff',
+  '#19c37d',
+  '#f59e0b',
+  '#ef5da8',
+  '#22d3ee',
+  '#f97316',
+  '#94a3b8',
+]
+
+function PieChartCard({
+  title,
+  subtitle,
+  rows,
+  valueLabel,
+}: {
+  title: string
+  subtitle: string
+  rows: DimensionPieRow[]
+  valueLabel: string
+}) {
+  const total = rows.reduce((sum, row) => sum + row.value, 0)
+  const gradient = buildPieGradient(rows)
+
+  return (
+    <div className="rounded-lg border border-ink-700 bg-ink-900/35 p-4">
+      <div className="mb-3">
+        <h3 className="text-sm font-bold text-ink-100">{title}</h3>
+        <p className="mt-0.5 text-[11px] text-ink-500">{subtitle}</p>
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="flex h-56 items-center justify-center rounded-lg border border-dashed border-ink-700 text-center text-xs text-ink-500">
+          집계 가능한 UTM 데이터가 없습니다.
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative h-36 w-36 rounded-full shadow-inner" style={{ background: gradient }}>
+            <div
+              className="absolute rounded-full border border-ink-700 bg-surface-darkSoft"
+              style={{ inset: '24%' }}
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-lg font-bold text-ink-100 font-mono">{fmtInt(total)}</span>
+              <span className="text-[10px] text-ink-500">{valueLabel}</span>
+            </div>
+          </div>
+
+          <div className="w-full space-y-2">
+            {rows.map((row, index) => (
+              <div key={`${title}-${row.label}`} className="flex items-center gap-2 text-xs">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                />
+                <span className="min-w-0 flex-1 truncate text-ink-300" title={row.label}>
+                  {row.label}
+                </span>
+                <span className="font-mono text-ink-100">{fmtInt(row.value)}</span>
+                <span className="w-12 text-right font-mono text-ink-500">{fmtPercent(row.pct, 0)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function buildPieGradient(rows: DimensionPieRow[]): string {
+  if (rows.length === 0) return 'conic-gradient(#1f2937 0% 100%)'
+
+  let cursor = 0
+  const stops = rows.map((row, index) => {
+    const start = cursor
+    const end = Math.min(100, cursor + row.pct)
+    cursor = end
+    return `${PIE_COLORS[index % PIE_COLORS.length]} ${start}% ${end}%`
+  })
+
+  if (cursor < 100) {
+    stops.push(`#1f2937 ${cursor}% 100%`)
+  }
+
+  return `conic-gradient(${stops.join(', ')})`
 }
 
 function roasColor(roas: number | null): 'good' | 'warn' | 'bad' | null {

@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
-// /api/admin/consultations/export — 선택 또는 전체 CSV 다운로드
-//   ?ids=uuid1,uuid2,... 또는 비우면 전체 (max 5000)
+// /api/admin/consultations/export — 선택/필터/전체 CSV 다운로드
+//   ?ids=uuid1,uuid2,... 또는 q/status_id/channel/from/to/preset 필터
 // ─────────────────────────────────────────────
 
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
+const MAX_EXPORT_ROWS = 10000
+
 export async function GET(req: NextRequest) {
   const guard = await guardApi()
   if (!guard.ok) return guard.response
@@ -16,6 +18,13 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const idsParam = searchParams.get('ids')
   const ids = idsParam ? idsParam.split(',').filter(Boolean) : null
+  const q = (searchParams.get('q') ?? '').trim()
+  const statusId = (searchParams.get('status_id') ?? '').trim()
+  const channel = (searchParams.get('channel') ?? '').trim()
+  const dateFrom = (searchParams.get('from') ?? '').trim()
+  const dateTo = (searchParams.get('to') ?? '').trim()
+  const preset = (searchParams.get('preset') ?? '').trim()
+  const { effectiveFrom, effectiveTo } = resolveDateRange({ dateFrom, dateTo, preset })
 
   const admin = createAdminClient()
   let query = admin
@@ -29,10 +38,20 @@ export async function GET(req: NextRequest) {
        is_favorite, is_blacklisted, ip_address`
     )
     .order('created_at', { ascending: false })
-    .limit(5000)
+    .limit(MAX_EXPORT_ROWS)
 
   if (ids && ids.length > 0) {
     query = query.in('id', ids)
+  } else {
+    if (statusId) query = query.eq('status_id', parseInt(statusId, 10))
+    if (channel) query = query.eq('utm_source', channel)
+    if (effectiveFrom) query = query.gte('created_at', `${effectiveFrom}T00:00:00`)
+    if (effectiveTo) query = query.lte('created_at', `${effectiveTo}T23:59:59`)
+    if (q) {
+      query = query.or(
+        `name.ilike.%${q}%,phone.ilike.%${q}%,store_name.ilike.%${q}%,internal_memo.ilike.%${q}%`,
+      )
+    }
   }
 
   const { data, error } = await query
@@ -90,7 +109,8 @@ export async function GET(req: NextRequest) {
   }
 
   const csv = '﻿' + lines.join('\n')  // BOM (엑셀 한글)
-  const filename = `consultations_${new Date().toISOString().slice(0, 10)}${ids ? '_selected' : ''}.csv`
+  const hasFilters = Boolean(q || statusId || channel || effectiveFrom || effectiveTo || preset)
+  const filename = `consultations_${new Date().toISOString().slice(0, 10)}${ids ? '_selected' : hasFilters ? '_filtered' : ''}.csv`
 
   return new NextResponse(csv, {
     headers: {
@@ -98,4 +118,46 @@ export async function GET(req: NextRequest) {
       'Content-Disposition': `attachment; filename="${filename}"`,
     },
   })
+}
+
+function resolveDateRange({
+  dateFrom,
+  dateTo,
+  preset,
+}: {
+  dateFrom: string
+  dateTo: string
+  preset: string
+}): { effectiveFrom: string; effectiveTo: string } {
+  let effectiveFrom = dateFrom
+  let effectiveTo = dateTo
+
+  if (preset && !dateFrom && !dateTo) {
+    const now = new Date()
+    const today = now.toISOString().slice(0, 10)
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10)
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10)
+    const start7d = new Date(now.getTime() - 7 * 86400000).toISOString().slice(0, 10)
+    const start3m = new Date(now.getFullYear(), now.getMonth() - 3, 1).toISOString().slice(0, 10)
+
+    if (preset === 'today') {
+      effectiveFrom = today
+      effectiveTo = today
+    } else if (preset === 'week') {
+      effectiveFrom = start7d
+      effectiveTo = today
+    } else if (preset === 'month') {
+      effectiveFrom = startOfMonth
+      effectiveTo = today
+    } else if (preset === 'last_month') {
+      effectiveFrom = startOfLastMonth
+      effectiveTo = endOfLastMonth
+    } else if (preset === 'last_3m') {
+      effectiveFrom = start3m
+      effectiveTo = today
+    }
+  }
+
+  return { effectiveFrom, effectiveTo }
 }
