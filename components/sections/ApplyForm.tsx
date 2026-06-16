@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react'
 import { EditableText } from '@/components/editable/EditableText'
-import { OptionalConsents } from '@/components/consent/OptionalConsents'
+import { ConsentAgreement } from '@/components/consent/OptionalConsents'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
@@ -159,6 +159,13 @@ export function ApplyForm({ blocks }: Props) {
     e.preventDefault()
     if (submitting) return
     setError(null)
+
+    // 필수 동의 검증 (개인정보 수집·이용 + 제3자 제공)
+    if (!form.consent_privacy || !form.consent_third_party) {
+      setError('필수 동의 항목에 모두 동의해주세요.')
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -467,26 +474,13 @@ export function ApplyForm({ blocks }: Props) {
                 />
               </div>
 
-              <label className="form-check">
-                <input
-                  type="checkbox"
-                  name="consent_privacy"
-                  required
-                  checked={form.consent_privacy}
-                  onChange={onChange}
-                />
-                <span>
-                  (필수) 개인정보 수집·이용에 동의합니다. 수집된 정보는 상담 목적으로만
-                  활용됩니다.
-                </span>
-              </label>
-
-              {/* 선택 동의 — 마케팅 활용 / 제3자 제공 (어드민에서 노출·문구 관리) */}
-              <OptionalConsents
+              {/* 동의 — 전체동의 + 필수/선택 (어드민에서 노출·문구 관리) */}
+              <ConsentAgreement
                 theme="light"
                 values={{
-                  consent_marketing: form.consent_marketing,
+                  consent_privacy: form.consent_privacy,
                   consent_third_party: form.consent_third_party,
+                  consent_marketing: form.consent_marketing,
                 }}
                 onToggle={(field, checked) =>
                   setForm((p) => ({ ...p, [field]: checked }))

@@ -1,30 +1,38 @@
 'use client'
 
 // ─────────────────────────────────────────────
-// ConsentManager — 선택 동의 항목 편집 폼
+// ConsentManager — 동의 항목 편집 폼 (3종)
 //
-// 두 항목(마케팅 활용 / 제3자 제공) 각각:
-//   - 폼 노출 ON/OFF
-//   - 체크박스 옆 문구(label)
-//   - '전문 보기' 약관 전문(body)
+// 항목별:
+//   - (필수) 개인정보 수집·이용 / (필수) 제3자 제공 / (선택) 마케팅 수신
+//   - 체크박스 옆 문구(label) + '전문 보기' 약관 전문(body) 편집
+//   - 선택 항목은 폼 노출 ON/OFF, 필수 항목은 항상 노출
 // 저장 → PUT /api/admin/settings/consent
 // ─────────────────────────────────────────────
 
 import { useState } from 'react'
-import type { ConsentItem, ConsentKind, ConsentSettings } from '@/lib/consent'
+import {
+  CONSENT_KINDS,
+  CONSENT_META,
+  type ConsentItem,
+  type ConsentKind,
+  type ConsentSettings,
+} from '@/lib/consent'
 
-const META: Record<ConsentKind, { title: string; hint: string }> = {
-  marketing: {
-    title: '마케팅 활용 동의',
-    hint: '이벤트·혜택·신상품 안내 등 광고성 정보 수신 동의입니다. 동의하지 않아도 상담 접수는 정상 진행돼요.',
+const UI: Record<ConsentKind, { title: string; hint: string }> = {
+  privacy: {
+    title: '개인정보 수집·이용 동의',
+    hint: '상담 접수에 반드시 필요한 필수 동의입니다. 수집 항목·목적·보유기간을 정확히 기재하세요.',
   },
   third_party: {
     title: '개인정보 제3자 제공 동의',
-    hint: '제휴 POS사·상담 위탁사 등에 정보를 제공하는 동의입니다. 전문에 실제 제공받는 업체명을 정확히 기재하세요.',
+    hint: '제휴사 상담 연결을 위한 필수 동의입니다. 전문에 실제 제공받는 업체명을 반드시 기재하세요.',
+  },
+  marketing: {
+    title: '마케팅 정보 수신 동의',
+    hint: '광고성 정보 수신 선택 동의입니다. 동의하지 않아도 상담 접수는 정상 진행돼요.',
   },
 }
-
-const ORDER: ConsentKind[] = ['marketing', 'third_party']
 
 export default function ConsentManager({ initial }: { initial: ConsentSettings }) {
   const [settings, setSettings] = useState<ConsentSettings>(initial)
@@ -43,10 +51,7 @@ export default function ConsentManager({ initial }: { initial: ConsentSettings }
       const res = await fetch('/api/admin/settings/consent', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          marketing: settings.marketing,
-          third_party: settings.third_party,
-        }),
+        body: JSON.stringify(settings),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -64,9 +69,10 @@ export default function ConsentManager({ initial }: { initial: ConsentSettings }
 
   return (
     <div className="space-y-6">
-      {ORDER.map((kind) => {
+      {CONSENT_KINDS.map((kind) => {
         const item = settings[kind]
-        const meta = META[kind]
+        const ui = UI[kind]
+        const required = CONSENT_META[kind].required
         return (
           <section
             key={kind}
@@ -74,19 +80,34 @@ export default function ConsentManager({ initial }: { initial: ConsentSettings }
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-ink-100 break-keep">{meta.title}</h2>
-                <p className="mt-1 text-xs text-ink-400 break-keep">{meta.hint}</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-ink-100 break-keep">{ui.title}</h2>
+                  <span
+                    className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${
+                      required
+                        ? 'bg-red-500/15 text-red-300'
+                        : 'bg-ink-700/50 text-ink-300'
+                    }`}
+                  >
+                    {required ? '필수' : '선택'}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-ink-400 break-keep">{ui.hint}</p>
               </div>
-              {/* 노출 ON/OFF */}
-              <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm text-ink-200">
-                <input
-                  type="checkbox"
-                  checked={item.enabled}
-                  onChange={(e) => patch(kind, 'enabled', e.target.checked)}
-                  className="h-4 w-4"
-                />
-                폼에 노출
-              </label>
+              {/* 노출 ON/OFF — 선택 항목만. 필수는 항상 노출 */}
+              {required ? (
+                <span className="shrink-0 text-xs text-ink-500">항상 노출</span>
+              ) : (
+                <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm text-ink-200">
+                  <input
+                    type="checkbox"
+                    checked={item.enabled}
+                    onChange={(e) => patch(kind, 'enabled', e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  폼에 노출
+                </label>
+              )}
             </div>
 
             <div className="mt-4 space-y-4">
@@ -99,7 +120,7 @@ export default function ConsentManager({ initial }: { initial: ConsentSettings }
                   value={item.label}
                   maxLength={200}
                   onChange={(e) => patch(kind, 'label', e.target.value)}
-                  placeholder="(선택) ○○에 동의합니다."
+                  placeholder="(필수) ○○에 동의합니다."
                   className="w-full rounded-md border border-ink-700/60 bg-ink-900/40 px-3 py-2 text-sm text-ink-100 placeholder-ink-600 focus:border-brand-blue focus:outline-none"
                 />
               </div>
@@ -147,9 +168,7 @@ export default function ConsentManager({ initial }: { initial: ConsentSettings }
         >
           {saving ? '저장 중…' : '저장하기'}
         </button>
-        <span className="text-xs text-ink-500">
-          저장 시 두 항목이 함께 반영됩니다.
-        </span>
+        <span className="text-xs text-ink-500">저장 시 세 항목이 함께 반영됩니다.</span>
       </div>
     </div>
   )

@@ -138,6 +138,13 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     )
   }
+  // 제3자 제공 동의도 필수 (상담 연결이 제휴사 제공을 전제로 함)
+  if (body.consent_third_party !== true) {
+    return NextResponse.json(
+      { error: '개인정보 제3자 제공 동의가 필요합니다.' },
+      { status: 400 }
+    )
+  }
 
   // 3) 메타 정보 추출
   //    referer / landing_page : 클라가 First-touch 로 보낸 게 우선 (정확)

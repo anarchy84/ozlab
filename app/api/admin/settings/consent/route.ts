@@ -17,7 +17,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { guardApi } from '@/lib/admin/auth-helpers'
 import { getConsentSettings } from '@/lib/consent-server'
 import {
-  CONSENT_BLOCK_KEYS,
+  CONSENT_KINDS,
+  CONSENT_META,
   type ConsentItem,
   type ConsentKind,
 } from '@/lib/consent'
@@ -27,7 +28,7 @@ import { revalidatePath } from 'next/cache'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const KINDS: ConsentKind[] = ['marketing', 'third_party']
+const KINDS: ConsentKind[] = CONSENT_KINDS
 const LABEL_MAX = 200
 const BODY_MAX = 20000
 
@@ -80,7 +81,7 @@ export async function PUT(req: NextRequest) {
       .from('content_blocks')
       .upsert(
         {
-          block_key: CONSENT_BLOCK_KEYS[kind],
+          block_key: CONSENT_META[kind].blockKey,
           block_type: 'text',
           value: item,
           updated_at: new Date().toISOString(),

@@ -16,7 +16,7 @@
 
 import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
-import { OptionalConsents } from '@/components/consent/OptionalConsents'
+import { ConsentAgreement } from '@/components/consent/OptionalConsents'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
@@ -149,9 +149,9 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     if (submitting) return
     setError(null)
 
-    // 동의 체크 (consent_privacy 필드 또는 폼 끝의 동의 박스)
-    if (values.consent_privacy !== true) {
-      setError('개인정보 수집·이용 동의가 필요합니다.')
+    // 필수 동의 검증 (개인정보 수집·이용 + 제3자 제공)
+    if (values.consent_privacy !== true || values.consent_third_party !== true) {
+      setError('필수 동의 항목에 모두 동의해주세요.')
       return
     }
 
@@ -293,24 +293,13 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
             />
           ))}
 
-          <label className="flex items-start gap-2 text-xs text-white/80">
-            <input
-              type="checkbox"
-              name="consent_privacy"
-              required
-              checked={values.consent_privacy === true}
-              onChange={handleChange}
-              className="mt-0.5"
-            />
-            <span>(필수) 개인정보 수집·이용에 동의합니다. 수집된 정보는 상담 목적으로만 활용됩니다.</span>
-          </label>
-
-          {/* 선택 동의 — 마케팅 활용 / 제3자 제공 (어드민에서 노출·문구 관리) */}
-          <OptionalConsents
+          {/* 동의 — 전체동의 + 필수/선택 (어드민에서 노출·문구 관리) */}
+          <ConsentAgreement
             theme="dark"
             values={{
-              consent_marketing: values.consent_marketing === true,
+              consent_privacy: values.consent_privacy === true,
               consent_third_party: values.consent_third_party === true,
+              consent_marketing: values.consent_marketing === true,
             }}
             onToggle={(field, checked) =>
               setValues((p) => ({ ...p, [field]: checked }))
