@@ -30,6 +30,16 @@ function makeSlug(title: string): string {
     .substring(0, 80)
 }
 
+// slug 정규화 — 수동 입력값에도 적용해서 공백/이상 문자 제거
+// (DB CHECK 제약 content_posts_slug_no_whitespace 위반 방지 + 깨진 URL 재발 차단)
+function normalizeSlug(raw: string | null | undefined): string {
+  return (raw ?? '')
+    .trim() // 앞뒤 공백 제거 (' toss-...' → 'toss-...')
+    .replace(/\s+/g, '-') // 중간 공백 → 하이픈
+    .replace(/-+/g, '-') // 연속 하이픈 정리
+    .replace(/^-+|-+$/g, '') // 앞뒤 하이픈 제거
+}
+
 function publicPostPath(category: string | null | undefined, slug: string): string {
   return category === 'blog' ? `/blog/${slug}` : `/tips/${slug}`
 }
@@ -83,7 +93,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'title is required' }, { status: 400 })
   }
 
-  const slug = body.slug || makeSlug(body.title)
+  // 수동 입력 slug든 자동 생성 slug든 항상 정규화 (공백 등 오염 차단)
+  const slug = normalizeSlug(body.slug) || makeSlug(body.title)
   const isPublished = body.is_published === true
 
   // 점수 계산 (저장 시점에 캐시)
@@ -130,6 +141,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: '같은 slug 의 글이 이미 있습니다. slug 를 바꿔 주세요.' },
         { status: 409 }
+      )
+    }
+    if (error.code === '23514') {
+      // CHECK 제약(content_posts_slug_no_whitespace) 위반
+      return NextResponse.json(
+        { error: 'slug 에 공백을 넣을 수 없습니다. 영문 소문자·숫자·하이픈(-)만 사용하세요.' },
+        { status: 400 }
       )
     }
     return NextResponse.json({ error: error.message }, { status: 500 })

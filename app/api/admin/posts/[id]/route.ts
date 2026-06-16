@@ -22,6 +22,16 @@ function publicPostPath(category: string | null | undefined, slug: string): stri
   return category === 'blog' ? `/blog/${slug}` : `/tips/${slug}`
 }
 
+// slug 정규화 — 수동 입력값에도 적용해서 공백/이상 문자 제거
+// (DB CHECK 제약 content_posts_slug_no_whitespace 위반 방지 + 깨진 URL 재발 차단)
+function normalizeSlug(raw: string | null | undefined): string {
+  return (raw ?? '')
+    .trim() // 앞뒤 공백 제거 (' toss-...' → 'toss-...')
+    .replace(/\s+/g, '-') // 중간 공백 → 하이픈
+    .replace(/-+/g, '-') // 연속 하이픈 정리
+    .replace(/^-+|-+$/g, '') // 앞뒤 하이픈 제거
+}
+
 function revalidatePostPaths(category: string | null | undefined, slug: string) {
   revalidatePath(publicPostPath(category, slug))
   revalidatePath(category === 'blog' ? '/blog' : '/tips')
@@ -75,6 +85,9 @@ export async function PUT(
     .eq('id', params.id)
     .single()
 
+  // 수동 입력 slug 정규화 (공백 등 오염 차단)
+  const slug = normalizeSlug(body.slug)
+
   // 처음 발행 시 published_at 보존
   let publishedAt: string | null | undefined = body.published_at
   if (body.is_published) {
@@ -90,7 +103,7 @@ export async function PUT(
     title: body.title,
     metaTitle: body.meta_title,
     metaDescription: body.meta_description,
-    slug: body.slug,
+    slug,
     bodyHtml: body.body_html ?? '',
     focusKeyword: body.focus_keyword ?? '',
     authorName: body.author_name ?? guard.profile.display_name ?? guard.profile.email,
@@ -101,7 +114,7 @@ export async function PUT(
     .from('content_posts')
     .update({
       title: body.title,
-      slug: body.slug,
+      slug,
       body_html: body.body_html ?? '',
       body_md: body.body_md ?? null,
       excerpt: body.excerpt ?? null,
@@ -127,6 +140,13 @@ export async function PUT(
       return NextResponse.json(
         { error: '같은 slug 의 글이 이미 있습니다.' },
         { status: 409 }
+      )
+    }
+    if (error.code === '23514') {
+      // CHECK 제약(content_posts_slug_no_whitespace) 위반
+      return NextResponse.json(
+        { error: 'slug 에 공백을 넣을 수 없습니다. 영문 소문자·숫자·하이픈(-)만 사용하세요.' },
+        { status: 400 }
       )
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
