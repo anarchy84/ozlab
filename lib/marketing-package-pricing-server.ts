@@ -4,7 +4,7 @@
 //   loadAllPackagePricing()  : 어드민용 (비활성 포함, service role)
 // ─────────────────────────────────────────────
 import 'server-only'
-import { createPublicServerClient } from '@/lib/supabase/public-server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
   DEFAULT_PACKAGE_SETTINGS,
@@ -67,7 +67,7 @@ function group(items: PackagePricingItem[]): PackagePricingData {
 // 공개 랜딩 — 활성 항목만
 export async function loadPackagePricing(): Promise<PackagePricingData> {
   try {
-    const supabase = createPublicServerClient()
+    const supabase = createClient()
     const [itemsRes, settingsRes] = await Promise.all([
       supabase.from('package_pricing_items').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
       supabase.from('package_pricing_settings').select('*').eq('id', 'marketing-package').maybeSingle(),
