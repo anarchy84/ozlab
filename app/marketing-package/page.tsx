@@ -8,6 +8,7 @@ import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { marketingPackageFaqsForBlocks } from '@/lib/marketing-package-faqs'
+import { loadPackagePricing } from '@/lib/marketing-package-pricing-server'
 import { absoluteUrl, breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
 import { mergePageMetadata } from '@/lib/admin/page-seo'
 
@@ -37,9 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MarketingPackagePage() {
-  const [blocksMap, landingSlots] = await Promise.all([
+  const [blocksMap, landingSlots, pricing] = await Promise.all([
     getBlocksForPage(PAGE_PATH),
     getLandingSlotsForPage(PAGE_PATH),
+    loadPackagePricing(),
   ])
   const blocks = blocksMapToRecord(blocksMap)
   const faqs = [
@@ -87,7 +89,7 @@ export default async function MarketingPackagePage() {
         ]}
       />
       <BlocksProvider blocks={blocks}>
-        <MarketingPackageLanding landingSlots={landingSlots} />
+        <MarketingPackageLanding landingSlots={landingSlots} pricing={pricing} />
       </BlocksProvider>
     </PublicPageFrame>
   )

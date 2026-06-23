@@ -21,6 +21,15 @@ import { LandingSlot } from '@/components/landing/LandingSlot'
 import { pickImageOrUndef, pickTextOrUndef } from '@/lib/content-blocks'
 import { SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import { marketingPackageFaqsForBlocks } from '@/lib/marketing-package-faqs'
+import {
+  computeDiscountPct,
+  computeRegularTotal,
+  computeSavings,
+  formatNum,
+  formatPct,
+  formatWon,
+  type PackagePricingData,
+} from '@/lib/marketing-package-pricing'
 import type { LandingSlotsByKey } from '@/lib/landing-sections'
 
 const PAGE_PATH = '/marketing-package'
@@ -71,23 +80,19 @@ const pillars = [
   },
 ]
 
-const pricingInitial = [
-  { name: '네이버 플레이스 최적화 + SEO 설계', desc: '검색 노출 알고리즘 분석 + 키워드·해시태그 매칭', monthly: '₩150,000' },
-  { name: 'AI 콘텐츠 생성 엔진·API 환경 연동', desc: '업체 전용 클라우드 + 프롬프트 커스텀 세팅', monthly: '₩150,000' },
-  { name: '광고 매체 초기 계정 연동 + 픽셀 설치', desc: 'Meta·TikTok·네이버 광고 계정 + 트래킹 픽셀', monthly: '₩150,000' },
-  { name: '인플루언서 매칭 + 타겟 데이터 인프라', desc: '체험단 모집 폼 + 지역 세그먼트 데이터 구축', monthly: '₩150,000' },
-]
-
-const pricingMonthly = [
-  { name: 'AI 숏폼 영상 기획·제작', desc: '매장 맞춤 릴스/틱톡/쇼츠 주 1회 · 월 4건', monthly: '₩400,000', yearly: '₩4,800,000' },
-  { name: '지역 인근 AI 타겟팅 광고 운영', desc: '매체 최적화·머신러닝 모니터링 (실비 별도)', monthly: '₩50,000', yearly: '₩600,000' },
-  { name: '로컬 최적화 블로그 콘텐츠 발행', desc: '지역 상권 검색 노출 키워드 원고 · 월 4건', monthly: '₩200,000', yearly: '₩2,400,000' },
-  { name: 'SNS 멀티 채널 업로드·브랜드 관리', desc: '인스타·틱톡·유튜브 쇼츠 채널 케어', monthly: '₩250,000', yearly: '₩3,000,000' },
-  { name: '바이럴 체험단 + 마이크로 인플루언서 모집', desc: '지역 기반 상시 모집 + 신청 명단 전달', monthly: '₩200,000', yearly: '₩2,400,000' },
-  { name: '네이버 플레이스 최적화 관리', desc: '월 1회 새 소식·이미지 + SEO 순위 최적화', monthly: '₩150,000', yearly: '₩1,800,000' },
-  { name: '플레이스 리워드 광고 운영 대행', desc: '트래픽·저장·알림 받기 활성화 (실비 별도)', monthly: '₩100,000', yearly: '₩1,200,000' },
-  { name: '소상공인·플레이스 검색 광고 운영 대행', desc: '지역 검색 광고 최적화 (광고 실비 별도)', monthly: '₩100,000', yearly: '₩1,200,000' },
-]
+// 견적 항목 이름 → 성격에 맞는 아이콘 (이름 키워드 기반, 어드민에서 이름 바꿔도 따라감)
+function itemIcon(name: string) {
+  if (name.includes('플레이스')) return <Icon.Pin s={18} />
+  if (name.includes('블로그')) return <Icon.Blog s={18} />
+  if (name.includes('영상') || name.includes('숏폼') || name.includes('릴스')) return <Icon.Video s={18} />
+  if (name.includes('인플루언서') || name.includes('체험단') || name.includes('바이럴')) return <Icon.Users s={18} />
+  if (name.includes('광고') || name.includes('픽셀')) return <Icon.Megaphone s={18} />
+  if (name.includes('채널') || name.includes('SNS')) return <Icon.Share s={18} />
+  if (name.includes('콘텐츠') || name.includes('AI') || name.includes('엔진')) return <Icon.Sparkle s={18} />
+  if (name.includes('데이터') || name.includes('타겟')) return <Icon.Target s={18} />
+  if (name.includes('SEO') || name.includes('검색')) return <Icon.Search s={18} />
+  return <Icon.Check s={18} />
+}
 
 const options = [
   { premium: false, tag: '실비 부담', title: '인스타·틱톡 매체 광고비', desc: '지역 타겟팅 광고 집행에 쓰이는 순수 광고 매체비.', price: '광고주 실비' },
@@ -103,9 +108,21 @@ const steps = [
   { icon: <Icon.Doc s={22} />, num: 'STEP 04', title: '월간 운영·리포트', desc: '자동 운영 + 매월 카톡 리포트. 사장님은 매장만.' },
 ]
 
-export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: LandingSlotsByKey }) {
+export function MarketingPackageLanding({
+  landingSlots = {},
+  pricing,
+}: {
+  landingSlots?: LandingSlotsByKey
+  pricing: PackagePricingData
+}) {
   const blocks = useBlocks()
   const faqs = marketingPackageFaqsForBlocks(blocks)
+
+  // 견적 — DB 마스터 기반 계산
+  const s = pricing.settings
+  const regularTotal = computeRegularTotal(pricing)
+  const savings = computeSavings(pricing)
+  const discountPct = computeDiscountPct(pricing)
 
   // 스티키 CTA 바 — 하단 신청폼이 보이면 숨김
   const applyRef = useRef<HTMLDivElement | null>(null)
@@ -459,19 +476,19 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
             <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
               <div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue/20 px-3 py-1 text-xs font-extrabold text-brand-neon">
-                  ⭐ {T('pricing.summary.badge', '연간 계약 특가 · 통합 패키지')}
+                  ⭐ {s.badge_label}
                 </span>
                 <div className="mt-5 flex items-end gap-3">
                   <span className="font-mono text-5xl font-extrabold leading-none text-white sm:text-6xl">
-                    {T('pricing.summary.monthly', '125,000')}
+                    {formatNum(s.package_monthly)}
                   </span>
-                  <span className="pb-1 text-lg font-bold text-white/70">{T('pricing.summary.monthlyUnit', '원 / 월')}</span>
+                  <span className="pb-1 text-lg font-bold text-white/70">원 / 월</span>
                 </div>
                 <p className="mt-2 text-sm text-white/60">
-                  {T('pricing.summary.yearly', '연 1,500,000원 · 부가세 별도 · 광고 실비/현장 촬영 제외')}
+                  연 {formatNum(s.package_yearly)}원 · {s.yearly_note}
                 </p>
                 <a href="#apply" className="btn btn-primary lg mt-6 w-full sm:w-auto">
-                  {T('pricing.summary.cta', '이 가격으로 견적 신청')}
+                  {s.cta_label}
                   <Icon.Arrow s={18} />
                 </a>
               </div>
@@ -480,16 +497,16 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
               <div className="grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-center">
                 <div className="bg-surface-dark px-3 py-5">
                   <p className="text-[11px] font-bold text-white/50">정상가</p>
-                  <p className="mt-1.5 font-mono text-sm font-extrabold text-white/50 line-through sm:text-base">₩20,050,000</p>
+                  <p className="mt-1.5 font-mono text-sm font-extrabold text-white/50 line-through sm:text-base">{formatWon(regularTotal)}</p>
                 </div>
                 <div className="bg-surface-dark px-3 py-5">
                   <p className="text-[11px] font-bold text-white/50">패키지가</p>
-                  <p className="mt-1.5 font-mono text-sm font-extrabold text-white sm:text-base">₩1,500,000</p>
+                  <p className="mt-1.5 font-mono text-sm font-extrabold text-white sm:text-base">{formatWon(s.package_yearly)}</p>
                 </div>
                 <div className="bg-brand-blue/20 px-3 py-5">
                   <p className="text-[11px] font-extrabold text-brand-neon">절약</p>
-                  <p className="mt-1.5 font-mono text-sm font-extrabold text-brand-neon sm:text-base">92.5%↓</p>
-                  <p className="mt-0.5 text-[10px] text-white/55">1,855만원</p>
+                  <p className="mt-1.5 font-mono text-sm font-extrabold text-brand-neon sm:text-base">{formatPct(discountPct)}↓</p>
+                  <p className="mt-0.5 text-[10px] text-white/55">{formatNum(savings)}원</p>
                 </div>
               </div>
             </div>
@@ -526,65 +543,65 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
               {T('pricing.detail.heading', '이 가격에 포함된 것 — 12종 전체 내역')}
             </p>
             <div className="overflow-hidden rounded-2xl border border-ink-150 bg-white shadow-sm">
-              {/* 초기 세팅 4종 */}
+              {/* 초기 세팅 */}
               <div className="flex items-center gap-2 bg-brand-tint/50 px-4 py-2.5 sm:px-5">
                 <Icon.Target s={16} />
-                <span className="text-xs font-extrabold tracking-wide text-brand-deep">초기 인프라 세팅 · 1회성 4종</span>
+                <span className="text-xs font-extrabold tracking-wide text-brand-deep">
+                  초기 인프라 세팅 · 1회성 {pricing.initial.length}종
+                </span>
               </div>
               <div className="divide-y divide-ink-100">
-                {pricingInitial.map((row, ri) => (
-                  <div
-                    key={`pi-${ri}`}
-                    className="flex flex-col gap-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                  >
-                    <div className="min-w-0">
-                      {T(`pricing.initial.${ri}.name`, row.name, {
-                        as: 'div',
-                        className: 'font-bold text-ink-900 break-keep',
-                      })}
-                      {T(`pricing.initial.${ri}.desc`, row.desc, {
-                        as: 'div',
-                        className: 'mt-0.5 text-xs text-ink-400 break-keep',
-                      })}
-                    </div>
-                    <span className="inline-flex shrink-0 items-center gap-1 self-start rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-600 sm:self-auto">
-                      <span className="font-mono text-ink-800">{row.monthly}</span>
-                      <span className="text-ink-400">· 1회성</span>
+                {pricing.initial.map((row) => (
+                  <div key={row.id} className="flex items-start gap-3 px-4 py-3.5 sm:px-5">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-deep">
+                      {itemIcon(row.name)}
                     </span>
+                    <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="font-bold text-ink-900 break-keep">{row.name}</div>
+                        {row.description && (
+                          <div className="mt-0.5 text-xs text-ink-400 break-keep">{row.description}</div>
+                        )}
+                      </div>
+                      <span className="inline-flex shrink-0 items-center gap-1 self-start rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-600 sm:self-auto">
+                        <span className="font-mono text-ink-800">{formatWon(row.monthly_price)}</span>
+                        <span className="text-ink-400">· 1회성</span>
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* 월 정기 8종 */}
+              {/* 월 정기 */}
               <div className="flex items-center gap-2 border-t border-ink-150 bg-brand-tint/50 px-4 py-2.5 sm:px-5">
                 <Icon.Clock s={16} />
-                <span className="text-xs font-extrabold tracking-wide text-brand-deep">월 정기 관리 · 8종</span>
+                <span className="text-xs font-extrabold tracking-wide text-brand-deep">
+                  월 정기 관리 · {pricing.monthly.length}종
+                </span>
               </div>
               <div className="divide-y divide-ink-100">
-                {pricingMonthly.map((row, ri) => (
-                  <div
-                    key={`pm-${ri}`}
-                    className="flex flex-col gap-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                  >
-                    <div className="min-w-0">
-                      {T(`pricing.monthly.${ri}.name`, row.name, {
-                        as: 'div',
-                        className: 'font-bold text-ink-900 break-keep',
-                      })}
-                      {T(`pricing.monthly.${ri}.desc`, row.desc, {
-                        as: 'div',
-                        className: 'mt-0.5 text-xs text-ink-400 break-keep',
-                      })}
-                    </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-1.5 self-start sm:self-auto">
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-600">
-                        <span className="text-ink-400">월</span>
-                        <span className="font-mono text-ink-800">{row.monthly}</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-500">
-                        <span className="text-ink-400">연</span>
-                        <span className="font-mono text-ink-700">{row.yearly}</span>
-                      </span>
+                {pricing.monthly.map((row) => (
+                  <div key={row.id} className="flex items-start gap-3 px-4 py-3.5 sm:px-5">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-blue/10 text-brand-deep">
+                      {itemIcon(row.name)}
+                    </span>
+                    <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="font-bold text-ink-900 break-keep">{row.name}</div>
+                        {row.description && (
+                          <div className="mt-0.5 text-xs text-ink-400 break-keep">{row.description}</div>
+                        )}
+                      </div>
+                      <div className="flex shrink-0 flex-wrap items-center gap-1.5 self-start sm:self-auto">
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-600">
+                          <span className="text-ink-400">월</span>
+                          <span className="font-mono text-ink-800">{formatWon(row.monthly_price)}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-500">
+                          <span className="text-ink-400">연</span>
+                          <span className="font-mono text-ink-700">{formatWon(row.yearly_price ?? row.monthly_price * 12)}</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -593,7 +610,7 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
               {/* 정상가 합계 */}
               <div className="flex items-center justify-between gap-3 border-t-2 border-ink-200 px-4 py-4 sm:px-5">
                 <span className="text-sm font-extrabold text-ink-900 break-keep">정상가 합계 (따로 계약 시)</span>
-                <span className="whitespace-nowrap font-mono text-base font-extrabold text-ink-400 line-through">₩20,050,000</span>
+                <span className="whitespace-nowrap font-mono text-base font-extrabold text-ink-400 line-through">{formatWon(regularTotal)}</span>
               </div>
               {/* 패키지가 강조 */}
               <div className="flex items-center justify-between gap-3 bg-surface-dark px-4 py-4 text-white sm:px-5">
@@ -602,8 +619,8 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
                   <p className="mt-0.5 text-[11px] text-white/55">초기 세팅 + 월 정기 전체 포함</p>
                 </div>
                 <div className="text-right">
-                  <span className="block whitespace-nowrap font-mono text-lg font-extrabold text-brand-neon">₩1,500,000</span>
-                  <span className="block text-[11px] text-white/60">월 125,000원</span>
+                  <span className="block whitespace-nowrap font-mono text-lg font-extrabold text-brand-neon">{formatWon(s.package_yearly)}</span>
+                  <span className="block text-[11px] text-white/60">월 {formatNum(s.package_monthly)}원</span>
                 </div>
               </div>
             </div>
