@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 // MarketingPackageLanding — /marketing-package
 //
-// "월 12만 5천원, 매장 마케팅 본부 통째로" 우리편 마케팅 패키지 랜딩.
+// "월 12만 5천원, 매장 마케팅 본부 통째로" 오즈랩페이 마케팅 패키지 랜딩.
 //   · 모든 카피 = content_blocks 인라인 편집 (blockKey prefix = 'package.')
 //   · 이미지 슬롯 = EditableVisualSlot (기본 레이아웃 → 어드민이 이미지로 교체 가능)
 //   · 랜딩 슬롯 = LandingSlot (마케터가 섹션 사이에 모듈 삽입)
@@ -151,21 +151,23 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
           <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               {T('hero.eyebrow', '📐 N페이커넥트 사장님 한정 제안', { className: 'eyebrow-dark' })}
-              <h1 className="mt-6 text-display text-white break-keep">
-                {T('hero.title.line1', '혼자 하는 마케팅은 그만.')}
-                <br />
-                <mark className="hl-solid">{T('hero.title.highlight', '월 12만 5천원')}</mark>
-                {T('hero.title.line2', '이면')}
-                <br />
-                <span className="text-white/55 line-through decoration-2">
-                  {T('hero.title.strike', '2,005만원짜리')}
-                </span>{' '}
-                {T('hero.title.line3', '마케팅 본부가 매장에.')}
+              <h1 className="mt-6 text-display text-white break-keep [text-wrap:balance]">
+                <span className="block">{T('hero.title.line1', '혼자 하는 마케팅은 그만.')}</span>
+                <span className="mt-1 block">
+                  <mark className="hl-solid">{T('hero.title.highlight', '월 12만 5천원')}</mark>
+                  {T('hero.title.line2', '이면')}
+                </span>
+                <span className="mt-1 block">
+                  <span className="text-white/55 line-through decoration-2">
+                    {T('hero.title.strike', '2,005만원짜리')}
+                  </span>{' '}
+                  {T('hero.title.line3', '마케팅 본부가 매장에.')}
+                </span>
               </h1>
               <p className="mt-6 max-w-[640px] text-lg-fluid text-white/70 break-keep">
                 {T(
                   'hero.sub',
-                  '단말기·인터넷·CCTV·키오스크 다 갖추셨으니, 이제 매출 만들 시간입니다. 우리편이 매장 마케팅 본부가 되어드립니다.',
+                  '단말기·인터넷·CCTV·키오스크 다 갖추셨으니, 이제 매출 만들 시간입니다. 오즈랩페이가 매장 마케팅 본부가 되어드립니다.',
                 )}
               </p>
 
@@ -253,7 +255,7 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
             <div>
               {T('about.eyebrow', 'CHAPTER 01 · ABOUT', { className: 'eyebrow' })}
               <h2 className="mt-4 text-h1 text-ink-900 break-keep">
-                {T('about.title.line1', '우리편이 누구냐고요?')}
+                {T('about.title.line1', '오즈랩페이가 누구냐고요?')}
                 <br />
                 <mark className="hl-solid">{T('about.title.highlight', '이미 매장 옆에 있던 사람')}</mark>
                 {T('about.title.line2', '입니다.')}
@@ -261,7 +263,7 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
               <p className="mt-5 max-w-[680px] text-lg-fluid text-ink-500 break-keep">
                 {T(
                   'about.lead',
-                  '단말기 가맹사를 넘어 매장 통합 운영 파트너로 성장한 우리편. 카드단말기·인터넷·CCTV·키오스크에 이어, 매장 매출까지 책임지는 마케팅 본부를 월 12만 5천원에 사장님 매장에 들이는 게 이 제안의 본질입니다.',
+                  '단말기 가맹사를 넘어 매장 통합 운영 파트너로 성장한 오즈랩페이. 카드단말기·인터넷·CCTV·키오스크에 이어, 매장 매출까지 책임지는 마케팅 본부를 월 12만 5천원에 사장님 매장에 들이는 게 이 제안의 본질입니다.',
                 )}
               </p>
 
@@ -285,7 +287,7 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
                 <p className="text-[15px] leading-relaxed text-ink-700 break-keep">
                   {T(
                     'about.callout',
-                    '듀얼 브랜드 구조 — 결제 인프라는 오즈랩페이(OZ labPay), 매장 운영·마케팅 통합은 우리편. 두 브랜드가 사장님 매장 하나에 풀스택으로 들어갑니다.',
+                    '풀스택 구조 — 오즈랩페이(OZ labPay)는 결제 인프라(단말기·간편결제)부터 매장 운영·마케팅까지 하나로 책임집니다. 단말기 하나로 시작해 매장 전체를 키웁니다.',
                   )}
                 </p>
               </div>
@@ -300,7 +302,7 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
               pagePath={PAGE_PATH}
               label="소개 비주얼"
               imageLabel="팀/대시보드/매장 이미지"
-              imageHint="우리편 운영 화면이나 매장 사진 4:5 권장"
+              imageHint="오즈랩페이 운영 화면이나 매장 사진 4:5 권장"
               aspect="4/5"
               defaultClassName="h-full"
             >
@@ -385,7 +387,7 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
             <p className="mt-4 text-lg-fluid text-ink-500 break-keep">
               {T(
                 'solution.lead',
-                '콘텐츠 제작, 광고 운영, 채널 관리, 인플루언서까지 — 매장 마케팅에 필요한 모든 작업을 우리편이 통째로 운영합니다. 사장님은 매장만 보세요.',
+                '콘텐츠 제작, 광고 운영, 채널 관리, 인플루언서까지 — 매장 마케팅에 필요한 모든 작업을 오즈랩페이가 통째로 운영합니다. 사장님은 매장만 보세요.',
               )}
             </p>
           </div>
@@ -434,42 +436,83 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
       {renderLandingSlot('package.after_solution', '솔루션(4필러) 아래')}
 
       {/* ════════ CHAPTER 04 · PRICING ════════ */}
-      <section className="bg-ink-50 py-section">
+      <section id="quote" className="scroll-mt-20 bg-ink-50 py-section">
         <div className="container-oz">
-          <div className="mb-10 max-w-[820px]">
-            {T('pricing.eyebrow', 'CHAPTER 04 · PRICING', { className: 'eyebrow' })}
-            <h2 className="mt-4 text-h1 text-ink-900 break-keep">
-              {T('pricing.title.line1', '패키지 상세 · 12종,')}
+          <div className="mb-8 max-w-[820px]">
+            {T('pricing.eyebrow', 'CHAPTER 04 · 견적', { className: 'eyebrow' })}
+            <h2 className="mt-4 text-h1 text-ink-900 break-keep [text-wrap:balance]">
+              {T('pricing.title.line1', '한 장으로 끝내는 견적,')}
               <br />
-              <mark className="hl-solid">{T('pricing.title.highlight', '정상가와 비교')}</mark>
-              {T('pricing.title.line2', '해서 보세요.')}
+              <mark className="hl-solid">{T('pricing.title.highlight', '월 12만 5천원')}</mark>
+              {T('pricing.title.line2', '이 전부입니다.')}
             </h2>
             <p className="mt-4 text-lg-fluid text-ink-500 break-keep">
               {T(
                 'pricing.lead',
-                '초기 인프라 세팅 4종(1회성) + 월 정기 관리 8종 = 총 12종 통합 운영. 통합 패키지로 가입 시 92.5% 할인.',
+                '초기 세팅 4종 + 월 정기 관리 8종, 총 12종을 하나로 묶었습니다. 통합 패키지로 가입하면 92.5% 할인.',
               )}
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-ink-150 bg-white shadow-sm">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-ink-150 bg-ink-50/60 text-xs font-extrabold text-ink-500">
-                  <th className="px-5 py-3">항목</th>
-                  <th className="px-5 py-3 text-right">정상가 (월)</th>
-                  <th className="px-5 py-3 text-right">연간</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-brand-tint/40">
-                  <td colSpan={3} className="px-5 py-2.5 text-xs font-extrabold tracking-wide text-brand-deep">
-                    초기 인프라 세팅 (1회성 · 4종)
-                  </td>
-                </tr>
+          {/* ① 핵심 견적 요약 — 가장 먼저 보이는 답 */}
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-surface-dark text-white shadow-lg">
+            <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue/20 px-3 py-1 text-xs font-extrabold text-brand-neon">
+                  ⭐ {T('pricing.summary.badge', '연간 계약 특가 · 통합 패키지')}
+                </span>
+                <div className="mt-5 flex items-end gap-3">
+                  <span className="font-mono text-5xl font-extrabold leading-none text-white sm:text-6xl">
+                    {T('pricing.summary.monthly', '125,000')}
+                  </span>
+                  <span className="pb-1 text-lg font-bold text-white/70">{T('pricing.summary.monthlyUnit', '원 / 월')}</span>
+                </div>
+                <p className="mt-2 text-sm text-white/60">
+                  {T('pricing.summary.yearly', '연 1,500,000원 · 부가세 별도 · 광고 실비/현장 촬영 제외')}
+                </p>
+                <a href="#apply" className="btn btn-primary lg mt-6 w-full sm:w-auto">
+                  {T('pricing.summary.cta', '이 가격으로 견적 신청')}
+                  <Icon.Arrow s={18} />
+                </a>
+              </div>
+
+              {/* 정상가 대비 절약 — 한눈에 */}
+              <div className="grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-center">
+                <div className="bg-surface-dark px-3 py-5">
+                  <p className="text-[11px] font-bold text-white/50">정상가</p>
+                  <p className="mt-1.5 font-mono text-sm font-extrabold text-white/50 line-through sm:text-base">₩20,050,000</p>
+                </div>
+                <div className="bg-surface-dark px-3 py-5">
+                  <p className="text-[11px] font-bold text-white/50">패키지가</p>
+                  <p className="mt-1.5 font-mono text-sm font-extrabold text-white sm:text-base">₩1,500,000</p>
+                </div>
+                <div className="bg-brand-blue/20 px-3 py-5">
+                  <p className="text-[11px] font-extrabold text-brand-neon">절약</p>
+                  <p className="mt-1.5 font-mono text-sm font-extrabold text-brand-neon sm:text-base">92.5%↓</p>
+                  <p className="mt-0.5 text-[10px] text-white/55">1,855만원</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ② 포함 내역 12종 — 모바일에서 줄바꿈되는 카드형 리스트 */}
+          <div className="mt-6">
+            <p className="mb-3 text-sm font-extrabold text-ink-700">
+              {T('pricing.detail.heading', '이 가격에 포함된 것 — 12종 전체 내역')}
+            </p>
+            <div className="overflow-hidden rounded-2xl border border-ink-150 bg-white shadow-sm">
+              {/* 초기 세팅 4종 */}
+              <div className="flex items-center gap-2 bg-brand-tint/50 px-4 py-2.5 sm:px-5">
+                <Icon.Target s={16} />
+                <span className="text-xs font-extrabold tracking-wide text-brand-deep">초기 인프라 세팅 · 1회성 4종</span>
+              </div>
+              <div className="divide-y divide-ink-100">
                 {pricingInitial.map((row, ri) => (
-                  <tr key={`pi-${ri}`} className="border-b border-ink-100 align-top">
-                    <td className="px-5 py-3.5">
+                  <div
+                    key={`pi-${ri}`}
+                    className="flex flex-col gap-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                  >
+                    <div className="min-w-0">
                       {T(`pricing.initial.${ri}.name`, row.name, {
                         as: 'div',
                         className: 'font-bold text-ink-900 break-keep',
@@ -478,21 +521,27 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
                         as: 'div',
                         className: 'mt-0.5 text-xs text-ink-400 break-keep',
                       })}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono font-bold text-ink-700">
-                      {T(`pricing.initial.${ri}.monthly`, row.monthly, { className: 'font-mono' })}
-                    </td>
-                    <td className="px-5 py-3.5 text-right text-ink-400">—</td>
-                  </tr>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-1 self-start rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-600 sm:self-auto">
+                      <span className="font-mono text-ink-800">{row.monthly}</span>
+                      <span className="text-ink-400">· 1회성</span>
+                    </span>
+                  </div>
                 ))}
-                <tr className="bg-brand-tint/40">
-                  <td colSpan={3} className="px-5 py-2.5 text-xs font-extrabold tracking-wide text-brand-deep">
-                    월 정기 관리 (8종)
-                  </td>
-                </tr>
+              </div>
+
+              {/* 월 정기 8종 */}
+              <div className="flex items-center gap-2 border-t border-ink-150 bg-brand-tint/50 px-4 py-2.5 sm:px-5">
+                <Icon.Clock s={16} />
+                <span className="text-xs font-extrabold tracking-wide text-brand-deep">월 정기 관리 · 8종</span>
+              </div>
+              <div className="divide-y divide-ink-100">
                 {pricingMonthly.map((row, ri) => (
-                  <tr key={`pm-${ri}`} className="border-b border-ink-100 align-top">
-                    <td className="px-5 py-3.5">
+                  <div
+                    key={`pm-${ri}`}
+                    className="flex flex-col gap-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                  >
+                    <div className="min-w-0">
                       {T(`pricing.monthly.${ri}.name`, row.name, {
                         as: 'div',
                         className: 'font-bold text-ink-900 break-keep',
@@ -501,61 +550,49 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
                         as: 'div',
                         className: 'mt-0.5 text-xs text-ink-400 break-keep',
                       })}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono font-bold text-ink-700">
-                      {T(`pricing.monthly.${ri}.monthly`, row.monthly, { className: 'font-mono' })}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono text-ink-500">
-                      {T(`pricing.monthly.${ri}.yearly`, row.yearly, { className: 'font-mono' })}
-                    </td>
-                  </tr>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-1.5 self-start sm:self-auto">
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-600">
+                        <span className="text-ink-400">월</span>
+                        <span className="font-mono text-ink-800">{row.monthly}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-lg bg-ink-50 px-2.5 py-1.5 text-xs font-bold text-ink-500">
+                        <span className="text-ink-400">연</span>
+                        <span className="font-mono text-ink-700">{row.yearly}</span>
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-ink-200 bg-white">
-                  <td className="px-5 py-4 font-extrabold text-ink-900">정상가 총합계 · 초기 60만 + 월 170만 × 12</td>
-                  <td className="whitespace-nowrap px-5 py-4 text-right font-mono font-extrabold text-ink-900">₩2,050,000</td>
-                  <td className="whitespace-nowrap px-5 py-4 text-right font-mono font-extrabold text-ink-900">₩18,000,000</td>
-                </tr>
-                <tr className="bg-surface-dark text-white">
-                  <td className="px-5 py-4">
-                    <p className="font-extrabold">⭐ 연간 계약 특가 통합 패키지</p>
-                    <p className="mt-0.5 text-xs text-white/55">초기 세팅비 + 월 정기 전체 포함 · 광고 실비/현장 촬영 제외</p>
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-4 text-right font-mono text-lg font-extrabold text-brand-neon">월 ₩125,000</td>
-                  <td className="whitespace-nowrap px-5 py-4 text-right font-mono text-lg font-extrabold text-brand-neon">₩1,500,000</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+              </div>
 
-          {/* 비교 + 절약 배너 */}
-          <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]">
-            <div className="rounded-2xl border border-ink-150 bg-white p-6 text-center shadow-sm">
-              <p className="text-xs font-bold text-ink-400">정상가</p>
-              <p className="mt-2 font-mono text-2xl font-extrabold text-ink-400 line-through">₩20,050,000</p>
-              <p className="mt-1 text-xs text-ink-400">12종 따로따로 계약 시</p>
-            </div>
-            <div className="rounded-2xl border-2 border-brand-blue/40 bg-gradient-to-br from-white to-brand-tint p-6 text-center shadow-sm">
-              <p className="text-xs font-extrabold text-brand-deep">⭐ 연간 통합 패키지</p>
-              <p className="mt-2 font-mono text-2xl font-extrabold text-ink-900">₩1,500,000</p>
-              <p className="mt-1 text-xs text-ink-500">월 ₩125,000 × 12개월</p>
-            </div>
-            <div className="flex flex-col items-center justify-center rounded-2xl bg-surface-dark p-6 text-center text-white">
-              <p className="text-xs font-bold text-white/55">사장님 절약 금액</p>
-              <p className="mt-2 font-mono text-3xl font-extrabold text-brand-neon">₩18,550,000</p>
-              <p className="mt-1 text-xs font-extrabold text-white">92.5% 할인</p>
+              {/* 정상가 합계 */}
+              <div className="flex items-center justify-between gap-3 border-t-2 border-ink-200 px-4 py-4 sm:px-5">
+                <span className="text-sm font-extrabold text-ink-900 break-keep">정상가 합계 (따로 계약 시)</span>
+                <span className="whitespace-nowrap font-mono text-base font-extrabold text-ink-400 line-through">₩20,050,000</span>
+              </div>
+              {/* 패키지가 강조 */}
+              <div className="flex items-center justify-between gap-3 bg-surface-dark px-4 py-4 text-white sm:px-5">
+                <div>
+                  <p className="text-sm font-extrabold">⭐ 통합 패키지 (연간)</p>
+                  <p className="mt-0.5 text-[11px] text-white/55">초기 세팅 + 월 정기 전체 포함</p>
+                </div>
+                <div className="text-right">
+                  <span className="block whitespace-nowrap font-mono text-lg font-extrabold text-brand-neon">₩1,500,000</span>
+                  <span className="block text-[11px] text-white/60">월 125,000원</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 flex items-start gap-3 rounded-xl border border-ink-150 bg-white p-5 shadow-sm">
+          {/* ③ 왜 싼가 */}
+          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-ink-150 bg-white p-5 shadow-sm">
             <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-blue/12 text-brand-deep">
               <Icon.Shield s={20} />
             </span>
             <p className="text-[15px] leading-relaxed text-ink-700 break-keep">
               {T(
                 'pricing.callout',
-                '왜 이렇게 쌉니까? — 우리편은 단말기 가맹 수수료 기반으로 운영되어 마케팅 운영비를 별도 마진으로 받지 않습니다. 사장님 매출이 늘면 결제 건수가 늘고, 결제 건수가 늘면 우리도 함께 성장하기 때문입니다. 매장과 우리편이 같은 배에 탄 구조입니다.',
+                '왜 이렇게 쌉니까? — 오즈랩페이는 단말기 가맹 수수료 기반으로 운영되어 마케팅 운영비를 별도 마진으로 받지 않습니다. 사장님 매출이 늘면 결제 건수가 늘고, 결제 건수가 늘면 오즈랩페이도 함께 성장하기 때문입니다. 매장과 오즈랩페이가 같은 배에 탄 구조입니다.',
               )}
             </p>
           </div>
@@ -690,13 +727,21 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
       >
         <a
           href={SITE_PHONE_HREF}
-          className="flex flex-1 items-center justify-center gap-2 bg-white/[0.06] py-4 text-sm font-extrabold"
+          aria-label={`${SITE_PHONE} 전화하기`}
+          className="flex flex-1 items-center justify-center gap-1.5 bg-white/[0.06] py-4 text-sm font-extrabold"
         >
           <Icon.Phone s={16} />
-          {SITE_PHONE} 전화
+          <span className="hidden sm:inline">{SITE_PHONE} </span>전화
         </a>
-        <a href="#apply" className="flex flex-1 items-center justify-center gap-2 py-4 text-sm font-extrabold">
-          견적 신청
+        <a
+          href="#quote"
+          className="flex flex-1 items-center justify-center gap-1.5 border-x border-white/10 py-4 text-sm font-extrabold text-brand-neon"
+        >
+          <Icon.Won s={16} />
+          견적 바로보기
+        </a>
+        <a href="#apply" className="flex flex-1 items-center justify-center gap-1.5 py-4 text-sm font-extrabold">
+          상담 신청
           <Icon.Arrow s={16} />
         </a>
       </div>

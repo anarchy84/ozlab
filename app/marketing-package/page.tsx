@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       '인스타 릴스 대행',
       '블로그 SEO',
       'AI 콘텐츠',
-      '우리편',
+      '오즈랩페이',
       'N페이커넥트',
     ],
   })
