@@ -182,6 +182,70 @@ const ic = {
       <path d="M14 14h3v3M20 14v6M14 20h3" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   ),
+  // ── 마케팅 패키지 랜딩용 추가 아이콘 ──
+  Video: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="6" width="13" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M16 10l5-3v10l-5-3v-4z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
+  ),
+  Sparkle: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path d="M19 14l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7.7-2z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
+  ),
+  Share: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="6" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="18" cy="6" r="2.6" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="18" cy="18" r="2.6" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+  Users: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="9" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M16 6.2A3 3 0 0 1 16 13M17.5 19c0-2.4-1.2-4.2-3-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  ),
+  Clock: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 7.5V12l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Doc: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path d="M6 3h8l4 4v14H6V3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M14 3v4h4M9 12h6M9 16h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  ),
+  Won: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 7l3 10 3-7 2 5 2-5 3 7 3-10"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3 10.5h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+  Target: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+    </svg>
+  ),
 }
 
 export const Icon = ic

@@ -109,6 +109,14 @@ export const LANDING_SLOT_DEFINITIONS: LandingSlotDefinition[] = [
   { pagePath: '/marketing-support', slotKey: 'marketing.after_why', label: '플레이스 설명 아래' },
   { pagePath: '/marketing-support', slotKey: 'marketing.before_cta', label: '신청 CTA 위' },
   { pagePath: '/marketing-support', slotKey: 'marketing.before_faq', label: 'FAQ 위' },
+  { pagePath: '/marketing-package', slotKey: 'package.after_hero', label: '히어로 아래' },
+  { pagePath: '/marketing-package', slotKey: 'package.after_about', label: '회사 소개 아래' },
+  { pagePath: '/marketing-package', slotKey: 'package.after_problem', label: '문제 섹션 아래' },
+  { pagePath: '/marketing-package', slotKey: 'package.after_solution', label: '솔루션(4필러) 아래' },
+  { pagePath: '/marketing-package', slotKey: 'package.after_pricing', label: '가격표 아래' },
+  { pagePath: '/marketing-package', slotKey: 'package.after_process', label: '진행 방식 아래' },
+  { pagePath: '/marketing-package', slotKey: 'package.before_faq', label: 'FAQ 위' },
+  { pagePath: '/marketing-package', slotKey: 'package.before_apply', label: '신청폼 위' },
 ]
 
 export function isLandingModuleType(value: unknown): value is LandingModuleType {
