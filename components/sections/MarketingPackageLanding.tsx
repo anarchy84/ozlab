@@ -183,19 +183,21 @@ export function MarketingPackageLanding({
         <div className="container-oz relative">
           <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
-              {T('hero.eyebrow', '오즈랩페이 · 네이버 공식대행사 · 자체 10만 팔로워 네트워크', { className: 'eyebrow-dark' })}
+              {T('hero.eyebrow', '매장 SNS 통째 운영 · 자체 10만 팔로워 네트워크', { className: 'eyebrow-dark' })}
               <h1 className="mt-6 text-display text-white break-keep [text-wrap:balance]">
-                <span className="block">{T('hero.title.line1', '플레이스·블로그·인스타·유튜브·틱톡·카카오,')}</span>
-                <span className="mt-1 block">
-                  <mark className="hl-solid">{T('hero.title.highlight', '매장 채널을 한 번에')}</mark>
-                  {T('hero.title.line2', ' 세팅하고')}
+                <span className="block">
+                  <span className="text-white/55 line-through decoration-2">{T('hero.title.strike', '대행사 월 200만원')}</span>
+                  {T('hero.title.line1', '짜리를,')}
                 </span>
-                <span className="mt-1 block">{T('hero.title.line3', '매달 대신 운영해 드립니다.')}</span>
+                <span className="mt-1 block">
+                  <mark className="hl-solid">{T('hero.title.highlight', '월 9만 9천원')}</mark>
+                  {T('hero.title.line2', '부터.')}
+                </span>
               </h1>
-              <p className="mt-6 max-w-[640px] text-lg-fluid text-white/70 break-keep">
+              <p className="mt-6 max-w-[560px] text-lg-fluid text-white/70 break-keep">
                 {T(
                   'hero.sub',
-                  '매장에 필요한 온라인 노출 채널을 한 번에 세팅하고, 자체 10만 팔로워 채널 네트워크로 매달 노출합니다. 성과는 매월 리포트로 확인하세요. 사장님은 매장만 보시면 됩니다.',
+                  '플레이스·인스타·틱톡·블로그·유튜브까지, 매장 SNS를 통째로 맡아 매달 대신 올려드립니다. 사장님은 장사만 하세요.',
                 )}
               </p>
 
