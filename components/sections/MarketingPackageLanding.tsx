@@ -495,6 +495,31 @@ export function MarketingPackageLanding({ landingSlots = {} }: { landingSlots?: 
             </div>
           </div>
 
+          {/* 운영 채널 행 — 어떤 채널을 다뤄주는지 직관적으로 */}
+          <div className="mt-6 rounded-2xl border border-ink-150 bg-white p-5 shadow-sm">
+            {T('pricing.channels.heading', '이런 채널을 직접 운영해 드립니다', {
+              as: 'p',
+              className: 'mb-4 text-sm font-extrabold text-ink-700',
+            })}
+            <div className="flex flex-wrap gap-2.5">
+              {[
+                { icon: <Icon.Blog s={20} />, label: '네이버 블로그', color: 'text-[#03C75A]' },
+                { icon: <Icon.Instagram s={20} />, label: '인스타그램', color: 'text-[#E1306C]' },
+                { icon: <Icon.Youtube s={20} />, label: '유튜브', color: 'text-[#FF0000]' },
+                { icon: <Icon.Tiktok s={20} />, label: '틱톡', color: 'text-ink-900' },
+                { icon: <Icon.Pin s={20} />, label: '네이버 플레이스', color: 'text-brand-blue' },
+              ].map((ch, ci) => (
+                <span
+                  key={`channel-${ci}`}
+                  className="inline-flex items-center gap-2 rounded-xl border border-ink-150 bg-ink-50/60 px-3.5 py-2 text-sm font-bold text-ink-800"
+                >
+                  <span className={ch.color}>{ch.icon}</span>
+                  {ch.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
           {/* ② 포함 내역 12종 — 모바일에서 줄바꿈되는 카드형 리스트 */}
           <div className="mt-6">
             <p className="mb-3 text-sm font-extrabold text-ink-700">

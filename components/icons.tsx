@@ -246,6 +246,49 @@ const ic = {
       <circle cx="12" cy="12" r="1" fill="currentColor" />
     </svg>
   ),
+  // ── 운영 채널 브랜드 아이콘 (currentColor 단색) ──
+  Blog: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="3.5" width="16" height="17" rx="3" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 8.5h8M8 12h8M8 15.5h5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  ),
+  Instagram: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17" cy="7" r="1.1" fill="currentColor" />
+    </svg>
+  ),
+  Youtube: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect x="2.5" y="6" width="19" height="12" rx="3.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M10.5 9.3l4.2 2.7-4.2 2.7V9.3z" fill="currentColor" />
+    </svg>
+  ),
+  Tiktok: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M13 3.5v10.8a3.4 3.4 0 1 1-3.4-3.4c.35 0 .7.05 1 .15"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M13 3.5c.5 2.4 2.3 4.2 4.7 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Pin: ({ s = 24 }: IconProps) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 21c4-4.2 6-7.4 6-10.2A6 6 0 0 0 6 10.8C6 13.6 8 16.8 12 21z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="10.5" r="2.2" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  ),
 }
 
 export const Icon = ic
