@@ -8,7 +8,6 @@ import { getLandingSlotsForPage } from '@/lib/landing-sections-server'
 import { blocksMapToRecord } from '@/lib/content-blocks'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { marketingPackageFaqsForBlocks } from '@/lib/marketing-package-faqs'
-import { loadPackagePricing } from '@/lib/marketing-package-pricing-server'
 import { absoluteUrl, breadcrumbJsonLd, faqJsonLd, publicMetadata, serviceJsonLd } from '@/lib/seo'
 import { mergePageMetadata } from '@/lib/admin/page-seo'
 
@@ -18,30 +17,30 @@ const PAGE_PATH = '/marketing-package'
 
 export async function generateMetadata(): Promise<Metadata> {
   const base = publicMetadata({
-    title: '매장 마케팅 패키지 — 월 12만 5천원',
+    title: '매장 온라인 노출·운영 패키지 — 월 9.9만원부터',
     description:
-      'N페이커넥트 가입 사장님 한정. 정상가 2,005만원짜리 매장 통합 마케팅 패키지(AI 콘텐츠·광고 운영·플레이스 SEO·인플루언서)를 연간 150만원에. 92.5% 할인.',
+      '플레이스·블로그·인스타그램·유튜브·틱톡·카카오까지, 매장에 필요한 온라인 노출 채널을 한 번에 세팅하고 매달 운영해 드립니다. 자체 10만 팔로워 채널 네트워크 노출 + 월 성과 리포트. Lite 9.9만 / Standard 20만 / Pro 39만.',
     path: PAGE_PATH,
     keywords: [
       '매장 마케팅',
       '자영업자 마케팅',
-      '플레이스 SEO',
-      '네이버 플레이스',
+      '플레이스 마케팅',
+      '네이버 플레이스 예약',
       '인스타 릴스 대행',
+      '틱톡 쇼츠 대행',
       '블로그 SEO',
-      'AI 콘텐츠',
+      '체험단 모집',
+      '카카오톡 채널',
       '오즈랩페이',
-      'N페이커넥트',
     ],
   })
   return mergePageMetadata(PAGE_PATH, base)
 }
 
 export default async function MarketingPackagePage() {
-  const [blocksMap, landingSlots, pricing] = await Promise.all([
+  const [blocksMap, landingSlots] = await Promise.all([
     getBlocksForPage(PAGE_PATH),
     getLandingSlotsForPage(PAGE_PATH),
-    loadPackagePricing(),
   ])
   const blocks = blocksMapToRecord(blocksMap)
   const faqs = [
@@ -55,41 +54,38 @@ export default async function MarketingPackagePage() {
         data={[
           breadcrumbJsonLd([
             { name: '홈', path: '/' },
-            { name: '매장 마케팅 패키지', path: PAGE_PATH },
+            { name: '매장 온라인 노출·운영 패키지', path: PAGE_PATH },
           ]),
           serviceJsonLd({
-            name: '매장 통합 마케팅 패키지 (월 12만 5천원)',
+            name: '매장 온라인 노출·운영 패키지',
             description:
-              'AI 콘텐츠 제작, 광고 운영, 멀티 채널 관리, 바이럴·인플루언서까지 매장 마케팅에 필요한 12종을 통합 운영하는 연간 패키지입니다.',
+              '플레이스·블로그·인스타그램·유튜브·틱톡·카카오 채널을 한 번에 세팅하고 매달 운영하는 소상공인 마케팅 패키지. 자체 10만 팔로워 채널 네트워크 노출과 월 성과 리포트를 제공합니다.',
             path: PAGE_PATH,
-            serviceType: 'Local Store Marketing Package',
-            keywords: ['매장 마케팅', '플레이스 SEO', 'AI 콘텐츠', '광고 운영 대행', '인플루언서 마케팅'],
-            audience: 'N페이커넥트 가입 또는 매장 운영 사장님',
+            serviceType: 'Local Store Online Marketing Operation',
+            keywords: ['플레이스 마케팅', '인스타 릴스 대행', '틱톡 쇼츠', '블로그 SEO', '체험단 모집', '카카오 단골 마케팅'],
+            audience: '매장을 운영하는 소상공인 사장님',
             offerCatalog: [
-              { name: 'AI 콘텐츠 자동 제작', description: '숏폼 영상·로컬 SEO 블로그 월 각 4건' },
-              { name: '광고 운영 풀세팅', description: '네이버·메타·플레이스·틱톡 4대 매체 운영·최적화' },
-              { name: '멀티 채널 관리', description: '인스타·틱톡·유튜브·플레이스 자동 분배 및 모니터링' },
-              { name: '바이럴 + 인플루언서', description: '지역 체험단 상시 모집 + 마이크로 인플루언서 매칭' },
+              { name: 'Lite', description: '월 99,000원 · 시작하는 매장을 위한 기본 노출 운영' },
+              { name: 'Standard', description: '월 200,000원 · 가장 많이 선택하는 멀티채널 운영' },
+              { name: 'Pro', description: '월 390,000원 · 전담 매니저 + 본격 성장 운영' },
             ],
           }),
           {
             '@context': 'https://schema.org',
-            '@type': 'Offer',
-            name: '연간 계약 특가 — 92.5% 할인',
+            '@type': 'Service',
+            name: '매장 온라인 노출·운영 패키지',
             url: absoluteUrl(PAGE_PATH),
-            price: '1500000',
-            priceCurrency: 'KRW',
-            eligibleCustomerType: 'N페이커넥트 가입 사장님 우대 (미가입 매장 동일가 신청 가능)',
-            itemOffered: {
-              '@type': 'Service',
-              name: '매장 통합 마케팅 패키지 12종 (초기 세팅 4종 + 월 정기 8종)',
-            },
+            offers: [
+              { '@type': 'Offer', name: 'Lite', price: '99000', priceCurrency: 'KRW' },
+              { '@type': 'Offer', name: 'Standard', price: '200000', priceCurrency: 'KRW' },
+              { '@type': 'Offer', name: 'Pro', price: '390000', priceCurrency: 'KRW' },
+            ],
           },
           faqJsonLd(faqs),
         ]}
       />
       <BlocksProvider blocks={blocks}>
-        <MarketingPackageLanding landingSlots={landingSlots} pricing={pricing} />
+        <MarketingPackageLanding landingSlots={landingSlots} />
       </BlocksProvider>
     </PublicPageFrame>
   )
