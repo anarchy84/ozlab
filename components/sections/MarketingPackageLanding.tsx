@@ -7,19 +7,16 @@
 //   · 모든 카피 = content_blocks 인라인 편집 (blockKey prefix = 'package.')
 //   · 이미지 슬롯 = EditableVisualSlot (기본 레이아웃 → 어드민이 이미지로 교체 가능)
 //   · 랜딩 슬롯 = LandingSlot (마케터가 섹션 사이에 모듈 삽입)
-//   · CTA = 페이지 하단 <ApplyForm/> (#apply) 로 스크롤 → /api/consultations 연동
-//   · 스티키 CTA 바 = 전화 + 견적신청(#apply 스크롤)
+//   · CTA = '요금·구성 바로보기'(#quote 스크롤) 단 하나. 상담은 당분간 카카오톡으로만.
+//     (신청 폼·전화 CTA 모두 제거됨)
 // ─────────────────────────────────────────────
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/icons'
 import { EditableText } from '@/components/editable/EditableText'
 import { EditableVisualSlot } from '@/components/editable/EditableVisualSlot'
 import { useBlocks } from '@/components/editable/BlocksProvider'
-import { ApplyForm } from '@/components/sections/ApplyForm'
 import { LandingSlot } from '@/components/landing/LandingSlot'
 import { pickImageOrUndef, pickTextOrUndef } from '@/lib/content-blocks'
-import { SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import { marketingPackageFaqsForBlocks } from '@/lib/marketing-package-faqs'
 import { formatNum, formatWon } from '@/lib/marketing-package-pricing'
 import type { LandingSlotsByKey } from '@/lib/landing-sections'
@@ -138,21 +135,6 @@ export function MarketingPackageLanding({
 }) {
   const blocks = useBlocks()
   const faqs = marketingPackageFaqsForBlocks(blocks)
-  const standard = tiers.find((t) => t.featured) ?? tiers[1]
-
-  // 스티키 CTA 바 — 하단 신청폼이 보이면 숨김
-  const applyRef = useRef<HTMLDivElement | null>(null)
-  const [stickyHidden, setStickyHidden] = useState(false)
-  useEffect(() => {
-    const el = applyRef.current
-    if (!el || !('IntersectionObserver' in window)) return
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => setStickyHidden(e.isIntersecting)),
-      { rootMargin: '0px 0px -160px 0px' },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
 
   // 편집 가능한 텍스트 헬퍼
   const T = (
@@ -216,16 +198,12 @@ export function MarketingPackageLanding({
 
               <div className="mt-7 flex flex-wrap gap-3">
                 <a href="#quote" className="btn btn-primary lg">
-                  {T('hero.cta.primary', '요금제 한눈에 보기')}
+                  {T('hero.cta.primary', '요금·구성 한눈에 보기')}
                   <Icon.Arrow s={18} />
-                </a>
-                <a href={SITE_PHONE_HREF} className="btn btn-ghost lg border-white/20 text-white hover:bg-white/10">
-                  <Icon.Phone s={18} />
-                  {T('hero.cta.tel', `${SITE_PHONE} 바로 전화`)}
                 </a>
               </div>
               <p className="mt-4 text-sm text-white/45 break-keep">
-                {T('hero.cta.micro', '신청 즉시 카톡 알림 + 전담 매니저 상담. 계약 강요 없이 매장에 맞는 티어만 안내합니다.')}
+                {T('hero.cta.micro', '아래에서 요금제와 매달 들어가는 작업을 모두 확인하실 수 있습니다.')}
               </p>
             </div>
 
@@ -517,13 +495,9 @@ export function MarketingPackageLanding({
                   <span className="font-mono text-6xl font-extrabold leading-none text-white">9.9</span>
                   <span className="pb-1.5 text-xl font-bold text-white/80">만원 / 월</span>
                 </div>
-                <p className="mt-2 text-sm text-white/55">
+                <p className="mt-3 text-sm text-white/55">
                   초기 셋업 {formatWon(SETUP_PRICE)} <span className="font-bold text-brand-neon">→ 1년 약정 시 무료</span> · 부가세 별도
                 </p>
-                <a href="#apply" className="btn btn-primary lg mt-6 w-full sm:w-auto">
-                  {T('flagship.cta', '월 9.9만으로 시작하기')}
-                  <Icon.Arrow s={18} />
-                </a>
                 {T('flagship.anchor', '직접 사람 뽑아 운영하면 월 200만원, 항목별 외주는 30~50만원씩. 그 일을 월 9만 9천원에 통째로 맡기세요.', {
                   as: 'p',
                   className: 'mt-4 max-w-[440px] text-xs leading-relaxed text-white/45 break-keep',
@@ -628,11 +602,6 @@ export function MarketingPackageLanding({
                       )
                     })}
                   </ul>
-                  <div className="p-4">
-                    <a href="#apply" className={`btn w-full ${t.featured ? 'btn-primary' : 'btn-ghost'}`}>
-                      {t.name} 신청
-                    </a>
-                  </div>
                 </div>
               ))}
             </div>
@@ -679,16 +648,6 @@ export function MarketingPackageLanding({
                       })}
                     </tr>
                   ))}
-                  <tr>
-                    <td className="px-5 py-4" />
-                    {tiers.map((t) => (
-                      <td key={`cta-${t.key}`} className={`px-4 py-4 text-center ${t.featured ? 'bg-brand-tint/50' : ''}`}>
-                        <a href="#apply" className={`btn w-full ${t.featured ? 'btn-primary' : 'btn-ghost'}`}>
-                          {t.name} 신청
-                        </a>
-                      </td>
-                    ))}
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -804,39 +763,16 @@ export function MarketingPackageLanding({
         </div>
       </section>
 
-      {renderLandingSlot('package.before_apply', '신청폼 위')}
+      {renderLandingSlot('package.before_apply', '하단 모듈')}
 
-      {/* ════════ 최종 CTA — 상담 신청 폼 (/api/consultations 연동) ════════ */}
-      <div ref={applyRef}>
-        <ApplyForm blocks={blocks} />
-      </div>
-
-      {/* ════════ 스티키 CTA 바 ════════ */}
-      <div
-        className={`fixed inset-x-0 bottom-0 z-40 flex border-t border-white/10 bg-surface-dark text-white shadow-[0_-8px_24px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
-          stickyHidden ? 'translate-y-full' : 'translate-y-0'
-        }`}
+      {/* ════════ 스티키 — 견적 바로보기 단독 ════════ */}
+      <a
+        href="#quote"
+        className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-2 border-t border-white/10 bg-surface-dark py-4 text-sm font-extrabold text-brand-neon shadow-[0_-8px_24px_rgba(0,0,0,0.18)]"
       >
-        <a
-          href={SITE_PHONE_HREF}
-          aria-label={`${SITE_PHONE} 전화하기`}
-          className="flex flex-1 items-center justify-center gap-1.5 bg-white/[0.06] py-4 text-sm font-extrabold"
-        >
-          <Icon.Phone s={16} />
-          <span className="hidden sm:inline">{SITE_PHONE} </span>전화
-        </a>
-        <a
-          href="#quote"
-          className="flex flex-1 items-center justify-center gap-1.5 border-x border-white/10 py-4 text-sm font-extrabold text-brand-neon"
-        >
-          <Icon.Won s={16} />
-          견적 바로보기
-        </a>
-        <a href="#apply" className="flex flex-1 items-center justify-center gap-1.5 py-4 text-sm font-extrabold">
-          상담 신청
-          <Icon.Arrow s={16} />
-        </a>
-      </div>
+        <Icon.Won s={16} />
+        {T('sticky.cta', '요금·구성 바로보기')}
+      </a>
       <div aria-hidden className="h-14" />
     </div>
   )
