@@ -201,30 +201,15 @@ export function MarketingPackageLanding({
                 )}
               </p>
 
-              {/* 가격 한눈에 — 3티어 + 셋업 무료 */}
-              <div className="mt-8 rounded-xl border border-white/15 bg-white/[0.05] p-5 backdrop-blur">
-                <p className="text-xs font-bold text-white/55">월 운영 패키지</p>
-                <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                  {tiers.map((t) => (
-                    <div
-                      key={t.key}
-                      className={`rounded-lg border px-2 py-3 ${
-                        t.featured ? 'border-brand-neon/50 bg-brand-blue/15' : 'border-white/10 bg-white/[0.04]'
-                      }`}
-                    >
-                      <p className={`text-xs font-extrabold ${t.featured ? 'text-brand-neon' : 'text-white/70'}`}>
-                        {t.name}
-                        {t.featured ? ' ★' : ''}
-                      </p>
-                      <p className="mt-1 font-mono text-base font-extrabold text-white">
-                        {formatNum(t.monthly / 10000)}만
-                      </p>
-                      <p className="text-[10px] text-white/45">원/월</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-white/60">
-                  + 초기 셋업 {formatWon(SETUP_PRICE)}{' '}
+              {/* 단일 미끼 가격 강조 */}
+              <div className="mt-8 inline-flex flex-col rounded-xl border border-white/15 bg-white/[0.05] px-6 py-5 backdrop-blur">
+                <p className="text-xs font-bold text-white/55">매장 SNS 운영, 이 가격에 시작</p>
+                <p className="mt-1 flex items-end gap-1.5">
+                  <span className="font-mono text-5xl font-extrabold leading-none text-white">9.9</span>
+                  <span className="pb-1 text-lg font-bold text-white/80">만원 / 월~</span>
+                </p>
+                <p className="mt-2 text-xs text-white/60">
+                  초기 셋업 {formatWon(SETUP_PRICE)}{' '}
                   <span className="font-bold text-brand-neon">→ 1년 약정 시 무료</span> · 부가세 별도
                 </p>
               </div>
@@ -477,15 +462,15 @@ export function MarketingPackageLanding({
           <div className="mb-8 max-w-[820px]">
             {T('pricing.eyebrow', '요금 안내', { className: 'eyebrow' })}
             <h2 className="mt-4 text-h1 text-ink-900 break-keep [text-wrap:balance]">
-              {T('pricing.title.line1', '초기 셋업 한 번,')}
+              {T('pricing.title.line1', '월 9만 9천원이면,')}
               <br />
-              <mark className="hl-solid">{T('pricing.title.highlight', '매달 알아서 운영')}</mark>
-              {T('pricing.title.line2', '됩니다.')}
+              <mark className="hl-solid">{T('pricing.title.highlight', '시작하기 충분')}</mark>
+              {T('pricing.title.line2', '합니다.')}
             </h2>
             <p className="mt-4 text-lg-fluid text-ink-500 break-keep">
               {T(
                 'pricing.lead',
-                '처음 한 번 채널을 세팅하고, 매달 Lite·Standard·Pro 중 매장에 맞는 요금제로 운영합니다. 1년 약정하면 초기 셋업비가 무료입니다.',
+                '부담 없이 월 9만 9천원으로 시작하고, 매장이 커지면 요금제를 올리면 됩니다. 1년 약정하면 초기 셋업비(55만원)도 무료입니다.',
               )}
             </p>
           </div>
@@ -517,11 +502,62 @@ export function MarketingPackageLanding({
             </div>
           </div>
 
+          {/* ★ 플래그십 미끼 오퍼 — 9.9만 단일 충격가 */}
+          <div className="mt-6 overflow-hidden rounded-3xl border border-white/10 bg-surface-dark text-white shadow-lg">
+            <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue/20 px-3 py-1 text-xs font-extrabold text-brand-neon">
+                  🔥 {T('flagship.badge', '이번 달 신규 매장 한정')}
+                </span>
+                {T('flagship.title', '내 가게 SNS, 이 가격에 매주 돌아갑니다', {
+                  as: 'h3',
+                  className: 'mt-4 text-h2 text-white break-keep',
+                })}
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="font-mono text-6xl font-extrabold leading-none text-white">9.9</span>
+                  <span className="pb-1.5 text-xl font-bold text-white/80">만원 / 월</span>
+                </div>
+                <p className="mt-2 text-sm text-white/55">
+                  초기 셋업 {formatWon(SETUP_PRICE)} <span className="font-bold text-brand-neon">→ 1년 약정 시 무료</span> · 부가세 별도
+                </p>
+                <a href="#apply" className="btn btn-primary lg mt-6 w-full sm:w-auto">
+                  {T('flagship.cta', '월 9.9만으로 시작하기')}
+                  <Icon.Arrow s={18} />
+                </a>
+                {T('flagship.anchor', '직접 사람 뽑아 운영하면 월 200만원, 항목별 외주는 30~50만원씩. 그 일을 월 9만 9천원에 통째로 맡기세요.', {
+                  as: 'p',
+                  className: 'mt-4 max-w-[440px] text-xs leading-relaxed text-white/45 break-keep',
+                })}
+              </div>
+
+              {/* 이 가격에 매주 들어가는 것 */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                <p className="text-xs font-extrabold text-white/70">이 가격에 매주 들어가는 것</p>
+                <ul className="mt-3 space-y-2.5">
+                  {[
+                    'SNS 콘텐츠 배포 (인스타·플레이스·블로그) — 주 1회',
+                    '세부 키워드 블로그 — 월 5회 (키워드 3개)',
+                    '플레이스 블로그 리뷰 — 월 3회',
+                    '플레이스 리워드 — 일 5회',
+                    '10만 팔로워 네트워크 릴스 — 월 1회',
+                  ].map((line, li) => (
+                    <li key={`fl-${li}`} className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-blue/25 text-brand-neon">
+                        <Icon.Check s={13} />
+                      </span>
+                      <span className="text-[13px] text-white/85 break-keep">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {/* ① 초기 셋업 */}
           <div className="mt-6 overflow-hidden rounded-2xl border border-ink-150 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-150 bg-brand-tint/50 px-5 py-3">
               <span className="flex items-center gap-2 text-sm font-extrabold text-brand-deep">
-                <Icon.Target s={16} /> {T('setup.heading', 'STEP 1 · 초기 셋업 (1회성)')}
+                <Icon.Target s={16} /> {T('setup.heading', '시작할 때 한 번 — 초기 셋업')}
               </span>
               <span className="text-xs font-bold text-ink-500">
                 정가 <span className="font-mono">{formatWon(SETUP_PRICE)}</span>
@@ -546,11 +582,18 @@ export function MarketingPackageLanding({
             </div>
           </div>
 
-          {/* ② 월 운영 3티어 */}
-          <div className="mt-8">
-            <p className="mb-4 flex items-center gap-2 text-sm font-extrabold text-brand-deep">
-              <Icon.Clock s={16} /> {T('tiers.heading', 'STEP 2 · 매달 운영 요금제 (3종 중 선택)')}
-            </p>
+          {/* ② 월 운영 3티어 — 펼침(업셀) */}
+          <details className="group mt-6 overflow-hidden rounded-2xl border border-ink-150 bg-white shadow-sm">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2 text-sm font-extrabold text-ink-900 break-keep">
+                <span className="shrink-0 text-brand-deep"><Icon.Clock s={16} /></span>
+                {T('tiers.heading', '더 자주·더 많이 올리고 싶다면? 요금제 전체 비교 (Lite·Standard·Pro)')}
+              </span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink-100 text-ink-600 transition-all group-open:rotate-45 group-open:bg-brand-blue group-open:text-white">
+                <Icon.Plus s={18} />
+              </span>
+            </summary>
+            <div className="border-t border-ink-150 p-5">
 
             {/* 모바일 — 티어 카드 */}
             <div className="grid gap-4 sm:hidden">
@@ -656,7 +699,8 @@ export function MarketingPackageLanding({
                 '연 약정(선결제)은 2개월분 할인 + 초기 셋업 무료 기준입니다. 예: Standard 월 결제 240만원 → 연 약정 200만원. 표시 가격은 모두 부가세 별도입니다.',
               )}
             </p>
-          </div>
+            </div>
+          </details>
         </div>
       </section>
 
