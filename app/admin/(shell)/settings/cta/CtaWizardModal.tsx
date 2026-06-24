@@ -39,8 +39,6 @@ import {
 } from '@/lib/admin/types'
 import {
   CALLABLE_TIME_OPTIONS,
-  CONTRACT_PERIOD_OPTIONS,
-  DEVICE_TYPE_OPTIONS,
   INDUSTRY_OPTIONS,
   REGION_OPTIONS,
   groupOptionsByField,
@@ -95,8 +93,6 @@ const DEFAULT_FIELDS: CtaFormField[] = [
   { id: 'store_name', label: '매장명', type: 'text', required: false, placeholder: '매장 상호명' },
   { id: 'industry', label: '업종', type: 'select', required: false, options: [...INDUSTRY_OPTIONS] },
   { id: 'region', label: '지역', type: 'select', required: false, options: [...REGION_OPTIONS] },
-  { id: 'device_type', label: '희망 상품/서비스', type: 'select', required: false, options: [...DEVICE_TYPE_OPTIONS] },
-  { id: 'contract_period', label: '약정', type: 'select', required: false, options: [...CONTRACT_PERIOD_OPTIONS] },
   { id: 'callable_time', label: '통화가능시간', type: 'select', required: false, options: [...CALLABLE_TIME_OPTIONS] },
   { id: 'message', label: '원하시는 구성 / 남기실 말씀', type: 'textarea', required: false, placeholder: '예) 10.1인치 POS 세트 견적 궁금합니다' },
 ]
@@ -593,7 +589,7 @@ function Step2Fields({
       </div>
 
       <p className="text-xs text-ink-500">
-        💡 표준 필드 ID(<code>name, phone, store_name, industry, region, device_type, contract_period, callable_time, message</code>)는 자동으로 표준 컬럼에 저장돼서 기존 분석/CSV 와 호환됩니다.
+        💡 표준 필드 ID(<code>name, phone, store_name, industry, region, callable_time, message</code>)는 자동으로 표준 컬럼에 저장돼서 기존 분석/CSV 와 호환됩니다.
         그 외 ID 는 <code>custom_fields</code> jsonb 에 저장됩니다.
       </p>
     </div>

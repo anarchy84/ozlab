@@ -487,55 +487,21 @@ export function ApplyForm({ blocks }: Props) {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="form-field">
-                  <label htmlFor="apply-device-type">희망 상품/서비스</label>
-                  <select
-                    id="apply-device-type"
-                    name="device_type"
-                    value={form.device_type}
-                    onChange={onChange}
-                  >
-                    <option value="">선택해주세요</option>
-                    {fieldOptions.device_type.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-field">
-                  <label htmlFor="apply-contract-period">약정</label>
-                  <select
-                    id="apply-contract-period"
-                    name="contract_period"
-                    value={form.contract_period}
-                    onChange={onChange}
-                  >
-                    <option value="">선택해주세요</option>
-                    {fieldOptions.contract_period.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-field sm:col-span-2">
-                  <label htmlFor="apply-callable-time">통화가능시간</label>
-                  <select
-                    id="apply-callable-time"
-                    name="callable_time"
-                    value={form.callable_time}
-                    onChange={onChange}
-                  >
-                    <option value="">선택해주세요</option>
-                    {fieldOptions.callable_time.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="form-field">
+                <label htmlFor="apply-callable-time">통화가능시간</label>
+                <select
+                  id="apply-callable-time"
+                  name="callable_time"
+                  value={form.callable_time}
+                  onChange={onChange}
+                >
+                  <option value="">선택해주세요</option>
+                  {fieldOptions.callable_time.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-field">

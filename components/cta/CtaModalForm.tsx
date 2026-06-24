@@ -44,6 +44,8 @@ const STANDARD_IDS = new Set([
   'message',
 ])
 
+const HIDDEN_PUBLIC_CTA_FIELD_IDS = new Set(['device_type', 'contract_period'])
+
 interface Props {
   cta: CtaButton
   /** 모달 닫기 콜백 (모달 모드일 때) */
@@ -595,7 +597,8 @@ function getStandardSelectOptions(
 
 function withRequiredConsultationFields(formFields: CtaFormField[] | null | undefined): CtaFormField[] {
   const base = formFields?.length ? formFields : DEFAULT_FALLBACK
-  const next = [...base]
+  const visibleBase = base.filter((field) => !HIDDEN_PUBLIC_CTA_FIELD_IDS.has(field.id))
+  const next = [...visibleBase]
   const existing = new Set(next.map((field) => field.id))
 
   for (const field of REQUIRED_CONSULTATION_FIELDS) {
@@ -618,8 +621,6 @@ const REQUIRED_CONSULTATION_FIELDS: CtaFormField[] = [
   { id: 'store_name', label: '매장명', type: 'text', required: false, placeholder: '매장 상호명' },
   { id: 'industry', label: '업종', type: 'select', required: false, options: [...INDUSTRY_OPTIONS] },
   { id: 'region', label: '지역', type: 'select', required: false, options: [...REGION_OPTIONS] },
-  { id: 'device_type', label: '희망 상품/서비스', type: 'select', required: false, options: [...DEVICE_TYPE_OPTIONS] },
-  { id: 'contract_period', label: '약정', type: 'select', required: false, options: [...CONTRACT_PERIOD_OPTIONS] },
   { id: 'callable_time', label: '통화가능시간', type: 'select', required: false, options: [...CALLABLE_TIME_OPTIONS] },
 ]
 

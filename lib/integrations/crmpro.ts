@@ -91,8 +91,8 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
     etc1: p.industry || '미입력',
     etc2: desiredService,
     etc3: callableTime,
-    etc4: extraInfo.slice(0, 500),
-    etc5: buildCustomerMessage(p, extraInfo).slice(0, 500),
+    etc4: (firstText(p.message) ?? '미입력').slice(0, 500),
+    etc5: extraInfo.slice(0, 500),
     reg_datetime: formatKstDatetime(p.createdAt ?? new Date()),
   }
 }
@@ -152,15 +152,6 @@ function firstText(...values: unknown[]): string | null {
     if (t.length > 0) return t.slice(0, 200)
   }
   return null
-}
-
-function buildCustomerMessage(p: CrmProLeadPayload, extraInfo: string): string {
-  const message = firstText(p.message)
-  const parts = [
-    message ? `문의: ${message}` : '문의: 미입력',
-    extraInfo || null,
-  ].filter(Boolean)
-  return parts.join(' / ')
 }
 
 function formatKstDatetime(value: string | Date): string {
