@@ -16,7 +16,7 @@ import { EditableText } from '@/components/editable/EditableText'
 import { ConsentAgreement } from '@/components/consent/OptionalConsents'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
-import { formatKoreanMobilePhoneInput, isStrictKoreanMobilePhone } from '@/lib/consultation-policy'
+import { isStrictKoreanMobilePhone } from '@/lib/consultation-policy'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
   INDUSTRY_OPTIONS,
@@ -151,11 +151,12 @@ export function ApplyForm({ blocks }: Props) {
     if (target instanceof HTMLInputElement && target.type === 'checkbox') {
       setForm((p) => ({ ...p, [name]: target.checked }))
     } else {
-      setForm((p) => ({
-        ...p,
-        [name]: name === 'phone' ? formatKoreanMobilePhoneInput(value) : value,
-      }))
+      setForm((p) => ({ ...p, [name]: value }))
     }
+  }
+
+  const setPhoneValue = (value: string) => {
+    setForm((p) => ({ ...p, phone: value }))
   }
 
   // 폼 제출 → /api/consultations POST
@@ -411,18 +412,9 @@ export function ApplyForm({ blocks }: Props) {
                 </div>
                 <div className="form-field">
                   <label htmlFor="apply-phone">연락처 *</label>
-                  <input
-                    id="apply-phone"
-                    name="phone"
-                    type="tel"
-                    required
-                    placeholder="010-0000-0000"
-                    autoComplete="tel"
-                    inputMode="numeric"
-                    pattern="010-[0-9]{4}-[0-9]{4}"
-                    maxLength={13}
+                  <SegmentedApplyPhoneInput
                     value={form.phone}
-                    onChange={onChange}
+                    onValueChange={setPhoneValue}
                   />
                 </div>
               </div>
@@ -521,4 +513,102 @@ export function ApplyForm({ blocks }: Props) {
       </div>
     </section>
   )
+}
+
+function SegmentedApplyPhoneInput({
+  value,
+  onValueChange,
+}: {
+  value: string
+  onValueChange: (value: string) => void
+}) {
+  const middleRef = useRef<HTMLInputElement>(null)
+  const lastRef = useRef<HTMLInputElement>(null)
+  const { middle, last } = splitPhoneValue(value)
+
+  function commit(nextMiddle: string, nextLast: string) {
+    if (!nextMiddle && !nextLast) {
+      onValueChange('')
+      return
+    }
+    onValueChange(`010-${nextMiddle}-${nextLast}`)
+  }
+
+  function handleMiddleChange(raw: string) {
+    const digits = raw.replace(/\D/g, '')
+    const body = digits.startsWith('010') ? digits.slice(3) : digits
+    const nextMiddle = body.slice(0, 4)
+    const nextLast = body.length > 4 ? body.slice(4, 8) : last
+    commit(nextMiddle, nextLast)
+    if (nextMiddle.length === 4) {
+      window.requestAnimationFrame(() => lastRef.current?.focus())
+    }
+  }
+
+  function handleLastChange(raw: string) {
+    const digits = raw.replace(/\D/g, '')
+    const body = digits.startsWith('010') ? digits.slice(3) : digits
+    if (body.length > 4) {
+      commit(body.slice(0, 4), body.slice(4, 8))
+      return
+    }
+    commit(middle, digits.slice(0, 4))
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        aria-label="전화번호 앞자리"
+        value="010"
+        readOnly
+        tabIndex={-1}
+        className="min-h-[52px] w-[74px] rounded-md border border-ink-200 bg-white px-3 text-center text-base font-semibold leading-normal text-ink-900 focus:outline-none"
+      />
+      <span className="text-ink-400">-</span>
+      <input
+        id="apply-phone"
+        ref={middleRef}
+        aria-label="전화번호 가운데 4자리"
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]{4}"
+        maxLength={4}
+        required
+        placeholder="0000"
+        autoComplete="tel-national"
+        value={middle}
+        onChange={(e) => handleMiddleChange(e.target.value)}
+        className="min-h-[52px] min-w-0 flex-1 rounded-md border border-ink-200 bg-white px-3 text-center text-base leading-normal text-ink-900 transition-colors placeholder:text-ink-400 focus:border-brand-blue focus:outline-none"
+      />
+      <span className="text-ink-400">-</span>
+      <input
+        ref={lastRef}
+        aria-label="전화번호 끝 4자리"
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]{4}"
+        maxLength={4}
+        required
+        placeholder="0000"
+        value={last}
+        onChange={(e) => handleLastChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Backspace' && last.length === 0) {
+            middleRef.current?.focus()
+          }
+        }}
+        className="min-h-[52px] min-w-0 flex-1 rounded-md border border-ink-200 bg-white px-3 text-center text-base leading-normal text-ink-900 transition-colors placeholder:text-ink-400 focus:border-brand-blue focus:outline-none"
+      />
+      <input type="hidden" name="phone" value={value} />
+    </div>
+  )
+}
+
+function splitPhoneValue(value: string): { middle: string; last: string } {
+  const digits = value.replace(/\D/g, '')
+  const body = digits.startsWith('010') ? digits.slice(3) : digits
+  return {
+    middle: body.slice(0, 4),
+    last: body.slice(4, 8),
+  }
 }
