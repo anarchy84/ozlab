@@ -18,6 +18,7 @@ import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { ConsentAgreement } from '@/components/consent/OptionalConsents'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
+import { formatKoreanMobilePhoneInput, isStrictKoreanMobilePhone } from '@/lib/consultation-policy'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
   INDUSTRY_OPTIONS,
@@ -140,8 +141,13 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     if (t instanceof HTMLInputElement && t.type === 'checkbox') {
       setValues((p) => ({ ...p, [t.name]: t.checked }))
     } else {
-      setValues((p) => ({ ...p, [t.name]: t.value }))
+      const value = t.name === 'phone' ? formatKoreanMobilePhoneInput(t.value) : t.value
+      setValues((p) => ({ ...p, [t.name]: value }))
     }
+  }
+
+  function setFieldValue(name: string, value: string | boolean) {
+    setValues((p) => ({ ...p, [name]: value }))
   }
 
   async function submit(e: FormEvent) {
@@ -152,6 +158,10 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
     // 필수 동의 검증 (개인정보 수집·이용 + 제3자 제공)
     if (values.consent_privacy !== true || values.consent_third_party !== true) {
       setError('필수 동의 항목에 모두 동의해주세요.')
+      return
+    }
+    if (!isStrictKoreanMobilePhone(typeof values.phone === 'string' ? values.phone : null)) {
+      setError('연락처는 010-0000-0000 형식으로 입력해주세요.')
       return
     }
 
@@ -289,6 +299,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
               field={f}
               value={values[f.id]}
               onChange={handleChange}
+              onValueChange={setFieldValue}
               standardOptions={{ industry: industryOptions, region: regionOptions }}
             />
           ))}
@@ -360,6 +371,7 @@ function DynamicField({
   field,
   value,
   onChange,
+  onValueChange,
   standardOptions,
 }: {
   field: CtaFormField
@@ -367,9 +379,11 @@ function DynamicField({
   onChange: (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => void
+  onValueChange: (name: string, value: string | boolean) => void
   standardOptions: StandardOptions
 }) {
   const selectOptions = getStandardSelectOptions(field, standardOptions) ?? field.options ?? []
+  const isPhoneField = field.type === 'phone' || field.id === 'phone'
   const inputClass =
     'w-full px-3 py-2 rounded text-sm bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-brand-blue'
 
@@ -414,15 +428,22 @@ function DynamicField({
             className="w-4 h-4"
           />
         )}
-        {(field.type === 'text' || field.type === 'phone' || field.type === 'email') && (
+        {isPhoneField && (
+          <SegmentedPhoneInput
+            name={field.id}
+            value={(value as string) ?? ''}
+            required={field.required}
+            onValueChange={onValueChange}
+          />
+        )}
+        {((field.type === 'text' && !isPhoneField) || field.type === 'email') && (
           <input
-            type={field.type === 'email' ? 'email' : field.type === 'phone' ? 'tel' : 'text'}
+            type={field.type === 'email' ? 'email' : 'text'}
             name={field.id}
             required={field.required}
             placeholder={field.placeholder}
             autoComplete={
               field.id === 'name' ? 'name'
-              : field.id === 'phone' ? 'tel'
               : field.type === 'email' ? 'email'
               : 'off'
             }
@@ -434,6 +455,106 @@ function DynamicField({
       </div>
     </label>
   )
+}
+
+function SegmentedPhoneInput({
+  name,
+  value,
+  required,
+  onValueChange,
+}: {
+  name: string
+  value: string
+  required?: boolean
+  onValueChange: (name: string, value: string) => void
+}) {
+  const lastRef = useRef<HTMLInputElement>(null)
+  const middleRef = useRef<HTMLInputElement>(null)
+  const { middle, last } = splitPhoneValue(value)
+
+  function commit(nextMiddle: string, nextLast: string) {
+    if (!nextMiddle && !nextLast) {
+      onValueChange(name, '')
+      return
+    }
+    onValueChange(name, `010-${nextMiddle}-${nextLast}`)
+  }
+
+  function handleMiddleChange(raw: string) {
+    const digits = raw.replace(/\D/g, '')
+    const body = digits.startsWith('010') ? digits.slice(3) : digits
+    const nextMiddle = body.slice(0, 4)
+    const nextLast = body.length > 4 ? body.slice(4, 8) : last
+    commit(nextMiddle, nextLast)
+    if (nextMiddle.length === 4) {
+      window.requestAnimationFrame(() => lastRef.current?.focus())
+    }
+  }
+
+  function handleLastChange(raw: string) {
+    const digits = raw.replace(/\D/g, '')
+    const body = digits.startsWith('010') ? digits.slice(3) : digits
+    if (body.length > 4) {
+      commit(body.slice(0, 4), body.slice(4, 8))
+      return
+    }
+    commit(middle, digits.slice(0, 4))
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <input
+        aria-label="전화번호 앞자리"
+        value="010"
+        readOnly
+        tabIndex={-1}
+        className="h-10 w-[4.4rem] rounded border border-white/20 bg-white/10 px-2 text-center text-sm font-semibold text-white focus:outline-none"
+      />
+      <span className="text-white/50">-</span>
+      <input
+        ref={middleRef}
+        aria-label="전화번호 가운데 4자리"
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]{4}"
+        maxLength={4}
+        required={required}
+        placeholder="0000"
+        value={middle}
+        onChange={(e) => handleMiddleChange(e.target.value)}
+        className="h-10 min-w-0 flex-1 rounded border border-white/20 bg-white/10 px-2 text-center text-sm text-white placeholder-white/40 focus:border-brand-blue focus:outline-none"
+      />
+      <span className="text-white/50">-</span>
+      <input
+        ref={lastRef}
+        aria-label="전화번호 끝 4자리"
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]{4}"
+        maxLength={4}
+        required={required}
+        placeholder="0000"
+        value={last}
+        onChange={(e) => handleLastChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Backspace' && last.length === 0) {
+            middleRef.current?.focus()
+          }
+        }}
+        className="h-10 min-w-0 flex-1 rounded border border-white/20 bg-white/10 px-2 text-center text-sm text-white placeholder-white/40 focus:border-brand-blue focus:outline-none"
+      />
+      <input type="hidden" name={name} value={value} />
+    </div>
+  )
+}
+
+function splitPhoneValue(value: string): { middle: string; last: string } {
+  const digits = value.replace(/\D/g, '')
+  const body = digits.startsWith('010') ? digits.slice(3) : digits
+  return {
+    middle: body.slice(0, 4),
+    last: body.slice(4, 8),
+  }
 }
 
 function getStandardSelectOptions(

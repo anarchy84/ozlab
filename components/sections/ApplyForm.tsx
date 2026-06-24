@@ -16,6 +16,7 @@ import { EditableText } from '@/components/editable/EditableText'
 import { ConsentAgreement } from '@/components/consent/OptionalConsents'
 import { pickTextOrUndef, type ContentBlock } from '@/lib/content-blocks'
 import { readCtaAttribution } from '@/lib/cta-attribution'
+import { formatKoreanMobilePhoneInput, isStrictKoreanMobilePhone } from '@/lib/consultation-policy'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
   INDUSTRY_OPTIONS,
@@ -150,7 +151,10 @@ export function ApplyForm({ blocks }: Props) {
     if (target instanceof HTMLInputElement && target.type === 'checkbox') {
       setForm((p) => ({ ...p, [name]: target.checked }))
     } else {
-      setForm((p) => ({ ...p, [name]: value }))
+      setForm((p) => ({
+        ...p,
+        [name]: name === 'phone' ? formatKoreanMobilePhoneInput(value) : value,
+      }))
     }
   }
 
@@ -163,6 +167,10 @@ export function ApplyForm({ blocks }: Props) {
     // 필수 동의 검증 (개인정보 수집·이용 + 제3자 제공)
     if (!form.consent_privacy || !form.consent_third_party) {
       setError('필수 동의 항목에 모두 동의해주세요.')
+      return
+    }
+    if (!isStrictKoreanMobilePhone(form.phone)) {
+      setError('연락처는 010-0000-0000 형식으로 입력해주세요.')
       return
     }
 
@@ -410,6 +418,9 @@ export function ApplyForm({ blocks }: Props) {
                     required
                     placeholder="010-0000-0000"
                     autoComplete="tel"
+                    inputMode="numeric"
+                    pattern="010-[0-9]{4}-[0-9]{4}"
+                    maxLength={13}
                     value={form.phone}
                     onChange={onChange}
                   />

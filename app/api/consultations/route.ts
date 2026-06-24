@@ -26,7 +26,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assignNextCounselorIfNeeded } from '@/lib/admin/assignment'
-import { normalizePhone } from '@/lib/consultation-policy'
+import { isStrictKoreanMobilePhone, normalizePhone } from '@/lib/consultation-policy'
 import { getConsultationPolicySettings } from '@/lib/consultation-policy-server'
 import { sendCrmProLead } from '@/lib/integrations/crmpro'
 import { sendMetaLead } from '@/lib/tracking/meta-capi'
@@ -128,10 +128,13 @@ export async function POST(req: NextRequest) {
   if (!phone) {
     return NextResponse.json({ error: '연락처를 입력해주세요.' }, { status: 400 })
   }
-  const normalizedPhone = normalizePhone(phone)
-  if (normalizedPhone.length < 7) {
-    return NextResponse.json({ error: '연락처를 정확히 입력해주세요.' }, { status: 400 })
+  if (!isStrictKoreanMobilePhone(phone)) {
+    return NextResponse.json(
+      { error: '연락처는 010-0000-0000 형식으로 입력해주세요.' },
+      { status: 400 },
+    )
   }
+  const normalizedPhone = normalizePhone(phone)
   if (body.consent_privacy !== true) {
     return NextResponse.json(
       { error: '개인정보 수집·이용 동의가 필요합니다.' },
