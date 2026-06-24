@@ -10,11 +10,15 @@
 //   - revalidate 60s — 옵션은 자주 안 바뀌므로 1분 캐시면 충분
 // ─────────────────────────────────────────────
 import { createClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const revalidate = 60
 
 export async function GET() {
+  const adminRows = await loadWithAdminClient()
+  if (adminRows) return json(adminRows)
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !anonKey) {
@@ -28,7 +32,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('consultation_field_options')
-    .select('id, field_key, value, sort_order')
+    .select('id, field_key, value, sort_order, is_active, created_at, updated_at')
     .eq('is_active', true)
     .order('sort_order', { ascending: true })
     .order('value', { ascending: true })
@@ -36,7 +40,30 @@ export async function GET() {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-  return NextResponse.json(data ?? [], {
+  return json(data ?? [])
+}
+
+async function loadWithAdminClient() {
+  try {
+    const admin = createAdminClient()
+    const { data, error } = await admin
+      .from('consultation_field_options')
+      .select('id, field_key, value, sort_order, is_active, created_at, updated_at')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('value', { ascending: true })
+    if (error) {
+      console.warn('[consultation-options public admin fallback]', error.message)
+      return null
+    }
+    return data ?? []
+  } catch {
+    return null
+  }
+}
+
+function json(data: unknown[]) {
+  return NextResponse.json(data, {
     headers: {
       // CDN/브라우저 캐시 — 1분 / stale-while-revalidate 5분
       'cache-control': 'public, max-age=60, stale-while-revalidate=300',

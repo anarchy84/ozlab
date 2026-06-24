@@ -14,22 +14,34 @@
 //   - 제출 성공 시 ✅ 화면 → 닫기
 // ─────────────────────────────────────────────
 
-import { useEffect, useRef, useState, FormEvent, ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, FormEvent, ChangeEvent } from 'react'
 import type { CtaButton, CtaFormField } from '@/lib/admin/types'
 import { ConsentAgreement } from '@/components/consent/OptionalConsents'
 import { captureCtaClick, readCtaAttribution } from '@/lib/cta-attribution'
 import { formatKoreanMobilePhoneInput, isStrictKoreanMobilePhone } from '@/lib/consultation-policy'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
+  CALLABLE_TIME_OPTIONS,
+  CONTRACT_PERIOD_OPTIONS,
+  DEVICE_TYPE_OPTIONS,
   INDUSTRY_OPTIONS,
   REGION_OPTIONS,
   groupOptionsByField,
+  type ConsultationFieldKey,
   type ConsultationFieldOption,
 } from '@/lib/consultation-options'
 import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
 
 const STANDARD_IDS = new Set([
-  'name', 'phone', 'store_name', 'industry', 'region', 'message',
+  'name',
+  'phone',
+  'store_name',
+  'industry',
+  'region',
+  'device_type',
+  'contract_period',
+  'callable_time',
+  'message',
 ])
 
 interface Props {
@@ -41,7 +53,10 @@ interface Props {
 }
 
 export function CtaModalForm({ cta, onClose, inline }: Props) {
-  const fields = cta.form_fields?.length ? cta.form_fields : DEFAULT_FALLBACK
+  const fields = useMemo(
+    () => withRequiredConsultationFields(cta.form_fields),
+    [cta.form_fields],
+  )
   const dc = cta.display_config ?? {}
 
   const [values, setValues] = useState<Record<string, string | boolean>>(() => {
@@ -61,9 +76,14 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
   // form_start 1회만 push
   const formStartedRef = useRef(false)
 
-  // 표준 select 필드(industry/region)는 DB 옵션 마스터에서 fetch
-  const [industryOptions, setIndustryOptions] = useState<readonly string[]>(INDUSTRY_OPTIONS)
-  const [regionOptions, setRegionOptions] = useState<readonly string[]>(REGION_OPTIONS)
+  // 표준 select 필드 5종은 DB 상담 옵션 마스터에서 fetch
+  const [fieldOptions, setFieldOptions] = useState<Record<ConsultationFieldKey, readonly string[]>>({
+    industry: INDUSTRY_OPTIONS,
+    region: REGION_OPTIONS,
+    device_type: DEVICE_TYPE_OPTIONS,
+    contract_period: CONTRACT_PERIOD_OPTIONS,
+    callable_time: CALLABLE_TIME_OPTIONS,
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -76,8 +96,13 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
         const grouped = groupOptionsByField(
           rows.map((r) => ({ ...r, is_active: true } as ConsultationFieldOption)),
         )
-        if (grouped.industry.length > 0) setIndustryOptions(grouped.industry)
-        if (grouped.region.length > 0) setRegionOptions(grouped.region)
+        setFieldOptions((prev) => ({
+          industry: grouped.industry.length > 0 ? grouped.industry : prev.industry,
+          region: grouped.region.length > 0 ? grouped.region : prev.region,
+          device_type: grouped.device_type.length > 0 ? grouped.device_type : prev.device_type,
+          contract_period: grouped.contract_period.length > 0 ? grouped.contract_period : prev.contract_period,
+          callable_time: grouped.callable_time.length > 0 ? grouped.callable_time : prev.callable_time,
+        }))
       } catch (e) {
         console.warn('[CtaModalForm consultation-options]', e)
       }
@@ -300,7 +325,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
               value={values[f.id]}
               onChange={handleChange}
               onValueChange={setFieldValue}
-              standardOptions={{ industry: industryOptions, region: regionOptions }}
+              standardOptions={fieldOptions}
             />
           ))}
 
@@ -363,8 +388,7 @@ export function CtaModalForm({ cta, onClose, inline }: Props) {
 
 // ─── 동적 단일 필드 렌더 ──
 type StandardOptions = {
-  industry: readonly string[]
-  region: readonly string[]
+  [K in ConsultationFieldKey]: readonly string[]
 }
 
 function DynamicField({
@@ -563,11 +587,50 @@ function getStandardSelectOptions(
 ): readonly string[] | null {
   if (field.id === 'industry') return std.industry
   if (field.id === 'region') return std.region
+  if (field.id === 'device_type') return std.device_type
+  if (field.id === 'contract_period') return std.contract_period
+  if (field.id === 'callable_time') return std.callable_time
   return null
 }
 
-// 폴백 — form_fields 비어있을 때
-const DEFAULT_FALLBACK: CtaFormField[] = [
+function withRequiredConsultationFields(formFields: CtaFormField[] | null | undefined): CtaFormField[] {
+  const base = formFields?.length ? formFields : DEFAULT_FALLBACK
+  const next = [...base]
+  const existing = new Set(next.map((field) => field.id))
+
+  for (const field of REQUIRED_CONSULTATION_FIELDS) {
+    if (existing.has(field.id)) continue
+    const messageIndex = next.findIndex((item) => item.id === 'message')
+    if (messageIndex >= 0) {
+      next.splice(messageIndex, 0, field)
+    } else {
+      next.push(field)
+    }
+    existing.add(field.id)
+  }
+
+  return next
+}
+
+const REQUIRED_CONSULTATION_FIELDS: CtaFormField[] = [
   { id: 'name', label: '사장님 성함', type: 'text', required: true, placeholder: '홍길동' },
   { id: 'phone', label: '연락처', type: 'phone', required: true, placeholder: '010-0000-0000' },
+  { id: 'store_name', label: '매장명', type: 'text', required: false, placeholder: '매장 상호명' },
+  { id: 'industry', label: '업종', type: 'select', required: false, options: [...INDUSTRY_OPTIONS] },
+  { id: 'region', label: '지역', type: 'select', required: false, options: [...REGION_OPTIONS] },
+  { id: 'device_type', label: '희망 상품/서비스', type: 'select', required: false, options: [...DEVICE_TYPE_OPTIONS] },
+  { id: 'contract_period', label: '약정', type: 'select', required: false, options: [...CONTRACT_PERIOD_OPTIONS] },
+  { id: 'callable_time', label: '통화가능시간', type: 'select', required: false, options: [...CALLABLE_TIME_OPTIONS] },
+]
+
+// 폴백 — form_fields 비어있을 때
+const DEFAULT_FALLBACK: CtaFormField[] = [
+  ...REQUIRED_CONSULTATION_FIELDS,
+  {
+    id: 'message',
+    label: '원하시는 구성 / 남기실 말씀',
+    type: 'textarea',
+    required: false,
+    placeholder: '예) 10.1인치 POS 세트 견적 궁금합니다',
+  },
 ]

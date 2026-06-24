@@ -45,6 +45,9 @@ interface ConsultationInput {
   store_name?: string
   industry?: string
   region?: string
+  device_type?: string
+  contract_period?: string
+  callable_time?: string
   message?: string
   consent_privacy?: boolean
   // 선택 동의 (마케팅 활용 / 제3자 제공)
@@ -77,7 +80,15 @@ interface ConsultationInput {
 
 // 표준 컬럼명 — custom_fields 에서 동일 이름이 들어오면 표준 컬럼으로 승격
 const STANDARD_FIELD_IDS = new Set([
-  'name', 'phone', 'store_name', 'industry', 'region', 'message',
+  'name',
+  'phone',
+  'store_name',
+  'industry',
+  'region',
+  'device_type',
+  'contract_period',
+  'callable_time',
+  'message',
 ])
 
 // -------------------------------------------------------------
@@ -225,6 +236,9 @@ export async function POST(req: NextRequest) {
   const promotedStore = body.store_name ?? (typeof customRaw.store_name === 'string' ? customRaw.store_name : undefined)
   const promotedIndustry = body.industry ?? (typeof customRaw.industry === 'string' ? customRaw.industry : undefined)
   const promotedRegion = body.region ?? (typeof customRaw.region === 'string' ? customRaw.region : undefined)
+  const promotedDeviceType = body.device_type ?? (typeof customRaw.device_type === 'string' ? customRaw.device_type : undefined)
+  const promotedContractPeriod = body.contract_period ?? (typeof customRaw.contract_period === 'string' ? customRaw.contract_period : undefined)
+  const promotedCallableTime = body.callable_time ?? (typeof customRaw.callable_time === 'string' ? customRaw.callable_time : undefined)
   const promotedMessage = body.message ?? (typeof customRaw.message === 'string' ? customRaw.message : undefined)
   for (const [k, v] of Object.entries(customRaw)) {
     if (STANDARD_FIELD_IDS.has(k)) continue   // 표준 필드는 위에서 흡수
@@ -252,6 +266,9 @@ export async function POST(req: NextRequest) {
       store_name: clean(promotedStore, 80),
       industry: clean(promotedIndustry, 40),
       region: clean(promotedRegion, 40),
+      device_type: clean(promotedDeviceType, 80),
+      contract_period: clean(promotedContractPeriod, 80),
+      callable_time: clean(promotedCallableTime, 80),
       message: clean(promotedMessage, 2000),
       custom_fields: customFields,
       ip_address: ip,
@@ -274,6 +291,7 @@ export async function POST(req: NextRequest) {
     })
     .select(
       `id, created_at, name, phone, store_name, industry, region, message,
+       device_type, contract_period, callable_time,
        inferred_channel, counselor_id, utm_source, utm_medium, utm_campaign,
        landing_page_path`,
     )
@@ -302,6 +320,9 @@ export async function POST(req: NextRequest) {
     storeName: data.store_name,
     industry: data.industry,
     region: data.region,
+    deviceType: data.device_type,
+    contractPeriod: data.contract_period,
+    callableTime: data.callable_time,
     message: data.message,
     createdAt: data.created_at,
     clientIp: ip,

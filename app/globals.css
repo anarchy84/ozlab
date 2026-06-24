@@ -276,6 +276,13 @@
   .form-field textarea {
     @apply resize-y min-h-[88px];
   }
+  .apply-form-stack {
+    display: grid;
+    gap: 1rem;
+  }
+  .apply-form-stack .form-submit {
+    margin-top: 0.5rem;
+  }
   .apply-contact-grid {
     display: grid;
     gap: 1rem;

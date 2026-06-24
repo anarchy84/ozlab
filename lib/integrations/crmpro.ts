@@ -20,6 +20,9 @@ interface CrmProLeadPayload {
   phone: string
   industry?: string | null
   region?: string | null
+  deviceType?: string | null
+  contractPeriod?: string | null
+  callableTime?: string | null
   storeName?: string | null
   message?: string | null
   createdAt?: string | Date | null
@@ -51,6 +54,7 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
   if (!p.name || tel.length < 7) return null
 
   const desiredService = firstText(
+    p.deviceType,
     p.customFields?.desired_service,
     p.customFields?.service,
     p.customFields?.product,
@@ -63,6 +67,7 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
   ) ?? '오즈랩페이 상담'
 
   const callableTime = firstText(
+    p.callableTime,
     p.customFields?.callable_time,
     p.customFields?.call_time,
     p.customFields?.available_time,
@@ -72,6 +77,7 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
   const extraInfo = [
     p.storeName ? `매장명: ${p.storeName}` : null,
     p.region ? `지역: ${p.region}` : null,
+    p.contractPeriod ? `약정: ${p.contractPeriod}` : null,
     p.landingPagePath ? `랜딩: ${p.landingPagePath}` : null,
     p.utmSource ? `utm_source: ${p.utmSource}` : null,
     p.utmMedium ? `utm_medium: ${p.utmMedium}` : null,
@@ -86,7 +92,7 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
     etc2: desiredService,
     etc3: callableTime,
     etc4: extraInfo.slice(0, 500),
-    etc5: (p.message || '').slice(0, 500),
+    etc5: buildCustomerMessage(p, extraInfo).slice(0, 500),
     reg_datetime: formatKstDatetime(p.createdAt ?? new Date()),
   }
 }
@@ -146,6 +152,15 @@ function firstText(...values: unknown[]): string | null {
     if (t.length > 0) return t.slice(0, 200)
   }
   return null
+}
+
+function buildCustomerMessage(p: CrmProLeadPayload, extraInfo: string): string {
+  const message = firstText(p.message)
+  const parts = [
+    message ? `문의: ${message}` : '문의: 미입력',
+    extraInfo || null,
+  ].filter(Boolean)
+  return parts.join(' / ')
 }
 
 function formatKstDatetime(value: string | Date): string {

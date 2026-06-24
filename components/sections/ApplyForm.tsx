@@ -19,9 +19,13 @@ import { readCtaAttribution } from '@/lib/cta-attribution'
 import { isStrictKoreanMobilePhone } from '@/lib/consultation-policy'
 import { KAKAO_CHAT_URL, SITE_PHONE, SITE_PHONE_HREF } from '@/lib/contact'
 import {
+  CALLABLE_TIME_OPTIONS,
+  CONTRACT_PERIOD_OPTIONS,
+  DEVICE_TYPE_OPTIONS,
   INDUSTRY_OPTIONS,
   REGION_OPTIONS,
   groupOptionsByField,
+  type ConsultationFieldKey,
   type ConsultationFieldOption,
 } from '@/lib/consultation-options'
 import { LEAD_DEFAULT_VALUE, getGaClientId, getGaSessionId, getFbp, getFbc, pushEvent } from '@/lib/tracking/datalayer'
@@ -37,6 +41,9 @@ type FormState = {
   store_name: string
   industry: string
   region: string
+  device_type: string
+  contract_period: string
+  callable_time: string
   message: string
   consent_privacy: boolean
   consent_marketing: boolean
@@ -50,6 +57,9 @@ const INITIAL: FormState = {
   store_name: '',
   industry: '',
   region: '',
+  device_type: '',
+  contract_period: '',
+  callable_time: '',
   message: '',
   consent_privacy: false,
   consent_marketing: false,
@@ -69,9 +79,14 @@ export function ApplyForm({ blocks }: Props) {
   // form_start 는 첫 필드 포커스 시 1회만 push
   const formStartedRef = useRef(false)
 
-  // 업종/지역 옵션 — DB 마스터에서 fetch. 실패하면 fallback 상수 사용.
-  const [industryOptions, setIndustryOptions] = useState<readonly string[]>(INDUSTRY_OPTIONS)
-  const [regionOptions, setRegionOptions] = useState<readonly string[]>(REGION_OPTIONS)
+  // 상담 옵션 5종 — DB 마스터에서 fetch. 실패하면 fallback 상수 사용.
+  const [fieldOptions, setFieldOptions] = useState<Record<ConsultationFieldKey, readonly string[]>>({
+    industry: INDUSTRY_OPTIONS,
+    region: REGION_OPTIONS,
+    device_type: DEVICE_TYPE_OPTIONS,
+    contract_period: CONTRACT_PERIOD_OPTIONS,
+    callable_time: CALLABLE_TIME_OPTIONS,
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -85,8 +100,13 @@ export function ApplyForm({ blocks }: Props) {
           // is_active 는 이미 서버에서 필터됨. 그래도 안전하게 처리
           rows.map((r) => ({ ...r, is_active: true } as ConsultationFieldOption)),
         )
-        if (grouped.industry.length > 0) setIndustryOptions(grouped.industry)
-        if (grouped.region.length > 0) setRegionOptions(grouped.region)
+        setFieldOptions((prev) => ({
+          industry: grouped.industry.length > 0 ? grouped.industry : prev.industry,
+          region: grouped.region.length > 0 ? grouped.region : prev.region,
+          device_type: grouped.device_type.length > 0 ? grouped.device_type : prev.device_type,
+          contract_period: grouped.contract_period.length > 0 ? grouped.contract_period : prev.contract_period,
+          callable_time: grouped.callable_time.length > 0 ? grouped.callable_time : prev.callable_time,
+        }))
       } catch (e) {
         console.warn('[ApplyForm consultation-options]', e)
       }
@@ -367,11 +387,13 @@ export function ApplyForm({ blocks }: Props) {
               </button>
             </div>
           ) : (
-            <form onSubmit={submit} noValidate onFocus={handleFieldFocus}>
-              <h3 className="text-h2 text-ink-900">상담 신청하기</h3>
-              <p className="text-sm text-ink-500 mt-1 mb-6">
-                * 표시는 필수 입력입니다.
-              </p>
+            <form onSubmit={submit} noValidate onFocus={handleFieldFocus} className="apply-form-stack">
+              <div>
+                <h3 className="text-h2 text-ink-900">상담 신청하기</h3>
+                <p className="mt-1 text-sm text-ink-500">
+                  * 표시는 필수 입력입니다.
+                </p>
+              </div>
 
               {/* honeypot — 봇 전용. 사람한텐 안 보임. tab 으로도 못 가게 처리 */}
               <div
@@ -440,7 +462,7 @@ export function ApplyForm({ blocks }: Props) {
                     onChange={onChange}
                   >
                     <option value="">선택해주세요</option>
-                    {industryOptions.map((o) => (
+                    {fieldOptions.industry.map((o) => (
                       <option key={o} value={o}>
                         {o}
                       </option>
@@ -456,7 +478,58 @@ export function ApplyForm({ blocks }: Props) {
                     onChange={onChange}
                   >
                     <option value="">선택해주세요</option>
-                    {regionOptions.map((o) => (
+                    {fieldOptions.region.map((o) => (
+                      <option key={o} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="form-field">
+                  <label htmlFor="apply-device-type">희망 상품/서비스</label>
+                  <select
+                    id="apply-device-type"
+                    name="device_type"
+                    value={form.device_type}
+                    onChange={onChange}
+                  >
+                    <option value="">선택해주세요</option>
+                    {fieldOptions.device_type.map((o) => (
+                      <option key={o} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="apply-contract-period">약정</label>
+                  <select
+                    id="apply-contract-period"
+                    name="contract_period"
+                    value={form.contract_period}
+                    onChange={onChange}
+                  >
+                    <option value="">선택해주세요</option>
+                    {fieldOptions.contract_period.map((o) => (
+                      <option key={o} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-field sm:col-span-2">
+                  <label htmlFor="apply-callable-time">통화가능시간</label>
+                  <select
+                    id="apply-callable-time"
+                    name="callable_time"
+                    value={form.callable_time}
+                    onChange={onChange}
+                  >
+                    <option value="">선택해주세요</option>
+                    {fieldOptions.callable_time.map((o) => (
                       <option key={o} value={o}>
                         {o}
                       </option>
