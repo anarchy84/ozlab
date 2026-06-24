@@ -397,7 +397,7 @@ export function ApplyForm({ blocks }: Props) {
                 </label>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="apply-contact-grid">
                 <div className="form-field">
                   <label htmlFor="apply-name">사장님 성함 *</label>
                   <input
@@ -556,15 +556,15 @@ function SegmentedApplyPhoneInput({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="phone-segment-group">
       <input
         aria-label="전화번호 앞자리"
         value="010"
         readOnly
         tabIndex={-1}
-        className="min-h-[52px] w-[74px] rounded-md border border-ink-200 bg-white px-3 text-center text-base font-semibold leading-normal text-ink-900 focus:outline-none"
+        className="phone-prefix"
       />
-      <span className="text-ink-400">-</span>
+      <span className="phone-separator" aria-hidden="true">-</span>
       <input
         id="apply-phone"
         ref={middleRef}
@@ -578,9 +578,9 @@ function SegmentedApplyPhoneInput({
         autoComplete="tel-national"
         value={middle}
         onChange={(e) => handleMiddleChange(e.target.value)}
-        className="min-h-[52px] min-w-0 flex-1 rounded-md border border-ink-200 bg-white px-3 text-center text-base leading-normal text-ink-900 transition-colors placeholder:text-ink-400 focus:border-brand-blue focus:outline-none"
+        className="phone-segment"
       />
-      <span className="text-ink-400">-</span>
+      <span className="phone-separator" aria-hidden="true">-</span>
       <input
         ref={lastRef}
         aria-label="전화번호 끝 4자리"
@@ -597,7 +597,7 @@ function SegmentedApplyPhoneInput({
             middleRef.current?.focus()
           }
         }}
-        className="min-h-[52px] min-w-0 flex-1 rounded-md border border-ink-200 bg-white px-3 text-center text-base leading-normal text-ink-900 transition-colors placeholder:text-ink-400 focus:border-brand-blue focus:outline-none"
+        className="phone-segment"
       />
       <input type="hidden" name="phone" value={value} />
     </div>

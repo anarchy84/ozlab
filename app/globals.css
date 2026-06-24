@@ -276,6 +276,61 @@
   .form-field textarea {
     @apply resize-y min-h-[88px];
   }
+  .apply-contact-grid {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 768px) {
+    .apply-contact-grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(270px, 1.1fr);
+      align-items: start;
+    }
+  }
+  .form-field .phone-segment-group {
+    display: grid;
+    grid-template-columns: 60px 8px minmax(0, 1fr) 8px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 6px;
+    width: 100%;
+  }
+  .form-field .phone-segment-group input {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    padding: 12px 10px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .form-field .phone-segment-group .phone-prefix {
+    background: #F8FAFC;
+    color: #111827;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+  .form-field .phone-segment-group .phone-segment {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .form-field .phone-segment-group .phone-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9CA3AF;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  @media (max-width: 380px) {
+    .form-field .phone-segment-group {
+      grid-template-columns: 52px 6px minmax(0, 1fr) 6px minmax(0, 1fr);
+      column-gap: 5px;
+    }
+    .form-field .phone-segment-group input {
+      padding-left: 8px;
+      padding-right: 8px;
+      font-size: 15px;
+    }
+  }
   .form-check {
     @apply flex items-start gap-3 text-sm text-ink-600 mt-5 leading-relaxed;
   }
