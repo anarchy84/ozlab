@@ -44,6 +44,9 @@ interface CrmProSubmitBody {
   etc4: string
   etc5: string
   reg_datetime: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
 }
 
 export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | null {
@@ -83,6 +86,9 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
     p.utmMedium ? `utm_medium: ${p.utmMedium}` : null,
     p.utmCampaign ? `utm_campaign: ${p.utmCampaign}` : null,
   ].filter(Boolean).join(' / ')
+  const utmSource = firstText(p.utmSource)
+  const utmMedium = firstText(p.utmMedium)
+  const utmCampaign = firstText(p.utmCampaign)
 
   return {
     group_no: groupNo,
@@ -94,6 +100,9 @@ export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | 
     etc4: (firstText(p.message) ?? '미입력').slice(0, 500),
     etc5: extraInfo.slice(0, 500),
     reg_datetime: formatKstDatetime(p.createdAt ?? new Date()),
+    ...(utmSource ? { utm_source: utmSource } : {}),
+    ...(utmMedium ? { utm_medium: utmMedium } : {}),
+    ...(utmCampaign ? { utm_campaign: utmCampaign } : {}),
   }
 }
 
@@ -137,7 +146,15 @@ export async function sendCrmProLead(p: CrmProLeadPayload): Promise<void> {
     const result = await res.json().catch(() => null) as { success?: boolean; message?: string } | null
     if (result && result.success === false) {
       console.warn('[CRMPro] rejected', result.message ?? 'unknown')
+      return
     }
+    console.info('[CRMPro] submitted', {
+      group_no: body.group_no,
+      has_utm_source: Boolean(body.utm_source),
+      has_utm_medium: Boolean(body.utm_medium),
+      has_utm_campaign: Boolean(body.utm_campaign),
+      message: result?.message ?? 'ok',
+    })
   } catch (err) {
     console.warn('[CRMPro] fetch error', err instanceof Error ? err.message : err)
   } finally {
