@@ -3,7 +3,7 @@
 //
 // env:
 //   - CRM_PRO_API_KEY    server-only API key
-//   - CRM_PRO_GROUP_NO   target DB group number, e.g. 158
+//   - CRM_PRO_GROUP_NO   optional reference value; production is forced to group 158
 //   - CRM_PRO_BASE_URL   optional, defaults to https://crmpro.kr/api
 //
 // 동작:
@@ -14,6 +14,7 @@
 import { normalizePhone } from '@/lib/consultation-policy'
 
 const DEFAULT_BASE_URL = 'https://crmpro.kr/api'
+const FINAL_CRM_PRO_GROUP_NO = 158
 
 interface CrmProLeadPayload {
   name: string
@@ -50,8 +51,7 @@ interface CrmProSubmitBody {
 }
 
 export function buildCrmProSubmitBody(p: CrmProLeadPayload): CrmProSubmitBody | null {
-  const groupNo = Number(process.env.CRM_PRO_GROUP_NO)
-  if (!Number.isInteger(groupNo) || groupNo <= 0) return null
+  const groupNo = resolveCrmProGroupNo()
 
   const tel = normalizePhone(p.phone)
   if (!p.name || tel.length < 7) return null
@@ -160,6 +160,17 @@ export async function sendCrmProLead(p: CrmProLeadPayload): Promise<void> {
   } finally {
     if (timer) clearTimeout(timer)
   }
+}
+
+function resolveCrmProGroupNo(): number {
+  const configuredGroupNo = Number(process.env.CRM_PRO_GROUP_NO)
+  if (configuredGroupNo !== FINAL_CRM_PRO_GROUP_NO) {
+    console.warn('[CRMPro] CRM_PRO_GROUP_NO mismatch; forcing final group', {
+      configured_group_no: Number.isFinite(configuredGroupNo) ? configuredGroupNo : null,
+      forced_group_no: FINAL_CRM_PRO_GROUP_NO,
+    })
+  }
+  return FINAL_CRM_PRO_GROUP_NO
 }
 
 function firstText(...values: unknown[]): string | null {
