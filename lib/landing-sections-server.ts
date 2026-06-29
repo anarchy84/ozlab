@@ -1,10 +1,10 @@
 import 'server-only'
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicServerClient } from '@/lib/supabase/public-server'
 import { normalizeLandingSlotItem, type LandingSlotsByKey } from '@/lib/landing-sections'
 
 export async function getLandingSlotsForPage(pagePath: string): Promise<LandingSlotsByKey> {
-  const supabase = createClient()
+  const supabase = createPublicServerClient()
   const { data, error } = await supabase
     .from('landing_slot_items')
     .select(

@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────
 
 import 'server-only'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicServerClient } from '@/lib/supabase/public-server'
 import type { ContentBlock, BlockValue } from './content-blocks'
 
 // -------------------------------------------------------------
@@ -22,7 +22,7 @@ export async function getBlock<T extends BlockValue = BlockValue>(
   blockKey: string,
   fallback?: T
 ): Promise<{ value: T | undefined; meta: ContentBlock | null }> {
-  const supabase = createClient()
+  const supabase = createPublicServerClient()
   const { data, error } = await supabase
     .from('content_blocks')
     .select('*')
@@ -45,7 +45,7 @@ export async function getBlock<T extends BlockValue = BlockValue>(
 export async function getBlocksForPage(
   pagePath: string
 ): Promise<Map<string, ContentBlock>> {
-  const supabase = createClient()
+  const supabase = createPublicServerClient()
   const { data, error } = await supabase
     .from('content_blocks')
     .select('*')
@@ -66,7 +66,7 @@ export async function getBlocksForPage(
 export async function getBlocks(
   blockKeys: string[]
 ): Promise<Map<string, ContentBlock>> {
-  const supabase = createClient()
+  const supabase = createPublicServerClient()
   const { data, error } = await supabase
     .from('content_blocks')
     .select('*')

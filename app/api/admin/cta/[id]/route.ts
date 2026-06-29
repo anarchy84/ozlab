@@ -2,11 +2,31 @@
 // /api/admin/cta/[id] — 개별 CTA 수정·삭제 (super_admin)
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { guardApi } from '@/lib/admin/auth-helpers'
 import type { CtaButtonInput } from '@/lib/admin/types'
 
 export const dynamic = 'force-dynamic'
+
+const PUBLIC_CTA_REVALIDATE_PATHS = [
+  '/',
+  '/naver-pos',
+  '/apple-pay-pos',
+  '/internet',
+  '/business/torder',
+  '/business/cctv',
+  '/marketing-support',
+]
+
+function revalidatePublicCtaPages(paths?: string[] | null) {
+  const targets = paths?.length ? paths : PUBLIC_CTA_REVALIDATE_PATHS
+  for (const path of targets) {
+    if (typeof path === 'string' && path.startsWith('/')) {
+      revalidatePath(path)
+    }
+  }
+}
 
 export async function PATCH(
   req: NextRequest,
@@ -60,6 +80,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'not found' }, { status: 404 })
   }
 
+  revalidatePublicCtaPages(data.page_paths)
   return NextResponse.json({ success: true, cta: data })
 }
 
@@ -81,5 +102,6 @@ export async function DELETE(
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+  revalidatePublicCtaPages()
   return NextResponse.json({ success: true })
 }

@@ -8,6 +8,7 @@
 //   cta_type / form_fields / trigger_config / display_config / page_paths 추가 입력
 // ─────────────────────────────────────────────
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { guardApi } from '@/lib/admin/auth-helpers'
 import {
@@ -18,6 +19,25 @@ import {
 import type { CtaButtonInput } from '@/lib/admin/types'
 
 export const dynamic = 'force-dynamic'
+
+const PUBLIC_CTA_REVALIDATE_PATHS = [
+  '/',
+  '/naver-pos',
+  '/apple-pay-pos',
+  '/internet',
+  '/business/torder',
+  '/business/cctv',
+  '/marketing-support',
+]
+
+function revalidatePublicCtaPages(paths?: string[] | null) {
+  const targets = paths?.length ? paths : PUBLIC_CTA_REVALIDATE_PATHS
+  for (const path of targets) {
+    if (typeof path === 'string' && path.startsWith('/')) {
+      revalidatePath(path)
+    }
+  }
+}
 
 export async function GET() {
   const guard = await guardApi()
@@ -101,5 +121,6 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+  revalidatePublicCtaPages(data.page_paths)
   return NextResponse.json({ success: true, cta: data }, { status: 201 })
 }

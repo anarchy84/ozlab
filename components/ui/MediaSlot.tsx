@@ -40,6 +40,9 @@ import type { SaveTarget } from '@/components/editable/EditorProvider'
 
 type MediaUsage = 'logo' | 'product' | 'scene' | 'case' | 'docs'
 
+const DEFAULT_RESPONSIVE_SIZES = '(max-width: 768px) 100vw, 50vw'
+const RESPONSIVE_WIDTHS = [480, 768, 1080, 1440]
+
 interface MediaSlotProps {
   // ── 편집 연결 (신규) ───────────────────────
   /** DB block_key (도트 표기법) — 인라인 편집 ✏️ 에 필수 */
@@ -141,11 +144,18 @@ export default function MediaSlot({
   // 실제 렌더할 이미지 URL 결정
   // value.fallback_url 이 있으면 <picture> 로 WebP+PNG 병행
   const hasImage = !!(value && value.url)
+  const responsiveSrcSet = value?.url ? buildSupabaseTransformSrcSet(value.url) : null
+  const responsiveSrc = value?.url ? buildSupabaseTransformUrl(value.url, 960) : null
+  const effectiveSizes = sizes ?? (responsiveSrcSet ? DEFAULT_RESPONSIVE_SIZES : undefined)
 
   const imageNode = hasImage && value ? (
     value.fallback_url ? (
       <picture>
-        <source srcSet={value.url} type="image/webp" />
+        <source
+          srcSet={responsiveSrcSet ?? value.url}
+          type="image/webp"
+          sizes={effectiveSizes}
+        />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={value.fallback_url}
@@ -153,8 +163,9 @@ export default function MediaSlot({
           width={value.width}
           height={value.height}
           loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
           decoding="async"
-          sizes={sizes}
+          sizes={effectiveSizes}
           className={cn(
             'absolute inset-0 w-full h-full',
             fit === 'cover' ? 'object-cover' : 'object-contain',
@@ -165,13 +176,15 @@ export default function MediaSlot({
     ) : (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={value.url}
+        src={responsiveSrc ?? value.url}
         alt={value.alt ?? label}
         width={value.width}
         height={value.height}
         loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : undefined}
         decoding="async"
-        sizes={sizes}
+        srcSet={responsiveSrcSet ?? undefined}
+        sizes={effectiveSizes}
         className={cn(
           'absolute inset-0 w-full h-full',
           fit === 'cover' ? 'object-cover' : 'object-contain',
@@ -232,6 +245,35 @@ export default function MediaSlot({
       {inner}
     </EditOverlay>
   )
+}
+
+function buildSupabaseTransformSrcSet(url: string): string | null {
+  const entries = RESPONSIVE_WIDTHS
+    .map((width) => {
+      const transformed = buildSupabaseTransformUrl(url, width)
+      return transformed ? `${transformed} ${width}w` : null
+    })
+    .filter(Boolean)
+
+  return entries.length > 0 ? entries.join(', ') : null
+}
+
+function buildSupabaseTransformUrl(url: string, width: number): string | null {
+  try {
+    const parsed = new URL(url)
+    const marker = '/storage/v1/object/public/'
+    if (!parsed.pathname.includes(marker)) return null
+
+    parsed.pathname = parsed.pathname.replace(marker, '/storage/v1/render/image/public/')
+    parsed.search = new URLSearchParams({
+      width: String(width),
+      quality: '78',
+      format: 'webp',
+    }).toString()
+    return parsed.toString()
+  } catch {
+    return null
+  }
 }
 
 // ─────────────────────────────────────────────

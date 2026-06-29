@@ -22,6 +22,7 @@ import {
   type SiteSettingKey,
 } from '@/lib/admin/site-settings'
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -86,5 +87,6 @@ export async function PUT(req: NextRequest) {
   }
 
   const updated = await getSiteSettings()
+  revalidatePath('/', 'layout')
   return NextResponse.json({ success: true, settings: updated })
 }

@@ -48,3 +48,6 @@ supabase/.temp/
 # 디자인 참고용 / 사용 안 함
 _design_reference/
 public/templates/products_template_ko_v0.2.xlsx
+
+# 산출물 (강의 자료 등 빌드 결과물)
+outputs/

@@ -130,14 +130,19 @@ export function Footer({ blocks, ctas }: Props) {
               className="text-sm text-ink-300 hover:text-white transition-colors"
             />
             {/* 상담 신청 — DynamicCTA (어트리뷰션 추적)
-                disableStyleClass: 다크 푸터에서 btn-ghost 의 hover:bg-ink-50 가
-                흰 배경을 만들어 hover:text-white 와 충돌해 텍스트가 사라지는 문제 방지.
-                다른 푸터 링크들과 동일한 텍스트 링크 톤으로 표시. */}
+                다크 푸터에서 유일한 컬러 CTA. 브랜드 블루→퍼플 그라데이션 +
+                흰 글자 = 가독성·주목도 모두 최대.
+                disableStyleClass 로 DB 의 'btn btn-ghost' 매핑 차단하고
+                className 으로 컴팩트 사이즈(px-4 py-2)와 화살표(after pseudo)를 직접 통제. */}
             <DynamicCTA
               placement="footer"
               ctas={ctas}
               fallback={{ label: '상담 신청', href: '#apply' }}
-              className="text-sm text-ink-300 hover:text-white transition-colors text-left"
+              className="inline-flex items-center justify-center gap-1.5 mt-1 px-4 py-2 rounded-full
+                         bg-brand-gradient text-white text-sm font-semibold w-fit
+                         shadow-brand transition-all
+                         hover:brightness-110 hover:shadow-violet
+                         after:ml-0.5 after:content-['→'] after:font-normal"
               disableStyleClass
             />
             {/* FAQ + 약관 (3-4번 링크) */}

@@ -131,17 +131,19 @@ export default async function RootLayout({
     envValue: process.env.NEXT_PUBLIC_GTM_ID,
     fallback: GTM_ID, // 마지막 코드 상수 fallback
   }) ?? GTM_ID
+  const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+    : null
 
   return (
     <html lang="ko">
       <head>
-        {/* Pretendard Variable — 공식 CDN (P4 에서 self-host 전환 검토) */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          as="style"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
-        />
+        {supabaseOrigin && (
+          <>
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+            <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
+          </>
+        )}
       </head>
       <body
         className="min-h-screen flex flex-col antialiased text-brand-ink"

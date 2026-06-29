@@ -24,7 +24,7 @@ import { breadcrumbJsonLd, faqJsonLd, publicMetadata, SITE_DESCRIPTION } from '@
 import { homeFaqsForBlocks } from '@/lib/home-faqs'
 import { mergePageMetadata } from '@/lib/admin/page-seo'
 
-export const revalidate = 0
+export const revalidate = 300
 
 // 홈 페이지 — root layout generateMetadata 결과 + page_seo DB 머지
 export async function generateMetadata(): Promise<Metadata> {

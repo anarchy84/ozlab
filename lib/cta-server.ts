@@ -1,7 +1,9 @@
 // ─────────────────────────────────────────────
 // CTA 서버사이드 조회 (페이지 SSR 시 placement 별 활성 CTA 가져오기)
 // ─────────────────────────────────────────────
-import { createClient } from '@/lib/supabase/server'
+import 'server-only'
+
+import { createPublicServerClient } from '@/lib/supabase/public-server'
 import type { CtaButton, CtaPlacement } from '@/lib/admin/types'
 
 /**
@@ -11,7 +13,7 @@ import type { CtaButton, CtaPlacement } from '@/lib/admin/types'
 export async function fetchCtasByPlacement(): Promise<
   Partial<Record<CtaPlacement, CtaButton[]>>
 > {
-  const supabase = createClient()
+  const supabase = createPublicServerClient()
   const { data, error } = await supabase
     .from('cta_buttons')
     .select('*')

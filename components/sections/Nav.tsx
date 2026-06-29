@@ -55,6 +55,8 @@ export function Nav({ blocks, ctas }: Props) {
           <img
             src="/brand/ozlabpay-logo-horizontal.png"
             alt="오즈랩페이"
+            width={512}
+            height={171}
             className="h-7 w-auto sm:h-8"
           />
         </a>
