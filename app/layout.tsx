@@ -12,7 +12,7 @@ import { SiteVisitTracker } from '@/components/tracking/SiteVisitTracker'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { GoogleTagManager } from '@/components/seo/GoogleTagManager'
 import { CustomHeadInjector } from '@/components/seo/CustomHeadInjector'
-import { GTM_ID, organizationJsonLd, SITE_DESCRIPTION, SITE_URL, websiteJsonLd } from '@/lib/seo'
+import { absoluteUrl, GTM_ID, organizationJsonLd, SITE_DESCRIPTION, SITE_URL, websiteJsonLd } from '@/lib/seo'
 import { getSiteSettings, resolveValue } from '@/lib/admin/site-settings'
 import './globals.css'
 
@@ -76,6 +76,11 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: '오즈랩페이',
     publisher: '오즈랩페이',
     category: 'business',
+    icons: {
+      shortcut: absoluteUrl('/favicon.ico'),
+      icon: [{ url: absoluteUrl('/favicon-48x48.png'), sizes: '48x48', type: 'image/png' }],
+      apple: [{ url: absoluteUrl('/apple-touch-icon.png'), sizes: '180x180', type: 'image/png' }],
+    },
     alternates: {
       canonical: '/',
       languages: { 'ko-KR': '/' },

@@ -68,6 +68,7 @@ export function organizationJsonLd() {
     '@id': absoluteUrl('/#organization'),
     name: SITE_NAME,
     url: SITE_URL,
+    logo: absoluteUrl('/icon-512x512.png'),
     telephone: SITE_PHONE,
     areaServed: 'KR',
     sameAs: [SITE_URL],
